@@ -1,5 +1,5 @@
 name: x_transaction
-description: "A new Flutter project."
+description: "A personal transaction management app."
 publish_to: 'none'
 version: 0.1.0
 
@@ -10,10 +10,31 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Database - Drift ORM for SQLite
+  drift: ^2.24.0
+  sqlite3_flutter_libs: ^0.5.32
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+  # Key-Value Storage
+  shared_preferences: ^2.5.0
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Animations
+  animations: ^2.0.11
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+
+  # Drift code generation
+  drift_dev: ^2.24.0
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.5
 
 flutter:
   uses-material-design: true
