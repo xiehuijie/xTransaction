@@ -1,22 +1,54 @@
+/// 初始化流程主页面
+///
+/// 重新设计的初始化流程，采用分步配置模式
+
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' hide Column;
 
-import '../../data/database/database.dart';
-import '../../data/database/tables.dart';
-import '../../providers/providers.dart';
 import '../../utils/haptic_service.dart';
 import '../../utils/biometric_service.dart';
 import '../home/home_page.dart';
-import 'onboarding_config.dart';
-import 'preconfig_accounts_page.dart';
-import 'preconfig_ledgers_page.dart';
-import 'preconfig_currencies_page.dart';
 import 'data_recovery_page.dart';
+import 'currency_config_page.dart';
+import 'account_config_page.dart';
+import 'category_config_page.dart';
+import 'ledger_config_page.dart';
+import 'onboarding_state.dart';
 
-/// 启动模式
-enum StartupMode { fresh, fromBackup }
+/// 步骤类型
+enum StepType {
+  welcome,
+  config,
+  complete,
+}
+
+/// 预配置类型
+enum PreConfigType {
+  currencies,
+  accounts,
+  categories,
+  ledgers,
+}
+
+/// 步骤配置
+class _StepConfig {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final StepType stepType;
+  final String? configKey;
+  final PreConfigType? preConfigType;
+
+  const _StepConfig({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.stepType,
+    this.configKey,
+    this.preConfigType,
+  });
+}
 
 /// 应用初始化页面
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -39,39 +71,36 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       stepType: StepType.welcome,
     ),
     _StepConfig(
-      title: '资产管理',
-      subtitle: '启用资产管理功能，查看您的账户余额和资产分布',
-      icon: Icons.account_balance_wallet_rounded,
-      configKey: 'enableAssetManagement',
-      stepType: StepType.config,
-      preConfigType: PreConfigType.accounts,
-    ),
-    _StepConfig(
-      title: '预算管理',
-      subtitle: '启用预算管理功能，帮助您控制支出',
-      icon: Icons.pie_chart_rounded,
-      configKey: 'enableBudgetManagement',
-      stepType: StepType.config,
-    ),
-    _StepConfig(
-      title: '多货币支持',
-      subtitle: '启用多货币功能，支持不同币种的记账和汇率转换',
+      title: '货币设置',
+      subtitle: '配置您需要使用的货币和默认货币',
       icon: Icons.currency_exchange_rounded,
-      configKey: 'enableMultiCurrency',
       stepType: StepType.config,
       preConfigType: PreConfigType.currencies,
     ),
     _StepConfig(
-      title: '多账本',
-      subtitle: '启用多账本功能，分开管理个人、家庭或项目账目',
+      title: '账户设置',
+      subtitle: '添加您的银行卡、钱包等账户',
+      icon: Icons.account_balance_wallet_rounded,
+      stepType: StepType.config,
+      preConfigType: PreConfigType.accounts,
+    ),
+    _StepConfig(
+      title: '分类设置',
+      subtitle: '配置收支分类，支持多层级结构',
+      icon: Icons.category_rounded,
+      stepType: StepType.config,
+      preConfigType: PreConfigType.categories,
+    ),
+    _StepConfig(
+      title: '账本设置',
+      subtitle: '创建账本并选择关联的账户和分类',
       icon: Icons.library_books_rounded,
-      configKey: 'enableMultiLedger',
       stepType: StepType.config,
       preConfigType: PreConfigType.ledgers,
     ),
     _StepConfig(
       title: '生物识别',
-      subtitle: '启用生物识别解锁，使用指纹或面容保护您的财务数据',
+      subtitle: '启用指纹或面容保护您的财务数据',
       icon: Icons.fingerprint_rounded,
       configKey: 'enableBiometric',
       stepType: StepType.config,
@@ -106,55 +135,41 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   void _goToDataRecovery() {
     HapticService.lightImpact();
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => const DataRecoveryPage()));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const DataRecoveryPage(),
+      ),
+    );
   }
 
   void _goToPreConfig(PreConfigType type) {
     HapticService.lightImpact();
     Widget page;
     switch (type) {
-      case PreConfigType.accounts:
-        page = const PreConfigAccountsPage();
-        break;
       case PreConfigType.currencies:
-        page = const PreConfigCurrenciesPage();
+        page = const CurrencyConfigPage();
+        break;
+      case PreConfigType.accounts:
+        page = const AccountConfigPage();
+        break;
+      case PreConfigType.categories:
+        page = const CategoryConfigPage();
         break;
       case PreConfigType.ledgers:
-        page = const PreConfigLedgersPage();
+        page = const LedgerConfigPage();
         break;
     }
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 
   Future<void> _completeSetup() async {
     setState(() => _isSaving = true);
 
     try {
-      final prefs = await ref.read(appPreferencesProvider.future);
-      final config = ref.read(initConfigProvider);
-      final db = ref.read(databaseProvider);
-
-      // 保存偏好设置
-      await prefs.saveInitConfig(
-        enableAssetManagement: config.enableAssetManagement,
-        enableBudgetManagement: config.enableBudgetManagement,
-        enableMultiCurrency: config.enableMultiCurrency,
-        enableMultiLedger: config.enableMultiLedger,
-        enableBiometric: config.enableBiometric,
-      );
-
-      // 保存预配置数据到数据库
-      await _savePreConfigToDatabase(db, config);
-
-      // 设置当前账本
-      if (config.preConfigLedgers.isNotEmpty) {
-        final ledgers = await db.ledgerDao.getAllLedgers();
-        if (ledgers.isNotEmpty) {
-          await prefs.setCurrentLedgerId(ledgers.first.ledgerId);
-        }
-      }
+      // TODO: 保存所有配置到数据库
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -163,12 +178,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 const HomePage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
-                  return FadeThroughTransition(
-                    animation: animation,
-                    secondaryAnimation: secondaryAnimation,
-                    child: child,
-                  );
-                },
+              return FadeThroughTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                child: child,
+              );
+            },
           ),
         );
       }
@@ -188,70 +203,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     }
   }
 
-  Future<void> _savePreConfigToDatabase(
-    AppDatabase db,
-    InitConfigState config,
-  ) async {
-    await db.transaction(() async {
-      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
-      // 保存自定义货币
-      for (final currency in config.preConfigCurrencies) {
-        await db.currencyDao.insertCurrency(
-          CurrencyCompanion.insert(
-            currencyCode: currency.currencyCode,
-            name: currency.name,
-            symbol: currency.symbol,
-            decimal: Value(currency.decimal),
-            source: const Value(CurrencySource.custom),
-          ),
-        );
-      }
-
-      // 保存账本
-      for (final ledger in config.preConfigLedgers) {
-        await db.ledgerDao.insertLedger(
-          LedgerCompanion.insert(
-            name: ledger.name,
-            currencyCode: ledger.currencyCode,
-            description: Value(ledger.description ?? ''),
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-      }
-
-      // 获取创建的第一个账本ID
-      final ledgers = await db.ledgerDao.getAllLedgers();
-      final firstLedgerId = ledgers.isNotEmpty ? ledgers.first.ledgerId : null;
-
-      // 保存账户
-      for (final account in config.preConfigAccounts) {
-        final accountId = await db.accountDao.insertAccount(
-          AccountCompanion.insert(
-            name: account.name,
-            type: AccountType.values.firstWhere(
-              (t) => t.name == account.type,
-              orElse: () => AccountType.balance,
-            ),
-            currencyCode: account.currencyCode,
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-
-        // 关联到第一个账本
-        if (firstLedgerId != null) {
-          await db.accountDao.linkAccountToLedger(accountId, firstLedgerId);
-        }
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final config = ref.watch(initConfigProvider);
+    final state = ref.watch(onboardingProvider);
     final step = _steps[_currentStep];
 
     return Scaffold(
@@ -277,7 +232,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       child: child,
                     );
                   },
-                  child: _buildStepContent(step, config, theme),
+                  child: _buildStepContent(step, state, theme),
                 ),
               ),
 
@@ -332,7 +287,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   Widget _buildStepContent(
     _StepConfig step,
-    InitConfigState config,
+    OnboardingState state,
     ThemeData theme,
   ) {
     return KeyedSubtree(
@@ -382,22 +337,22 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               _buildStartupOptions(theme),
             ],
 
-            // 配置开关
-            if (step.configKey != null) ...[
+            // 配置按钮
+            if (step.preConfigType != null) ...[
               const SizedBox(height: 32),
-              _buildConfigSwitch(step.configKey!, config, theme),
+              _buildPreConfigButton(step, state, theme),
+            ],
 
-              // 预配置按钮
-              if (step.preConfigType != null) ...[
-                const SizedBox(height: 16),
-                _buildPreConfigButton(step, config, theme),
-              ],
+            // 生物识别开关
+            if (step.configKey == 'enableBiometric') ...[
+              const SizedBox(height: 32),
+              _buildBiometricSwitch(state.enableBiometric, theme),
             ],
 
             // 完成页面摘要
             if (step.stepType == StepType.complete) ...[
               const SizedBox(height: 32),
-              _buildCompleteSummary(config, theme),
+              _buildCompleteSummary(state, theme),
             ],
           ],
         ),
@@ -433,7 +388,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '全新开始',
+                          '从新开始',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -511,65 +466,97 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
-  Widget _buildConfigSwitch(
-    String configKey,
-    InitConfigState config,
+  Widget _buildPreConfigButton(
+    _StepConfig step,
+    OnboardingState state,
     ThemeData theme,
   ) {
-    bool value;
-    void Function(bool) onChanged;
+    String buttonText;
+    int itemCount;
+    String statusText;
+    bool isConfigured;
 
-    switch (configKey) {
-      case 'enableAssetManagement':
-        value = config.enableAssetManagement;
-        onChanged = ref
-            .read(initConfigProvider.notifier)
-            .setEnableAssetManagement;
+    switch (step.preConfigType!) {
+      case PreConfigType.currencies:
+        buttonText = '配置货币';
+        itemCount = state.availableCurrencies.length;
+        statusText = '已选择 $itemCount 种货币';
+        isConfigured = itemCount >= 1;
         break;
-      case 'enableBudgetManagement':
-        value = config.enableBudgetManagement;
-        onChanged = ref
-            .read(initConfigProvider.notifier)
-            .setEnableBudgetManagement;
+      case PreConfigType.accounts:
+        buttonText = '配置账户';
+        itemCount = state.accounts.length;
+        statusText = '已添加 $itemCount 个账户';
+        isConfigured = itemCount >= 1;
         break;
-      case 'enableMultiCurrency':
-        value = config.enableMultiCurrency;
-        onChanged = ref
-            .read(initConfigProvider.notifier)
-            .setEnableMultiCurrency;
+      case PreConfigType.categories:
+        buttonText = '配置分类';
+        final expenseCount = _countCategories(state.expenseCategories);
+        final incomeCount = _countCategories(state.incomeCategories);
+        itemCount = expenseCount + incomeCount;
+        statusText = '支出 $expenseCount 个, 收入 $incomeCount 个';
+        isConfigured = itemCount >= 1;
         break;
-      case 'enableMultiLedger':
-        value = config.enableMultiLedger;
-        onChanged = ref.read(initConfigProvider.notifier).setEnableMultiLedger;
+      case PreConfigType.ledgers:
+        buttonText = '配置账本';
+        itemCount = state.ledgers.length;
+        statusText = '已创建 $itemCount 个账本';
+        isConfigured = itemCount >= 1;
         break;
-      case 'enableBiometric':
-        value = config.enableBiometric;
-        // 生物识别需要特殊处理
-        return _buildBiometricSwitch(value, theme);
-      default:
-        return const SizedBox.shrink();
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(value ? '已启用' : '未启用', style: theme.textTheme.titleMedium),
-          Switch.adaptive(
-            value: value,
-            onChanged: (v) {
-              HapticService.selectionClick();
-              onChanged(v);
-            },
+    return Column(
+      children: [
+        // 状态显示
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
           ),
-        ],
-      ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isConfigured ? Icons.check_circle : Icons.info_outline,
+                    color: isConfigured
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    statusText,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isConfigured
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 配置按钮
+        OutlinedButton.icon(
+          onPressed: () => _goToPreConfig(step.preConfigType!),
+          icon: const Icon(Icons.settings_outlined),
+          label: Text(buttonText),
+        ),
+      ],
     );
+  }
+
+  int _countCategories(List<PreConfigCategory> categories) {
+    int count = categories.length;
+    for (final cat in categories) {
+      count += _countCategories(cat.children);
+    }
+    return count;
   }
 
   Widget _buildBiometricSwitch(bool value, ThemeData theme) {
@@ -621,15 +608,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       default:
                         message = '无法启用生物识别';
                     }
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(message)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(message)),
+                    );
                   }
                   return;
                 }
               }
 
-              ref.read(initConfigProvider.notifier).setEnableBiometric(v);
+              ref.read(onboardingProvider.notifier).setEnableBiometric(v);
             },
           ),
         ],
@@ -637,45 +624,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
-  Widget _buildPreConfigButton(
-    _StepConfig step,
-    InitConfigState config,
-    ThemeData theme,
-  ) {
-    bool isEnabled;
-    String buttonText;
-    int itemCount;
-
-    switch (step.preConfigType!) {
-      case PreConfigType.accounts:
-        isEnabled = config.enableAssetManagement;
-        buttonText = '管理预配置账户';
-        itemCount = config.preConfigAccounts.length;
-        break;
-      case PreConfigType.currencies:
-        isEnabled = config.enableMultiCurrency;
-        buttonText = '管理货币配置';
-        itemCount = config.preConfigCurrencies.length;
-        break;
-      case PreConfigType.ledgers:
-        isEnabled = config.enableMultiLedger;
-        buttonText = '管理预配置账本';
-        itemCount = config.preConfigLedgers.length;
-        break;
-    }
-
-    if (!isEnabled) {
-      return const SizedBox.shrink();
-    }
-
-    return OutlinedButton.icon(
-      onPressed: () => _goToPreConfig(step.preConfigType!),
-      icon: const Icon(Icons.settings_outlined),
-      label: Text(itemCount > 0 ? '$buttonText ($itemCount)' : buttonText),
-    );
-  }
-
-  Widget _buildCompleteSummary(InitConfigState config, ThemeData theme) {
+  Widget _buildCompleteSummary(OnboardingState state, ThemeData theme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -691,54 +640,34 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             const SizedBox(height: 16),
             _buildSummaryRow(
               theme,
-              '资产管理',
-              config.enableAssetManagement ? '已启用' : '未启用',
-              config.enableAssetManagement,
+              '货币',
+              '${state.availableCurrencies.length} 种',
+              state.availableCurrencies.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '预算管理',
-              config.enableBudgetManagement ? '已启用' : '未启用',
-              config.enableBudgetManagement,
+              '账户',
+              '${state.accounts.length} 个',
+              state.accounts.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '多货币',
-              config.enableMultiCurrency ? '已启用' : '未启用',
-              config.enableMultiCurrency,
+              '分类',
+              '${_countCategories(state.expenseCategories) + _countCategories(state.incomeCategories)} 个',
+              state.expenseCategories.isNotEmpty || state.incomeCategories.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '多账本',
-              config.enableMultiLedger ? '已启用' : '未启用',
-              config.enableMultiLedger,
+              '账本',
+              '${state.ledgers.length} 个',
+              state.ledgers.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
               '生物识别',
-              config.enableBiometric ? '已启用' : '未启用',
-              config.enableBiometric,
+              state.enableBiometric ? '已启用' : '未启用',
+              state.enableBiometric,
             ),
-            const Divider(height: 24),
-            _buildSummaryRow(
-              theme,
-              '预配置账户',
-              '${config.preConfigAccounts.length} 个',
-              true,
-            ),
-            _buildSummaryRow(
-              theme,
-              '预配置账本',
-              '${config.preConfigLedgers.length} 个',
-              true,
-            ),
-            if (config.preConfigCurrencies.isNotEmpty)
-              _buildSummaryRow(
-                theme,
-                '自定义货币',
-                '${config.preConfigCurrencies.length} 个',
-                true,
-              ),
           ],
         ),
       ),
@@ -752,23 +681,25 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     bool isEnabled,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+          Icon(
+            isEnabled ? Icons.check_circle : Icons.circle_outlined,
+            size: 18,
+            color: isEnabled
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline,
           ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label)),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: TextStyle(
               color: isEnabled
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurfaceVariant,
-              fontWeight: isEnabled ? FontWeight.w500 : null,
+                  : theme.colorScheme.outline,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -777,67 +708,43 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Widget _buildBottomButtons(ThemeData theme, _StepConfig step) {
-    final isFirstStep = _currentStep == 0;
-    final isLastStep = _currentStep == _steps.length - 1;
-
-    // 欢迎页面不显示按钮（使用卡片选择）
+    // 欢迎页面没有按钮
     if (step.stepType == StepType.welcome) {
-      return const SizedBox.shrink();
+      return const SizedBox(height: 56);
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: Row(
-        children: [
-          // 返回按钮
-          if (!isFirstStep)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _previousStep,
-                child: const Text('上一步'),
-              ),
-            ),
-          if (!isFirstStep) const SizedBox(width: 16),
-
-          // 下一步/完成按钮
-          Expanded(
-            child: FilledButton(
-              onPressed: _isSaving
-                  ? null
-                  : (isLastStep ? _completeSetup : _nextStep),
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(isLastStep ? '开始使用' : '下一步'),
-            ),
+    return Row(
+      children: [
+        // 返回按钮
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _previousStep,
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('上一步'),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 16),
+        // 下一步或完成按钮
+        Expanded(
+          child: step.stepType == StepType.complete
+              ? FilledButton.icon(
+                  onPressed: _isSaving ? null : _completeSetup,
+                  icon: _isSaving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check),
+                  label: Text(_isSaving ? '保存中...' : '开始使用'),
+                )
+              : FilledButton.icon(
+                  onPressed: _nextStep,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('下一步'),
+                ),
+        ),
+      ],
     );
   }
-}
-
-enum StepType { welcome, config, complete }
-
-enum PreConfigType { accounts, currencies, ledgers }
-
-class _StepConfig {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String? configKey;
-  final StepType stepType;
-  final PreConfigType? preConfigType;
-
-  const _StepConfig({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    this.configKey,
-    required this.stepType,
-    this.preConfigType,
-  });
 }
