@@ -12,6 +12,9 @@ on:
           - release
           - debug
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build APK

@@ -321,6 +321,19 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
                   return;
                 }
 
+                // 检查是否与已有自定义货币冲突
+                final existingCustom = ref.read(initConfigProvider).preConfigCurrencies;
+                final conflictIndex = existingCustom.indexWhere((c) => c.currencyCode == code);
+                if (conflictIndex >= 0 && (!isEdit || conflictIndex != index)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('货币代码已被使用'),
+                      backgroundColor: theme.colorScheme.error,
+                    ),
+                  );
+                  return;
+                }
+
                 final newCurrency = PreConfigCurrency(
                   currencyCode: code,
                   name: name,
