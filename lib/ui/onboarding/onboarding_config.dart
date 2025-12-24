@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 预配置账户数据
@@ -95,7 +94,7 @@ class InitConfigState {
   final bool enableMultiCurrency;
   final bool enableMultiLedger;
   final bool enableBiometric;
-  
+
   // 预配置数据
   final List<PreConfigAccount> preConfigAccounts;
   final List<PreConfigLedger> preConfigLedgers;
@@ -118,11 +117,7 @@ class InitConfigState {
   factory InitConfigState.initial() {
     return const InitConfigState(
       preConfigAccounts: [
-        PreConfigAccount(
-          name: '我的账户',
-          currencyCode: 'CNY',
-          type: 'balance',
-        ),
+        PreConfigAccount(name: '我的账户', currencyCode: 'CNY', type: 'balance'),
       ],
       preConfigLedgers: [
         PreConfigLedger(

@@ -27,13 +27,7 @@ enum StakeholderType { person, merchant, company, other }
 enum TransactionType { expense, income, transfer }
 
 /// 交易关联类型
-enum TransactionRelationType {
-  afterwards,
-  forwards,
-  children,
-  parent,
-  related,
-}
+enum TransactionRelationType { afterwards, forwards, children, parent, related }
 
 // ==================== 表定义 ====================
 
@@ -70,8 +64,8 @@ class Account extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {name},
-      ];
+    {name},
+  ];
 }
 
 /// 账户元数据表
@@ -117,8 +111,9 @@ class AccountBonus extends Table {
 class AccountLoan extends Table {
   IntColumn get accountId =>
       integer().named('account_id').references(Account, #accountId)();
-  IntColumn get stakeholderId =>
-      integer().named('stakeholder_id').references(Stakeholder, #stakeholderId)();
+  IntColumn get stakeholderId => integer()
+      .named('stakeholder_id')
+      .references(Stakeholder, #stakeholderId)();
   TextColumn get type => textEnum<AccountLoanType>()();
   IntColumn get amount => integer()();
   IntColumn get rate => integer()();
@@ -134,8 +129,7 @@ class AccountLoan extends Table {
 /// 借贷计划表
 @DataClassName('LoanPlanEntity')
 class LoanPlan extends Table {
-  IntColumn get loanPlanId =>
-      integer().autoIncrement().named('loan_plan_id')();
+  IntColumn get loanPlanId => integer().autoIncrement().named('loan_plan_id')();
   IntColumn get accountId =>
       integer().named('account_id').references(Account, #accountId)();
   IntColumn get amount => integer()();
@@ -178,8 +172,8 @@ class Ledger extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {name},
-      ];
+    {name},
+  ];
 }
 
 /// 账户账本关联表
@@ -212,17 +206,18 @@ class Project extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {ledgerId, name},
-      ];
+    {ledgerId, name},
+  ];
 }
 
 /// 分类表
 @DataClassName('CategoryEntity')
 class Category extends Table {
-  IntColumn get categoryId =>
-      integer().autoIncrement().named('category_id')();
-  IntColumn get parentId =>
-      integer().nullable().named('parent_id').references(Category, #categoryId)();
+  IntColumn get categoryId => integer().autoIncrement().named('category_id')();
+  IntColumn get parentId => integer()
+      .nullable()
+      .named('parent_id')
+      .references(Category, #categoryId)();
   TextColumn get name => text()();
   TextColumn get type => textEnum<CategoryType>()();
   TextColumn get icon => text().withDefault(const Constant(''))();
@@ -230,8 +225,8 @@ class Category extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {name, type},
-      ];
+    {name, type},
+  ];
 }
 
 /// 分类账本关联表

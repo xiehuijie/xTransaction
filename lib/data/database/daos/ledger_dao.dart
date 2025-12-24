@@ -4,12 +4,9 @@ import '../tables.dart';
 
 part 'ledger_dao.g.dart';
 
-@DriftAccessor(tables: [
-  Ledger,
-  Project,
-  RelationAccountLedger,
-  RelationCategoryLedger,
-])
+@DriftAccessor(
+  tables: [Ledger, Project, RelationAccountLedger, RelationCategoryLedger],
+)
 class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
   LedgerDao(super.db);
 
@@ -23,8 +20,7 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
       (select(ledger)..where((t) => t.ledgerId.equals(id))).getSingleOrNull();
 
   /// 添加账本
-  Future<int> insertLedger(LedgerCompanion entry) =>
-      into(ledger).insert(entry);
+  Future<int> insertLedger(LedgerCompanion entry) => into(ledger).insert(entry);
 
   /// 更新账本
   Future<bool> updateLedger(LedgerEntity entry) =>
@@ -45,9 +41,9 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
 
   /// 获取所有未归档的项目
   Future<List<ProjectEntity>> getActiveProjects(int ledgerId) =>
-      (select(project)
-            ..where(
-                (t) => t.ledgerId.equals(ledgerId) & t.archived.equals(false)))
+      (select(project)..where(
+            (t) => t.ledgerId.equals(ledgerId) & t.archived.equals(false),
+          ))
           .get();
 
   /// 根据ID获取项目
@@ -81,9 +77,9 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
 
   /// 获取账本关联的所有账户ID
   Future<List<int>> getAccountIdsByLedgerId(int ledgerId) async {
-    final relations = await (select(relationAccountLedger)
-          ..where((t) => t.ledgerId.equals(ledgerId)))
-        .get();
+    final relations = await (select(
+      relationAccountLedger,
+    )..where((t) => t.ledgerId.equals(ledgerId))).get();
     return relations.map((r) => r.accountId).toList();
   }
 
@@ -101,9 +97,9 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
 
   /// 获取账本关联的所有分类ID
   Future<List<int>> getCategoryIdsByLedgerId(int ledgerId) async {
-    final relations = await (select(relationCategoryLedger)
-          ..where((t) => t.ledgerId.equals(ledgerId)))
-        .get();
+    final relations = await (select(
+      relationCategoryLedger,
+    )..where((t) => t.ledgerId.equals(ledgerId))).get();
     return relations.map((r) => r.categoryId).toList();
   }
 
@@ -119,8 +115,9 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
 
   /// 解除分类与账本的关联
   Future<int> unlinkCategoryFromLedger(int categoryId, int ledgerId) =>
-      (delete(relationCategoryLedger)
-            ..where((t) =>
-                t.categoryId.equals(categoryId) & t.ledgerId.equals(ledgerId)))
+      (delete(relationCategoryLedger)..where(
+            (t) =>
+                t.categoryId.equals(categoryId) & t.ledgerId.equals(ledgerId),
+          ))
           .go();
 }

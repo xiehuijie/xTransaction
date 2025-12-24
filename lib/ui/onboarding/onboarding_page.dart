@@ -106,11 +106,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   void _goToDataRecovery() {
     HapticService.lightImpact();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const DataRecoveryPage(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const DataRecoveryPage()));
   }
 
   void _goToPreConfig(PreConfigType type) {
@@ -127,9 +125,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         page = const PreConfigLedgersPage();
         break;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => page),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
   }
 
   Future<void> _completeSetup() async {
@@ -192,7 +188,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     }
   }
 
-  Future<void> _savePreConfigToDatabase(AppDatabase db, InitConfigState config) async {
+  Future<void> _savePreConfigToDatabase(
+    AppDatabase db,
+    InitConfigState config,
+  ) async {
     await db.transaction(() async {
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
@@ -387,7 +386,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             if (step.configKey != null) ...[
               const SizedBox(height: 32),
               _buildConfigSwitch(step.configKey!, config, theme),
-              
+
               // 预配置按钮
               if (step.preConfigType != null) ...[
                 const SizedBox(height: 16),
@@ -588,7 +587,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             value: value,
             onChanged: (v) async {
               HapticService.selectionClick();
-              
+
               if (v) {
                 // 检查生物识别可用性
                 final canCheck = await BiometricService.canCheckBiometrics();
@@ -605,7 +604,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 final result = await BiometricService.authenticate(
                   localizedReason: '验证身份以启用生物识别解锁',
                 );
-                
+
                 if (result != BiometricResult.success) {
                   if (mounted) {
                     String message;
@@ -622,9 +621,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       default:
                         message = '无法启用生物识别';
                     }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(message)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(message)));
                   }
                   return;
                 }
@@ -672,9 +671,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     return OutlinedButton.icon(
       onPressed: () => _goToPreConfig(step.preConfigType!),
       icon: const Icon(Icons.settings_outlined),
-      label: Text(
-        itemCount > 0 ? '$buttonText ($itemCount)' : buttonText,
-      ),
+      label: Text(itemCount > 0 ? '$buttonText ($itemCount)' : buttonText),
     );
   }
 
@@ -824,6 +821,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 }
 
 enum StepType { welcome, config, complete }
+
 enum PreConfigType { accounts, currencies, ledgers }
 
 class _StepConfig {

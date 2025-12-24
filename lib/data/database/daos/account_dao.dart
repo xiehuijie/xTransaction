@@ -4,16 +4,18 @@ import '../tables.dart';
 
 part 'account_dao.g.dart';
 
-@DriftAccessor(tables: [
-  Account,
-  AccountMeta,
-  AccountCredit,
-  AccountBonus,
-  AccountLoan,
-  LoanPlan,
-  LoanRecord,
-  RelationAccountLedger,
-])
+@DriftAccessor(
+  tables: [
+    Account,
+    AccountMeta,
+    AccountCredit,
+    AccountBonus,
+    AccountLoan,
+    LoanPlan,
+    LoanRecord,
+    RelationAccountLedger,
+  ],
+)
 class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   AccountDao(super.db);
 
@@ -57,11 +59,12 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
     AccountMetaScope scope,
     String key,
   ) =>
-      (select(accountMeta)
-            ..where((t) =>
+      (select(accountMeta)..where(
+            (t) =>
                 t.accountId.equals(accountId) &
                 t.scope.equalsValue(scope) &
-                t.key.equals(key)))
+                t.key.equals(key),
+          ))
           .getSingleOrNull();
 
   /// 添加或更新账户元数据
@@ -74,19 +77,20 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
     AccountMetaScope scope,
     String key,
   ) =>
-      (delete(accountMeta)
-            ..where((t) =>
+      (delete(accountMeta)..where(
+            (t) =>
                 t.accountId.equals(accountId) &
                 t.scope.equalsValue(scope) &
-                t.key.equals(key)))
+                t.key.equals(key),
+          ))
           .go();
 
   // ==================== CreditAccount CRUD ====================
 
   /// 获取信用账户详情
-  Future<CreditAccountEntity?> getCreditAccount(int accountId) =>
-      (select(accountCredit)..where((t) => t.accountId.equals(accountId)))
-          .getSingleOrNull();
+  Future<CreditAccountEntity?> getCreditAccount(int accountId) => (select(
+    accountCredit,
+  )..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
 
   /// 添加信用账户详情
   Future<void> insertCreditAccount(AccountCreditCompanion entry) =>
@@ -100,10 +104,10 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   /// 获取赠送金账户关联
   Future<List<BonusAccountEntity>> getBonusAccountsByPrepaidId(
-          int prepaidAccountId) =>
-      (select(accountBonus)
-            ..where((t) => t.prepaidAccountId.equals(prepaidAccountId)))
-          .get();
+    int prepaidAccountId,
+  ) => (select(
+    accountBonus,
+  )..where((t) => t.prepaidAccountId.equals(prepaidAccountId))).get();
 
   /// 添加赠送金账户关联
   Future<void> insertBonusAccount(AccountBonusCompanion entry) =>
@@ -111,18 +115,19 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   /// 删除赠送金账户关联
   Future<int> deleteBonusAccount(int bonusAccountId, int prepaidAccountId) =>
-      (delete(accountBonus)
-            ..where((t) =>
+      (delete(accountBonus)..where(
+            (t) =>
                 t.bonusAccountId.equals(bonusAccountId) &
-                t.prepaidAccountId.equals(prepaidAccountId)))
+                t.prepaidAccountId.equals(prepaidAccountId),
+          ))
           .go();
 
   // ==================== LoanAccount CRUD ====================
 
   /// 获取借贷账户详情
-  Future<LoanAccountEntity?> getLoanAccount(int accountId) =>
-      (select(accountLoan)..where((t) => t.accountId.equals(accountId)))
-          .getSingleOrNull();
+  Future<LoanAccountEntity?> getLoanAccount(int accountId) => (select(
+    accountLoan,
+  )..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
 
   /// 添加借贷账户详情
   Future<void> insertLoanAccount(AccountLoanCompanion entry) =>
@@ -182,9 +187,9 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   /// 获取账户关联的账本
   Future<List<LedgerAccountRelationEntity>> getAccountLedgers(int accountId) =>
-      (select(relationAccountLedger)
-            ..where((t) => t.accountId.equals(accountId)))
-          .get();
+      (select(
+        relationAccountLedger,
+      )..where((t) => t.accountId.equals(accountId))).get();
 
   /// 将账户关联到账本
   Future<void> linkAccountToLedger(int accountId, int ledgerId) =>
@@ -198,8 +203,8 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
 
   /// 解除账户与账本的关联
   Future<int> unlinkAccountFromLedger(int accountId, int ledgerId) =>
-      (delete(relationAccountLedger)
-            ..where((t) =>
-                t.accountId.equals(accountId) & t.ledgerId.equals(ledgerId)))
+      (delete(relationAccountLedger)..where(
+            (t) => t.accountId.equals(accountId) & t.ledgerId.equals(ledgerId),
+          ))
           .go();
 }

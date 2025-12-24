@@ -16,10 +16,10 @@ class DatabaseExportService {
   /// 返回导出文件的路径
   Future<String> exportToJsonFile({String? customFileName}) async {
     final data = await _db.exportToJson();
-    
+
     // 将实体转换为可序列化的Map
     final exportData = <String, dynamic>{};
-    
+
     for (final entry in data.entries) {
       if (entry.value is List) {
         exportData[entry.key] = (entry.value as List)
@@ -36,7 +36,8 @@ class DatabaseExportService {
     final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
 
     final directory = await getApplicationDocumentsDirectory();
-    final fileName = customFileName ??
+    final fileName =
+        customFileName ??
         'x_transaction_backup_${DateTime.now().millisecondsSinceEpoch}.json';
     final filePath = p.join(directory.path, 'backups', fileName);
 

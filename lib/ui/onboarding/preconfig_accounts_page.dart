@@ -9,7 +9,8 @@ class PreConfigAccountsPage extends ConsumerStatefulWidget {
   const PreConfigAccountsPage({super.key});
 
   @override
-  ConsumerState<PreConfigAccountsPage> createState() => _PreConfigAccountsPageState();
+  ConsumerState<PreConfigAccountsPage> createState() =>
+      _PreConfigAccountsPageState();
 }
 
 class _PreConfigAccountsPageState extends ConsumerState<PreConfigAccountsPage> {
@@ -20,10 +21,7 @@ class _PreConfigAccountsPageState extends ConsumerState<PreConfigAccountsPage> {
     final accounts = config.preConfigAccounts;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('账户预配置'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('账户预配置'), centerTitle: true),
       body: accounts.isEmpty
           ? _buildEmptyState(theme)
           : ListView.builder(
@@ -69,7 +67,11 @@ class _PreConfigAccountsPageState extends ConsumerState<PreConfigAccountsPage> {
     );
   }
 
-  Widget _buildAccountCard(PreConfigAccount account, int index, ThemeData theme) {
+  Widget _buildAccountCard(
+    PreConfigAccount account,
+    int index,
+    ThemeData theme,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
@@ -81,7 +83,9 @@ class _PreConfigAccountsPageState extends ConsumerState<PreConfigAccountsPage> {
           ),
         ),
         title: Text(account.name),
-        subtitle: Text('${account.currencyCode} · ${_getAccountTypeName(account.type)}'),
+        subtitle: Text(
+          '${account.currencyCode} · ${_getAccountTypeName(account.type)}',
+        ),
         trailing: PopupMenuButton<String>(
           onSelected: (value) {
             HapticService.selectionClick();
@@ -152,11 +156,19 @@ class _PreConfigAccountsPageState extends ConsumerState<PreConfigAccountsPage> {
     _showAccountDialog(context, null, null);
   }
 
-  void _showEditAccountDialog(BuildContext context, PreConfigAccount account, int index) {
+  void _showEditAccountDialog(
+    BuildContext context,
+    PreConfigAccount account,
+    int index,
+  ) {
     _showAccountDialog(context, account, index);
   }
 
-  void _showAccountDialog(BuildContext context, PreConfigAccount? account, int? index) {
+  void _showAccountDialog(
+    BuildContext context,
+    PreConfigAccount? account,
+    int? index,
+  ) {
     final theme = Theme.of(context);
     final isEdit = account != null;
     final nameController = TextEditingController(text: account?.name ?? '');
@@ -252,7 +264,9 @@ class _PreConfigAccountsPageState extends ConsumerState<PreConfigAccountsPage> {
                 );
 
                 if (isEdit && index != null) {
-                  ref.read(initConfigProvider.notifier).updateAccount(index, newAccount);
+                  ref
+                      .read(initConfigProvider.notifier)
+                      .updateAccount(index, newAccount);
                 } else {
                   ref.read(initConfigProvider.notifier).addAccount(newAccount);
                 }

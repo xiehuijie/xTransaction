@@ -30,7 +30,9 @@ class NavigationItem {
 }
 
 /// 当前选中的导航项ID
-final selectedNavItemProvider = StateProvider<NavItemId>((ref) => NavItemId.overview);
+final selectedNavItemProvider = StateProvider<NavItemId>(
+  (ref) => NavItemId.overview,
+);
 
 /// 主页面
 class HomePage extends ConsumerStatefulWidget {
@@ -117,7 +119,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         onDestinationSelected: (index) {
           HapticService.selectionClick();
           final currentPreviousId = _previousId ?? selectedItemId;
-          final previousIndex = items.indexWhere((item) => item.id == currentPreviousId);
+          final previousIndex = items.indexWhere(
+            (item) => item.id == currentPreviousId,
+          );
           setState(() {
             _isReverse = index < previousIndex;
             _previousId = items[index].id;

@@ -9,10 +9,7 @@ class DataRecoveryPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('从备份恢复'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('从备份恢复'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -39,7 +36,7 @@ class DataRecoveryPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 48),
-            
+
             // 选择备份文件按钮（禁用状态）
             SizedBox(
               width: double.infinity,
@@ -50,7 +47,7 @@ class DataRecoveryPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // 云端恢复按钮（禁用状态）
             SizedBox(
               width: double.infinity,
@@ -60,22 +57,21 @@ class DataRecoveryPage extends StatelessWidget {
                 label: const Text('从云端恢复（即将推出）'),
               ),
             ),
-            
+
             const SizedBox(height: 48),
-            
+
             // 提示信息
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.info_outline, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

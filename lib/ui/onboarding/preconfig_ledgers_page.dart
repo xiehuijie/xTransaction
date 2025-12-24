@@ -9,7 +9,8 @@ class PreConfigLedgersPage extends ConsumerStatefulWidget {
   const PreConfigLedgersPage({super.key});
 
   @override
-  ConsumerState<PreConfigLedgersPage> createState() => _PreConfigLedgersPageState();
+  ConsumerState<PreConfigLedgersPage> createState() =>
+      _PreConfigLedgersPageState();
 }
 
 class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
@@ -20,10 +21,7 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
     final ledgers = config.preConfigLedgers;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('账本预配置'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('账本预配置'), centerTitle: true),
       body: ledgers.isEmpty
           ? _buildEmptyState(theme)
           : ListView.builder(
@@ -81,9 +79,11 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
           ),
         ),
         title: Text(ledger.name),
-        subtitle: Text(ledger.description?.isNotEmpty == true 
-            ? '${ledger.currencyCode} · ${ledger.description}'
-            : ledger.currencyCode),
+        subtitle: Text(
+          ledger.description?.isNotEmpty == true
+              ? '${ledger.currencyCode} · ${ledger.description}'
+              : ledger.currencyCode,
+        ),
         trailing: PopupMenuButton<String>(
           onSelected: (value) {
             HapticService.selectionClick();
@@ -124,15 +124,25 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
     _showLedgerDialog(context, null, null);
   }
 
-  void _showEditLedgerDialog(BuildContext context, PreConfigLedger ledger, int index) {
+  void _showEditLedgerDialog(
+    BuildContext context,
+    PreConfigLedger ledger,
+    int index,
+  ) {
     _showLedgerDialog(context, ledger, index);
   }
 
-  void _showLedgerDialog(BuildContext context, PreConfigLedger? ledger, int? index) {
+  void _showLedgerDialog(
+    BuildContext context,
+    PreConfigLedger? ledger,
+    int? index,
+  ) {
     final theme = Theme.of(context);
     final isEdit = ledger != null;
     final nameController = TextEditingController(text: ledger?.name ?? '');
-    final descController = TextEditingController(text: ledger?.description ?? '');
+    final descController = TextEditingController(
+      text: ledger?.description ?? '',
+    );
     String selectedCurrency = ledger?.currencyCode ?? 'CNY';
 
     showDialog(
@@ -215,7 +225,9 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
                 );
 
                 if (isEdit && index != null) {
-                  ref.read(initConfigProvider.notifier).updateLedger(index, newLedger);
+                  ref
+                      .read(initConfigProvider.notifier)
+                      .updateLedger(index, newLedger);
                 } else {
                   ref.read(initConfigProvider.notifier).addLedger(newLedger);
                 }
@@ -246,7 +258,9 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
           FilledButton(
             onPressed: () {
               HapticService.mediumImpact();
-              final success = ref.read(initConfigProvider.notifier).removeLedger(index);
+              final success = ref
+                  .read(initConfigProvider.notifier)
+                  .removeLedger(index);
               Navigator.pop(context);
               if (!success) {
                 ScaffoldMessenger.of(context).showSnackBar(

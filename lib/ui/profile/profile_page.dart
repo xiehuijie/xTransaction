@@ -151,9 +151,7 @@ class ProfilePage extends ConsumerWidget {
                   Icons.account_balance_wallet,
                   size: 48,
                 ),
-                children: [
-                  const Text('一款简洁高效的个人记账应用'),
-                ],
+                children: [const Text('一款简洁高效的个人记账应用')],
               );
             },
           ),
@@ -188,7 +186,8 @@ class ProfilePage extends ConsumerWidget {
 /// 创建设置页的滑入动画路由
 Route _createSettingsRoute() {
   return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => const SettingsPage(),
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        const SettingsPage(),
     transitionDuration: const Duration(milliseconds: 300),
     reverseTransitionDuration: const Duration(milliseconds: 300),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -200,10 +199,7 @@ Route _createSettingsRoute() {
       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
       var offsetAnimation = animation.drive(tween);
 
-      return SlideTransition(
-        position: offsetAnimation,
-        child: child,
-      );
+      return SlideTransition(position: offsetAnimation, child: child);
     },
   );
 }

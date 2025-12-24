@@ -126,15 +126,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _handleBiometricChange(bool value) async {
     HapticService.selectionClick();
-    
+
     if (value) {
       // 启用生物识别前，先验证生物识别可用性
       final canCheck = await BiometricService.canCheckBiometrics();
       if (!canCheck) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('设备不支持生物识别或未设置生物识别')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('设备不支持生物识别或未设置生物识别')));
         }
         return;
       }
@@ -143,7 +143,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       final result = await BiometricService.authenticate(
         localizedReason: '验证身份以启用生物识别解锁',
       );
-      
+
       if (result != BiometricResult.success) {
         if (mounted) {
           String message;
@@ -160,9 +160,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             default:
               message = '无法启用生物识别';
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
         }
         return;
       }

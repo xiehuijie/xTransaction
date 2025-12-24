@@ -10,10 +10,7 @@ class OverviewPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('概览'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('概览'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -19,10 +19,12 @@ class PreConfigCurrenciesPage extends ConsumerStatefulWidget {
   const PreConfigCurrenciesPage({super.key});
 
   @override
-  ConsumerState<PreConfigCurrenciesPage> createState() => _PreConfigCurrenciesPageState();
+  ConsumerState<PreConfigCurrenciesPage> createState() =>
+      _PreConfigCurrenciesPageState();
 }
 
-class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPage> {
+class _PreConfigCurrenciesPageState
+    extends ConsumerState<PreConfigCurrenciesPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -30,10 +32,7 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
     final customCurrencies = config.preConfigCurrencies;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('货币配置'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('货币配置'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -64,14 +63,20 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    items: _systemCurrencies.map((c) => DropdownMenuItem(
-                      value: c.currencyCode,
-                      child: Text('${c.name} (${c.currencyCode})'),
-                    )).toList(),
+                    items: _systemCurrencies
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.currencyCode,
+                            child: Text('${c.name} (${c.currencyCode})'),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (value) {
                       if (value != null) {
                         HapticService.selectionClick();
-                        ref.read(initConfigProvider.notifier).setDefaultCurrency(value);
+                        ref
+                            .read(initConfigProvider.notifier)
+                            .setDefaultCurrency(value);
                       }
                     },
                   ),
@@ -89,13 +94,10 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
             ),
           ),
           const SizedBox(height: 8),
-          ..._systemCurrencies.map((currency) => _buildCurrencyCard(
-            currency, 
-            false, 
-            -1, 
-            theme,
-          )),
-          
+          ..._systemCurrencies.map(
+            (currency) => _buildCurrencyCard(currency, false, -1, theme),
+          ),
+
           const SizedBox(height: 24),
 
           // 自定义货币
@@ -132,12 +134,10 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
               ),
             )
           else
-            ...customCurrencies.asMap().entries.map((entry) => _buildCurrencyCard(
-              entry.value,
-              true,
-              entry.key,
-              theme,
-            )),
+            ...customCurrencies.asMap().entries.map(
+              (entry) =>
+                  _buildCurrencyCard(entry.value, true, entry.key, theme),
+            ),
         ],
       ),
     );
@@ -153,7 +153,7 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isCustom 
+          backgroundColor: isCustom
               ? theme.colorScheme.tertiaryContainer
               : theme.colorScheme.primaryContainer,
           child: Text(
@@ -204,7 +204,9 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
             : Icon(
                 Icons.lock_outlined,
                 size: 20,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
               ),
       ),
     );
@@ -214,16 +216,28 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
     _showCurrencyDialog(context, null, null);
   }
 
-  void _showEditCurrencyDialog(BuildContext context, PreConfigCurrency currency, int index) {
+  void _showEditCurrencyDialog(
+    BuildContext context,
+    PreConfigCurrency currency,
+    int index,
+  ) {
     _showCurrencyDialog(context, currency, index);
   }
 
-  void _showCurrencyDialog(BuildContext context, PreConfigCurrency? currency, int? index) {
+  void _showCurrencyDialog(
+    BuildContext context,
+    PreConfigCurrency? currency,
+    int? index,
+  ) {
     final theme = Theme.of(context);
     final isEdit = currency != null;
-    final codeController = TextEditingController(text: currency?.currencyCode ?? '');
+    final codeController = TextEditingController(
+      text: currency?.currencyCode ?? '',
+    );
     final nameController = TextEditingController(text: currency?.name ?? '');
-    final symbolController = TextEditingController(text: currency?.symbol ?? '');
+    final symbolController = TextEditingController(
+      text: currency?.symbol ?? '',
+    );
     int decimal = currency?.decimal ?? 2;
 
     showDialog(
@@ -299,7 +313,7 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
                 final code = codeController.text.trim().toUpperCase();
                 final name = nameController.text.trim();
                 final symbol = symbolController.text.trim();
-                
+
                 if (code.isEmpty || name.isEmpty || symbol.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -311,7 +325,8 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
                 }
 
                 // 检查是否与系统货币冲突
-                if (!isEdit && _systemCurrencies.any((c) => c.currencyCode == code)) {
+                if (!isEdit &&
+                    _systemCurrencies.any((c) => c.currencyCode == code)) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('货币代码已被系统货币使用'),
@@ -322,8 +337,12 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
                 }
 
                 // 检查是否与已有自定义货币冲突
-                final existingCustom = ref.read(initConfigProvider).preConfigCurrencies;
-                final conflictIndex = existingCustom.indexWhere((c) => c.currencyCode == code);
+                final existingCustom = ref
+                    .read(initConfigProvider)
+                    .preConfigCurrencies;
+                final conflictIndex = existingCustom.indexWhere(
+                  (c) => c.currencyCode == code,
+                );
                 if (conflictIndex >= 0 && (!isEdit || conflictIndex != index)) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -343,9 +362,13 @@ class _PreConfigCurrenciesPageState extends ConsumerState<PreConfigCurrenciesPag
                 );
 
                 if (isEdit && index != null) {
-                  ref.read(initConfigProvider.notifier).updateCurrency(index, newCurrency);
+                  ref
+                      .read(initConfigProvider.notifier)
+                      .updateCurrency(index, newCurrency);
                 } else {
-                  ref.read(initConfigProvider.notifier).addCurrency(newCurrency);
+                  ref
+                      .read(initConfigProvider.notifier)
+                      .addCurrency(newCurrency);
                 }
                 Navigator.pop(context);
               },

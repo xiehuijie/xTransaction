@@ -41,11 +41,11 @@ class BiometricService {
   }
 
   /// 执行生物识别认证
-  /// 
+  ///
   /// [localizedReason] - 显示给用户的认证原因
   /// [useErrorDialogs] - 是否使用系统错误对话框
   /// [stickyAuth] - 认证是否持久（应用切换后继续）
-  /// 
+  ///
   /// 注意: 当设备不支持生物识别时，会允许使用PIN/密码作为备选认证方式。
   /// 这意味着即使用户启用"生物识别解锁"，设备密码也可用于解锁。
   static Future<BiometricResult> authenticate({
@@ -74,9 +74,7 @@ class BiometricService {
         ),
       );
 
-      return didAuthenticate 
-          ? BiometricResult.success 
-          : BiometricResult.failed;
+      return didAuthenticate ? BiometricResult.success : BiometricResult.failed;
     } on PlatformException catch (e) {
       if (e.code == 'NotAvailable') {
         return BiometricResult.notAvailable;
@@ -121,25 +119,25 @@ class BiometricService {
 enum BiometricResult {
   /// 认证成功
   success,
-  
+
   /// 认证失败（用户取消或验证失败）
   failed,
-  
+
   /// 设备不支持生物识别
   notSupported,
-  
+
   /// 生物识别不可用
   notAvailable,
-  
+
   /// 未注册生物识别信息
   notEnrolled,
-  
+
   /// 认证被临时锁定
   lockedOut,
-  
+
   /// 认证被永久锁定
   permanentlyLockedOut,
-  
+
   /// 发生错误
   error,
 }
