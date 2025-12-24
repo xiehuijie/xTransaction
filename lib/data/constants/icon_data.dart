@@ -1,10 +1,10 @@
 /// 图标数据常量定义
-/// 
+///
 /// 图标存储格式说明：
 /// - emoji:<unicode> - Emoji表情，如 emoji:1f600 (😀)
 /// - material:<icon_name> - Material图标，如 material:account_balance
 /// - flag:<country_code> - 国旗图标，如 flag:CN
-/// 
+///
 /// 示例：
 /// - 货币人民币图标：flag:CN 或 emoji:1f1e8-1f1f3
 /// - 账户钱包图标：emoji:1f4b0 或 material:wallet
@@ -12,28 +12,21 @@
 import 'package:flutter/material.dart';
 
 /// 图标类型枚举
-enum IconType {
-  emoji,
-  material,
-  flag,
-}
+enum IconType { emoji, material, flag }
 
 /// 图标数据类
 class AppIcon {
   final IconType type;
   final String value;
 
-  const AppIcon({
-    required this.type,
-    required this.value,
-  });
+  const AppIcon({required this.type, required this.value});
 
   /// 从存储格式字符串解析
   factory AppIcon.fromString(String str) {
     if (str.isEmpty) {
       return const AppIcon(type: IconType.material, value: 'help_outline');
     }
-    
+
     final parts = str.split(':');
     if (parts.length != 2) {
       return const AppIcon(type: IconType.material, value: 'help_outline');
@@ -70,7 +63,10 @@ class AppIcon {
   String? get emojiChar {
     if (type != IconType.emoji) return null;
     try {
-      final codePoints = value.split('-').map((s) => int.parse(s, radix: 16)).toList();
+      final codePoints = value
+          .split('-')
+          .map((s) => int.parse(s, radix: 16))
+          .toList();
       return String.fromCharCodes(codePoints);
     } catch (_) {
       return null;
@@ -106,7 +102,7 @@ const Map<String, IconData> materialIconsMap = {
   'favorite': Icons.favorite,
   'home': Icons.home,
   'settings': Icons.settings,
-  
+
   // 财务相关
   'account_balance': Icons.account_balance,
   'account_balance_wallet': Icons.account_balance_wallet,
@@ -126,7 +122,7 @@ const Map<String, IconData> materialIconsMap = {
   'bar_chart': Icons.bar_chart,
   'receipt': Icons.receipt,
   'receipt_long': Icons.receipt_long,
-  
+
   // 购物
   'shopping_cart': Icons.shopping_cart,
   'shopping_bag': Icons.shopping_bag,
@@ -135,7 +131,7 @@ const Map<String, IconData> materialIconsMap = {
   'local_mall': Icons.local_mall,
   'local_offer': Icons.local_offer,
   'sell': Icons.sell,
-  
+
   // 餐饮
   'restaurant': Icons.restaurant,
   'restaurant_menu': Icons.restaurant_menu,
@@ -150,7 +146,7 @@ const Map<String, IconData> materialIconsMap = {
   'breakfast_dining': Icons.breakfast_dining,
   'coffee': Icons.coffee,
   'local_grocery_store': Icons.local_grocery_store,
-  
+
   // 交通
   'directions_car': Icons.directions_car,
   'local_taxi': Icons.local_taxi,
@@ -164,7 +160,7 @@ const Map<String, IconData> materialIconsMap = {
   'local_gas_station': Icons.local_gas_station,
   'local_parking': Icons.local_parking,
   'ev_station': Icons.ev_station,
-  
+
   // 住房
   'house': Icons.house,
   'apartment': Icons.apartment,
@@ -176,7 +172,7 @@ const Map<String, IconData> materialIconsMap = {
   'kitchen': Icons.kitchen,
   'bathroom': Icons.bathroom,
   'weekend': Icons.weekend,
-  
+
   // 公用事业
   'power': Icons.power,
   'water_drop': Icons.water_drop,
@@ -187,7 +183,7 @@ const Map<String, IconData> materialIconsMap = {
   'smartphone': Icons.smartphone,
   'router': Icons.router,
   'tv': Icons.tv,
-  
+
   // 健康
   'local_hospital': Icons.local_hospital,
   'medical_services': Icons.medical_services,
@@ -198,7 +194,7 @@ const Map<String, IconData> materialIconsMap = {
   'sports_gymnastics': Icons.sports_gymnastics,
   'spa': Icons.spa,
   'self_improvement': Icons.self_improvement,
-  
+
   // 教育
   'school': Icons.school,
   'book': Icons.book,
@@ -209,7 +205,7 @@ const Map<String, IconData> materialIconsMap = {
   'calculate': Icons.calculate,
   'translate': Icons.translate,
   'history_edu': Icons.history_edu,
-  
+
   // 娱乐
   'movie': Icons.movie,
   'theaters': Icons.theaters,
@@ -221,15 +217,15 @@ const Map<String, IconData> materialIconsMap = {
   'celebration': Icons.celebration,
   'park': Icons.park,
   'attractions': Icons.attractions,
-  
+
   // 宠物
   'pets': Icons.pets,
-  
+
   // 礼物
   'card_giftcard': Icons.card_giftcard,
   'redeem': Icons.redeem,
   'cake': Icons.cake,
-  
+
   // 工作
   'work': Icons.work,
   'business': Icons.business,
@@ -237,7 +233,7 @@ const Map<String, IconData> materialIconsMap = {
   'laptop': Icons.laptop,
   'computer': Icons.computer,
   'print': Icons.print,
-  
+
   // 其他
   'category': Icons.category,
   'label': Icons.label,
@@ -289,10 +285,24 @@ const List<IconCategory> materialIconCategories = [
     name: '财务',
     icon: Icons.account_balance_wallet,
     iconKeys: [
-      'account_balance', 'account_balance_wallet', 'wallet', 'credit_card',
-      'savings', 'attach_money', 'money', 'payments', 'currency_exchange',
-      'paid', 'price_change', 'trending_up', 'trending_down', 'show_chart',
-      'pie_chart', 'bar_chart', 'receipt', 'receipt_long',
+      'account_balance',
+      'account_balance_wallet',
+      'wallet',
+      'credit_card',
+      'savings',
+      'attach_money',
+      'money',
+      'payments',
+      'currency_exchange',
+      'paid',
+      'price_change',
+      'trending_up',
+      'trending_down',
+      'show_chart',
+      'pie_chart',
+      'bar_chart',
+      'receipt',
+      'receipt_long',
     ],
   ),
   IconCategory(
@@ -300,8 +310,13 @@ const List<IconCategory> materialIconCategories = [
     name: '购物',
     icon: Icons.shopping_cart,
     iconKeys: [
-      'shopping_cart', 'shopping_bag', 'store', 'storefront',
-      'local_mall', 'local_offer', 'sell',
+      'shopping_cart',
+      'shopping_bag',
+      'store',
+      'storefront',
+      'local_mall',
+      'local_offer',
+      'sell',
     ],
   ),
   IconCategory(
@@ -309,9 +324,18 @@ const List<IconCategory> materialIconCategories = [
     name: '餐饮',
     icon: Icons.restaurant,
     iconKeys: [
-      'restaurant', 'restaurant_menu', 'local_dining', 'fastfood',
-      'local_cafe', 'local_bar', 'local_pizza', 'bakery_dining',
-      'lunch_dining', 'dinner_dining', 'breakfast_dining', 'coffee',
+      'restaurant',
+      'restaurant_menu',
+      'local_dining',
+      'fastfood',
+      'local_cafe',
+      'local_bar',
+      'local_pizza',
+      'bakery_dining',
+      'lunch_dining',
+      'dinner_dining',
+      'breakfast_dining',
+      'coffee',
       'local_grocery_store',
     ],
   ),
@@ -320,9 +344,18 @@ const List<IconCategory> materialIconCategories = [
     name: '交通',
     icon: Icons.directions_car,
     iconKeys: [
-      'directions_car', 'local_taxi', 'directions_bus', 'train',
-      'flight', 'local_shipping', 'two_wheeler', 'electric_bike',
-      'electric_car', 'local_gas_station', 'local_parking', 'ev_station',
+      'directions_car',
+      'local_taxi',
+      'directions_bus',
+      'train',
+      'flight',
+      'local_shipping',
+      'two_wheeler',
+      'electric_bike',
+      'electric_car',
+      'local_gas_station',
+      'local_parking',
+      'ev_station',
     ],
   ),
   IconCategory(
@@ -330,8 +363,17 @@ const List<IconCategory> materialIconCategories = [
     name: '住房',
     icon: Icons.home,
     iconKeys: [
-      'house', 'apartment', 'cottage', 'villa', 'hotel', 'bed',
-      'chair', 'kitchen', 'bathroom', 'weekend', 'home',
+      'house',
+      'apartment',
+      'cottage',
+      'villa',
+      'hotel',
+      'bed',
+      'chair',
+      'kitchen',
+      'bathroom',
+      'weekend',
+      'home',
     ],
   ),
   IconCategory(
@@ -339,8 +381,15 @@ const List<IconCategory> materialIconCategories = [
     name: '公用事业',
     icon: Icons.power,
     iconKeys: [
-      'power', 'water_drop', 'gas_meter', 'electric_meter', 'wifi',
-      'phone', 'smartphone', 'router', 'tv',
+      'power',
+      'water_drop',
+      'gas_meter',
+      'electric_meter',
+      'wifi',
+      'phone',
+      'smartphone',
+      'router',
+      'tv',
     ],
   ),
   IconCategory(
@@ -348,9 +397,15 @@ const List<IconCategory> materialIconCategories = [
     name: '健康',
     icon: Icons.favorite,
     iconKeys: [
-      'local_hospital', 'medical_services', 'medication',
-      'health_and_safety', 'fitness_center', 'sports',
-      'sports_gymnastics', 'spa', 'self_improvement',
+      'local_hospital',
+      'medical_services',
+      'medication',
+      'health_and_safety',
+      'fitness_center',
+      'sports',
+      'sports_gymnastics',
+      'spa',
+      'self_improvement',
     ],
   ),
   IconCategory(
@@ -358,8 +413,15 @@ const List<IconCategory> materialIconCategories = [
     name: '教育',
     icon: Icons.school,
     iconKeys: [
-      'school', 'book', 'menu_book', 'auto_stories', 'library_books',
-      'science', 'calculate', 'translate', 'history_edu',
+      'school',
+      'book',
+      'menu_book',
+      'auto_stories',
+      'library_books',
+      'science',
+      'calculate',
+      'translate',
+      'history_edu',
     ],
   ),
   IconCategory(
@@ -367,8 +429,16 @@ const List<IconCategory> materialIconCategories = [
     name: '娱乐',
     icon: Icons.movie,
     iconKeys: [
-      'movie', 'theaters', 'music_note', 'headphones', 'videogame_asset',
-      'sports_esports', 'casino', 'celebration', 'park', 'attractions',
+      'movie',
+      'theaters',
+      'music_note',
+      'headphones',
+      'videogame_asset',
+      'sports_esports',
+      'casino',
+      'celebration',
+      'park',
+      'attractions',
     ],
   ),
   IconCategory(
@@ -376,9 +446,22 @@ const List<IconCategory> materialIconCategories = [
     name: '其他',
     icon: Icons.more_horiz,
     iconKeys: [
-      'pets', 'card_giftcard', 'redeem', 'cake', 'work', 'business',
-      'business_center', 'laptop', 'computer', 'print', 'category',
-      'label', 'bookmark', 'flag', 'star', 'favorite',
+      'pets',
+      'card_giftcard',
+      'redeem',
+      'cake',
+      'work',
+      'business',
+      'business_center',
+      'laptop',
+      'computer',
+      'print',
+      'category',
+      'label',
+      'bookmark',
+      'flag',
+      'star',
+      'favorite',
     ],
   ),
 ];

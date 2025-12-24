@@ -1,5 +1,5 @@
 /// 数据恢复页面（从备份恢复）
-/// 
+///
 /// 允许用户从本地备份或云端恢复数据
 
 import 'package:flutter/material.dart';
@@ -16,10 +16,7 @@ class DataRecoveryPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('从备份恢复'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('从备份恢复'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -53,11 +50,9 @@ class DataRecoveryPage extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () {
                   HapticService.lightImpact();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('备份恢复功能正在开发中'),
-                    ),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('备份恢复功能正在开发中')));
                 },
                 icon: const Icon(Icons.folder_open_outlined),
                 label: const Text('选择备份文件'),
@@ -71,11 +66,9 @@ class DataRecoveryPage extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () {
                   HapticService.lightImpact();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('云端备份功能正在开发中'),
-                    ),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('云端备份功能正在开发中')));
                 },
                 icon: const Icon(Icons.cloud_outlined),
                 label: const Text('从云端恢复'),
@@ -88,15 +81,14 @@ class DataRecoveryPage extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.info_outline, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

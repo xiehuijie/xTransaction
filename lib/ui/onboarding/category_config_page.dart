@@ -1,5 +1,5 @@
 /// 分类预配置页面
-/// 
+///
 /// 初始化流程的第三步，配置交易分类
 /// 支持4种分类类型：支出、收入、折扣/优惠、税收/手续费
 
@@ -283,10 +283,17 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
                           }
                         });
                       },
-                      onEdit: () => _showEditDialog(context, categories[index], index),
-                      onDelete: () => _confirmDelete(context, categories[index], index),
-                      onAddChild: () => _showAddChildDialog(context, categories[index], index),
-                      onUpdateCategory: (category) => _updateCategory(index, category),
+                      onEdit: () =>
+                          _showEditDialog(context, categories[index], index),
+                      onDelete: () =>
+                          _confirmDelete(context, categories[index], index),
+                      onAddChild: () => _showAddChildDialog(
+                        context,
+                        categories[index],
+                        index,
+                      ),
+                      onUpdateCategory: (category) =>
+                          _updateCategory(index, category),
                     );
                   },
                 ),
@@ -332,7 +339,11 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
     );
   }
 
-  void _showEditDialog(BuildContext context, PreConfigCategory category, int index) {
+  void _showEditDialog(
+    BuildContext context,
+    PreConfigCategory category,
+    int index,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -341,13 +352,20 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
         type: widget.type,
         category: category,
         onSave: (newCategory) {
-          _updateCategory(index, newCategory.copyWith(children: category.children));
+          _updateCategory(
+            index,
+            newCategory.copyWith(children: category.children),
+          );
         },
       ),
     );
   }
 
-  void _showAddChildDialog(BuildContext context, PreConfigCategory parent, int parentIndex) {
+  void _showAddChildDialog(
+    BuildContext context,
+    PreConfigCategory parent,
+    int parentIndex,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -368,7 +386,11 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
     );
   }
 
-  void _confirmDelete(BuildContext context, PreConfigCategory category, int index) {
+  void _confirmDelete(
+    BuildContext context,
+    PreConfigCategory category,
+    int index,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -431,10 +453,7 @@ class _CategoryItemTile extends StatelessWidget {
         Material(
           color: Colors.transparent,
           child: ListTile(
-            contentPadding: EdgeInsets.only(
-              left: 16 + depth * 24.0,
-              right: 8,
-            ),
+            contentPadding: EdgeInsets.only(left: 16 + depth * 24.0, right: 8),
             leading: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -446,7 +465,10 @@ class _CategoryItemTile extends StatelessWidget {
                       size: 20,
                     ),
                     onPressed: onToggleExpand,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
                     padding: EdgeInsets.zero,
                   )
                 else
@@ -560,15 +582,23 @@ class _ChildCategoryItemState extends State<_ChildCategoryItem> {
   bool _isExpanded = false;
 
   void _updateChild(PreConfigCategory newChild) {
-    final newChildren = List<PreConfigCategory>.from(widget.parentCategory.children);
+    final newChildren = List<PreConfigCategory>.from(
+      widget.parentCategory.children,
+    );
     newChildren[widget.childIndex] = newChild;
-    widget.onUpdateParent(widget.parentCategory.copyWith(children: newChildren));
+    widget.onUpdateParent(
+      widget.parentCategory.copyWith(children: newChildren),
+    );
   }
 
   void _removeChild() {
-    final newChildren = List<PreConfigCategory>.from(widget.parentCategory.children);
+    final newChildren = List<PreConfigCategory>.from(
+      widget.parentCategory.children,
+    );
     newChildren.removeAt(widget.childIndex);
-    widget.onUpdateParent(widget.parentCategory.copyWith(children: newChildren));
+    widget.onUpdateParent(
+      widget.parentCategory.copyWith(children: newChildren),
+    );
   }
 
   void _addGrandChild(PreConfigCategory grandChild) {
@@ -601,7 +631,10 @@ class _ChildCategoryItemState extends State<_ChildCategoryItem> {
                     size: 20,
                   ),
                   onPressed: () => setState(() => _isExpanded = !_isExpanded),
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   padding: EdgeInsets.zero,
                 )
               else
@@ -696,7 +729,9 @@ class _ChildCategoryItemState extends State<_ChildCategoryItem> {
         type: widget.category.type,
         category: widget.category,
         onSave: (newCategory) {
-          _updateChild(newCategory.copyWith(children: widget.category.children));
+          _updateChild(
+            newCategory.copyWith(children: widget.category.children),
+          );
         },
       ),
     );
@@ -707,10 +742,8 @@ class _ChildCategoryItemState extends State<_ChildCategoryItem> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (context) => _CategoryEditor(
-        type: widget.category.type,
-        onSave: _addGrandChild,
-      ),
+      builder: (context) =>
+          _CategoryEditor(type: widget.category.type, onSave: _addGrandChild),
     );
   }
 

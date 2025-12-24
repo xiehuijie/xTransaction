@@ -1,5 +1,5 @@
 /// 通用图标显示组件
-/// 
+///
 /// 根据存储格式字符串显示对应的图标
 
 import 'package:flutter/material.dart';
@@ -11,19 +11,19 @@ import '../../data/constants/icon_data.dart';
 class AppIconWidget extends StatelessWidget {
   /// 图标数据
   final AppIcon icon;
-  
+
   /// 图标大小
   final double size;
-  
+
   /// 图标颜色（仅对Material图标有效）
   final Color? color;
-  
+
   /// 背景颜色
   final Color? backgroundColor;
-  
+
   /// 是否显示圆形背景
   final bool showBackground;
-  
+
   /// 圆角半径
   final double borderRadius;
 
@@ -59,17 +59,14 @@ class AppIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     Widget iconWidget;
-    
+
     switch (icon.type) {
       case IconType.emoji:
         final emoji = icon.emojiChar;
         if (emoji != null) {
-          iconWidget = Text(
-            emoji,
-            style: TextStyle(fontSize: size * 0.8),
-          );
+          iconWidget = Text(emoji, style: TextStyle(fontSize: size * 0.8));
         } else {
           iconWidget = Icon(
             Icons.help_outline,
@@ -78,7 +75,7 @@ class AppIconWidget extends StatelessWidget {
           );
         }
         break;
-        
+
       case IconType.material:
         final iconData = icon.materialIcon;
         iconWidget = Icon(
@@ -87,7 +84,7 @@ class AppIconWidget extends StatelessWidget {
           color: color ?? theme.colorScheme.onSurfaceVariant,
         );
         break;
-        
+
       case IconType.flag:
         iconWidget = CountryFlag.fromCountryCode(
           icon.value,
@@ -120,16 +117,16 @@ class AppIconWidget extends StatelessWidget {
 class AppIconButton extends StatelessWidget {
   /// 图标数据
   final AppIcon? icon;
-  
+
   /// 图标大小
   final double size;
-  
+
   /// 点击回调
   final VoidCallback? onTap;
-  
+
   /// 是否显示编辑提示
   final bool showEditHint;
-  
+
   /// 提示文字
   final String hintText;
 
@@ -155,18 +152,13 @@ class AppIconButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.5),
-          ),
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
         ),
         child: Stack(
           children: [
             Center(
               child: icon != null
-                  ? AppIconWidget(
-                      icon: icon!,
-                      size: size * 0.5,
-                    )
+                  ? AppIconWidget(icon: icon!, size: size * 0.5)
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

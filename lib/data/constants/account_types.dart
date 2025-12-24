@@ -1,5 +1,5 @@
 /// 账户类型相关常量与配置
-/// 
+///
 /// 定义各种账户类型的默认配置和说明
 
 import 'package:flutter/material.dart';
@@ -9,19 +9,19 @@ import '../database/tables.dart';
 class AccountTypeInfo {
   /// 账户类型
   final AccountType type;
-  
+
   /// 显示名称
   final String name;
-  
+
   /// 描述
   final String description;
-  
+
   /// 图标
   final IconData icon;
-  
+
   /// 是否支持自定义货币
   final bool supportsCustomCurrency;
-  
+
   /// 是否需要额外配置
   final bool requiresExtraConfig;
 
@@ -98,44 +98,44 @@ const List<AccountType> creatableAccountTypes = [
 /// 账户元数据系统级键名
 class AccountMetaKeys {
   AccountMetaKeys._();
-  
+
   /// 银行卡号
   static const String bankCardNumber = 'bank_card_number';
-  
+
   /// 银行名称
   static const String bankName = 'bank_name';
-  
+
   /// 开户行
   static const String bankBranch = 'bank_branch';
-  
+
   /// 持卡人姓名
   static const String cardHolderName = 'card_holder_name';
-  
+
   /// 卡片有效期
   static const String cardExpiry = 'card_expiry';
-  
+
   /// 初始余额（用于初始化时记录）
   static const String initialBalance = 'initial_balance';
-  
+
   /// 投资账户：绑定的股票/基金代码
   static const String investCode = 'invest_code';
-  
+
   /// 投资账户：投资类型（stock/fund/crypto/other）
   static const String investType = 'invest_type';
-  
+
   /// 预付账户：是否启用赠送金
   static const String enableBonus = 'enable_bonus';
-  
+
   /// 预付账户：赠送金扣减模式
   static const String bonusDeductMode = 'bonus_deduct_mode';
 }
 
 /// 投资类型枚举
 enum InvestType {
-  stock,  // 股票
-  fund,   // 基金
+  stock, // 股票
+  fund, // 基金
   crypto, // 虚拟货币
-  other,  // 其他
+  other, // 其他
 }
 
 /// 投资类型信息

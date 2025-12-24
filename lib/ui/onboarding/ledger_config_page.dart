@@ -1,5 +1,5 @@
 /// 账本预配置页面
-/// 
+///
 /// 初始化流程的第四步，配置多账本
 
 import 'package:flutter/material.dart';
@@ -23,10 +23,7 @@ class LedgerConfigPage extends ConsumerWidget {
     final state = ref.watch(onboardingProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('账本配置'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('账本配置'), centerTitle: true),
       body: Column(
         children: [
           // 说明
@@ -80,10 +77,9 @@ class LedgerConfigPage extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: state.ledgers.length,
                     onReorder: (oldIndex, newIndex) {
-                      ref.read(onboardingProvider.notifier).reorderLedger(
-                        oldIndex,
-                        newIndex,
-                      );
+                      ref
+                          .read(onboardingProvider.notifier)
+                          .reorderLedger(oldIndex, newIndex);
                     },
                     itemBuilder: (context, index) {
                       final ledger = state.ledgers[index];
@@ -169,10 +165,7 @@ class _LedgerItem extends ConsumerWidget {
             if (ledger.isDefault) ...[
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(4),
@@ -246,10 +239,10 @@ class _LedgerItem extends ConsumerWidget {
 
   String _buildSubtitle() {
     final parts = <String>[];
-    
+
     // 货币
     parts.add(ledger.currencyCode);
-    
+
     // 账户
     if (ledger.selectedAccountIds.isEmpty) {
       if (ledger.autoAccount) {
@@ -260,7 +253,7 @@ class _LedgerItem extends ConsumerWidget {
     } else {
       parts.add('${ledger.selectedAccountIds.length}个账户');
     }
-    
+
     return parts.join(' · ');
   }
 
@@ -273,7 +266,9 @@ class _LedgerItem extends ConsumerWidget {
           availableCurrencies: state.availableCurrencies,
           defaultCurrency: state.defaultCurrency ?? 'CNY',
           onSave: (newLedger) {
-            ref.read(onboardingProvider.notifier).updateLedger(index, newLedger);
+            ref
+                .read(onboardingProvider.notifier)
+                .updateLedger(index, newLedger);
           },
         ),
       ),
@@ -337,18 +332,20 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.ledger?.name);
-    _descriptionController = TextEditingController(text: widget.ledger?.description);
+    _descriptionController = TextEditingController(
+      text: widget.ledger?.description,
+    );
     _icon = widget.ledger?.icon;
     _currencyCode = widget.ledger?.currencyCode ?? widget.defaultCurrency;
     _autoAccount = widget.ledger?.autoAccount ?? true;
     _autoCategory = widget.ledger?.autoCategory ?? true;
     _selectedAccountIds = Set.from(widget.ledger?.selectedAccountIds ?? {});
     _selectedCategoryIds = Set.from(widget.ledger?.selectedCategoryIds ?? {});
-    
+
     // 确保货币代码有效
     if (!widget.availableCurrencies.contains(_currencyCode)) {
-      _currencyCode = widget.availableCurrencies.isNotEmpty 
-          ? widget.availableCurrencies.first 
+      _currencyCode = widget.availableCurrencies.isNotEmpty
+          ? widget.availableCurrencies.first
           : 'CNY';
     }
   }
@@ -400,9 +397,8 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
   Future<void> _selectAccounts() async {
     final result = await Navigator.of(context).push<Set<String>>(
       MaterialPageRoute(
-        builder: (_) => AccountSelectionPage(
-          initialSelectedIds: _selectedAccountIds,
-        ),
+        builder: (_) =>
+            AccountSelectionPage(initialSelectedIds: _selectedAccountIds),
       ),
     );
     if (result != null) {
@@ -413,9 +409,8 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
   Future<void> _selectCategories() async {
     final result = await Navigator.of(context).push<Set<String>>(
       MaterialPageRoute(
-        builder: (_) => CategorySelectionPage(
-          initialSelectedIds: _selectedCategoryIds,
-        ),
+        builder: (_) =>
+            CategorySelectionPage(initialSelectedIds: _selectedCategoryIds),
       ),
     );
     if (result != null) {
@@ -505,13 +500,16 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
 
   Widget _buildCurrencySelector(ThemeData theme) {
     // 构建可用货币列表
-    final currencies = widget.availableCurrencies.map((code) {
-      try {
-        return FiatCurrency.fromCode(code);
-      } catch (_) {
-        return null;
-      }
-    }).whereType<FiatCurrency>().toList();
+    final currencies = widget.availableCurrencies
+        .map((code) {
+          try {
+            return FiatCurrency.fromCode(code);
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<FiatCurrency>()
+        .toList();
 
     return Card(
       child: Column(
@@ -534,7 +532,10 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
               value: _currencyCode,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               items: currencies.map((currency) {
                 return DropdownMenuItem<String>(
@@ -613,7 +614,8 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
               ),
               trailing: const Icon(Icons.chevron_right),
             ),
-            if (_selectedAccountIds.isNotEmpty && _selectedAccountIds.length <= 5) ...[
+            if (_selectedAccountIds.isNotEmpty &&
+                _selectedAccountIds.length <= 5) ...[
               const Divider(height: 1),
               Padding(
                 padding: const EdgeInsets.all(12),
@@ -643,7 +645,8 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
   }
 
   Widget _buildCategorySelection(ThemeData theme, OnboardingState state) {
-    final totalCategories = state.expenseCategories.length +
+    final totalCategories =
+        state.expenseCategories.length +
         state.incomeCategories.length +
         state.discountCategories.length +
         state.costCategories.length;

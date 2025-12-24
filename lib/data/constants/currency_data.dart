@@ -1,5 +1,5 @@
 /// 货币数据常量
-/// 
+///
 /// 基于 ISO 4217 标准的世界主流货币数据
 /// 数据源：sealed_currencies 库 + 手动补充
 
@@ -9,25 +9,25 @@ import 'package:flutter/material.dart';
 class CurrencyTemplate {
   /// ISO 4217 货币代码
   final String code;
-  
+
   /// 货币名称（中文）
   final String nameCN;
-  
+
   /// 货币名称（英文）
   final String nameEN;
-  
+
   /// 货币符号
   final String symbol;
-  
+
   /// 小数位数
   final int decimal;
-  
+
   /// 符号位置：true=前缀，false=后缀
   final bool symbolPrefix;
-  
+
   /// 国家/地区代码（用于显示国旗）
   final String? countryCode;
-  
+
   /// 是否为主流货币
   final bool isPopular;
 
@@ -152,7 +152,7 @@ const List<CurrencyTemplate> worldCurrencies = [
     countryCode: 'CH',
     isPopular: true,
   ),
-  
+
   // 亚洲货币
   CurrencyTemplate(
     code: 'MOP',
@@ -263,7 +263,7 @@ const List<CurrencyTemplate> worldCurrencies = [
     symbol: 'B\$',
     countryCode: 'BN',
   ),
-  
+
   // 中东货币
   CurrencyTemplate(
     code: 'AED',
@@ -324,7 +324,7 @@ const List<CurrencyTemplate> worldCurrencies = [
     symbol: '₺',
     countryCode: 'TR',
   ),
-  
+
   // 欧洲货币（非欧元区）
   CurrencyTemplate(
     code: 'RUB',
@@ -412,7 +412,7 @@ const List<CurrencyTemplate> worldCurrencies = [
     symbol: '₴',
     countryCode: 'UA',
   ),
-  
+
   // 美洲货币
   CurrencyTemplate(
     code: 'MXN',
@@ -457,7 +457,7 @@ const List<CurrencyTemplate> worldCurrencies = [
     symbol: 'S/',
     countryCode: 'PE',
   ),
-  
+
   // 非洲货币
   CurrencyTemplate(
     code: 'ZAR',
@@ -494,7 +494,7 @@ const List<CurrencyTemplate> worldCurrencies = [
     symbol: 'د.م.',
     countryCode: 'MA',
   ),
-  
+
   // 大洋洲货币
   CurrencyTemplate(
     code: 'NZD',
@@ -545,13 +545,48 @@ const List<CurrencyRegion> currencyRegions = [
     id: 'popular',
     name: '常用',
     icon: Icons.star,
-    currencyCodes: ['CNY', 'USD', 'EUR', 'JPY', 'GBP', 'HKD', 'TWD', 'KRW', 'SGD', 'AUD', 'CAD', 'CHF'],
+    currencyCodes: [
+      'CNY',
+      'USD',
+      'EUR',
+      'JPY',
+      'GBP',
+      'HKD',
+      'TWD',
+      'KRW',
+      'SGD',
+      'AUD',
+      'CAD',
+      'CHF',
+    ],
   ),
   CurrencyRegion(
     id: 'asia',
     name: '亚洲',
     icon: Icons.public,
-    currencyCodes: ['CNY', 'JPY', 'KRW', 'HKD', 'TWD', 'SGD', 'MOP', 'THB', 'MYR', 'IDR', 'PHP', 'VND', 'INR', 'PKR', 'BDT', 'LKR', 'NPR', 'MMK', 'KHR', 'LAK', 'BND'],
+    currencyCodes: [
+      'CNY',
+      'JPY',
+      'KRW',
+      'HKD',
+      'TWD',
+      'SGD',
+      'MOP',
+      'THB',
+      'MYR',
+      'IDR',
+      'PHP',
+      'VND',
+      'INR',
+      'PKR',
+      'BDT',
+      'LKR',
+      'NPR',
+      'MMK',
+      'KHR',
+      'LAK',
+      'BND',
+    ],
   ),
   CurrencyRegion(
     id: 'middleeast',
@@ -563,7 +598,23 @@ const List<CurrencyRegion> currencyRegions = [
     id: 'europe',
     name: '欧洲',
     icon: Icons.castle,
-    currencyCodes: ['EUR', 'GBP', 'CHF', 'RUB', 'PLN', 'CZK', 'HUF', 'SEK', 'NOK', 'DKK', 'ISK', 'RON', 'BGN', 'HRK', 'UAH'],
+    currencyCodes: [
+      'EUR',
+      'GBP',
+      'CHF',
+      'RUB',
+      'PLN',
+      'CZK',
+      'HUF',
+      'SEK',
+      'NOK',
+      'DKK',
+      'ISK',
+      'RON',
+      'BGN',
+      'HRK',
+      'UAH',
+    ],
   ),
   CurrencyRegion(
     id: 'americas',

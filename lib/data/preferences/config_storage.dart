@@ -1,5 +1,5 @@
 /// 应用配置存储服务
-/// 
+///
 /// 提供类型安全的键值对存储，分门别类管理各种配置项
 /// 每个配置项都有详细说明，便于维护
 
@@ -9,13 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract class ConfigKey<T> {
   /// 存储键名
   final String key;
-  
+
   /// 配置项说明
   final String description;
-  
+
   /// 默认值
   final T defaultValue;
-  
+
   /// 配置分类
   final String category;
 
@@ -89,9 +89,9 @@ class StringListConfigKey extends ConfigKey<List<String>> {
 /// 应用状态相关配置
 class AppStateConfig {
   AppStateConfig._();
-  
+
   static const category = 'app_state';
-  
+
   /// 是否已完成初始化向导
   static const initialized = BoolConfigKey(
     key: 'app_initialized',
@@ -99,7 +99,7 @@ class AppStateConfig {
     defaultValue: false,
     category: category,
   );
-  
+
   /// 应用版本号（用于检测升级）
   static const appVersion = StringConfigKey(
     key: 'app_version',
@@ -107,7 +107,7 @@ class AppStateConfig {
     defaultValue: '',
     category: category,
   );
-  
+
   /// 数据库版本号
   static const dbVersion = IntConfigKey(
     key: 'db_version',
@@ -120,9 +120,9 @@ class AppStateConfig {
 /// 功能开关配置
 class FeatureConfig {
   FeatureConfig._();
-  
+
   static const category = 'feature';
-  
+
   /// 是否启用资产管理功能
   static const enableAssetManagement = BoolConfigKey(
     key: 'enable_asset_management',
@@ -130,7 +130,7 @@ class FeatureConfig {
     defaultValue: true,
     category: category,
   );
-  
+
   /// 是否启用预算管理功能
   static const enableBudgetManagement = BoolConfigKey(
     key: 'enable_budget_management',
@@ -138,7 +138,7 @@ class FeatureConfig {
     defaultValue: true,
     category: category,
   );
-  
+
   /// 是否启用多货币功能
   static const enableMultiCurrency = BoolConfigKey(
     key: 'enable_multi_currency',
@@ -146,7 +146,7 @@ class FeatureConfig {
     defaultValue: false,
     category: category,
   );
-  
+
   /// 是否启用多账户功能
   static const enableMultiAccount = BoolConfigKey(
     key: 'enable_multi_account',
@@ -154,7 +154,7 @@ class FeatureConfig {
     defaultValue: true,
     category: category,
   );
-  
+
   /// 是否启用多账本功能
   static const enableMultiLedger = BoolConfigKey(
     key: 'enable_multi_ledger',
@@ -162,7 +162,7 @@ class FeatureConfig {
     defaultValue: false,
     category: category,
   );
-  
+
   /// 是否启用生物识别解锁
   static const enableBiometric = BoolConfigKey(
     key: 'enable_biometric',
@@ -175,9 +175,9 @@ class FeatureConfig {
 /// 货币相关配置
 class CurrencyConfig {
   CurrencyConfig._();
-  
+
   static const category = 'currency';
-  
+
   /// 默认货币代码
   static const defaultCurrencyCode = StringConfigKey(
     key: 'default_currency_code',
@@ -185,7 +185,7 @@ class CurrencyConfig {
     defaultValue: 'CNY',
     category: category,
   );
-  
+
   /// 已启用的货币代码列表
   static const enabledCurrencyCodes = StringListConfigKey(
     key: 'enabled_currency_codes',
@@ -197,9 +197,9 @@ class CurrencyConfig {
 /// 账本相关配置
 class LedgerConfig {
   LedgerConfig._();
-  
+
   static const category = 'ledger';
-  
+
   /// 当前选中的账本ID
   static const currentLedgerId = NullableIntConfigKey(
     key: 'current_ledger_id',
@@ -211,9 +211,9 @@ class LedgerConfig {
 /// 外观相关配置
 class AppearanceConfig {
   AppearanceConfig._();
-  
+
   static const category = 'appearance';
-  
+
   /// 主题模式（system/light/dark）
   static const themeMode = StringConfigKey(
     key: 'theme_mode',
@@ -221,7 +221,7 @@ class AppearanceConfig {
     defaultValue: 'system',
     category: category,
   );
-  
+
   /// 主题色
   static const themeColor = StringConfigKey(
     key: 'theme_color',
@@ -229,7 +229,7 @@ class AppearanceConfig {
     defaultValue: 'teal',
     category: category,
   );
-  
+
   /// 应用语言
   static const locale = NullableStringConfigKey(
     key: 'locale',
@@ -241,9 +241,9 @@ class AppearanceConfig {
 /// 隐私安全相关配置
 class PrivacyConfig {
   PrivacyConfig._();
-  
+
   static const category = 'privacy';
-  
+
   /// 锁屏超时时间（秒）
   static const lockTimeout = IntConfigKey(
     key: 'lock_timeout',
@@ -251,7 +251,7 @@ class PrivacyConfig {
     defaultValue: 0,
     category: category,
   );
-  
+
   /// 是否隐藏金额
   static const hideAmount = BoolConfigKey(
     key: 'hide_amount',
@@ -264,16 +264,16 @@ class PrivacyConfig {
 /// 记账相关配置
 class TransactionConfig {
   TransactionConfig._();
-  
+
   static const category = 'transaction';
-  
+
   /// 默认使用的账户ID
   static const defaultAccountId = NullableIntConfigKey(
     key: 'default_account_id',
     description: '记账时默认使用的账户ID',
     category: category,
   );
-  
+
   /// 是否记住上次使用的分类
   static const rememberLastCategory = BoolConfigKey(
     key: 'remember_last_category',
@@ -281,14 +281,14 @@ class TransactionConfig {
     defaultValue: true,
     category: category,
   );
-  
+
   /// 上次使用的支出分类ID
   static const lastExpenseCategoryId = NullableIntConfigKey(
     key: 'last_expense_category_id',
     description: '上次使用的支出分类ID',
     category: category,
   );
-  
+
   /// 上次使用的收入分类ID
   static const lastIncomeCategoryId = NullableIntConfigKey(
     key: 'last_income_category_id',
@@ -383,67 +383,94 @@ class AppConfigStorage {
 
   // 应用状态
   bool get isInitialized => getBool(AppStateConfig.initialized);
-  Future<bool> setInitialized(bool value) => setBool(AppStateConfig.initialized, value);
+  Future<bool> setInitialized(bool value) =>
+      setBool(AppStateConfig.initialized, value);
 
   // 功能开关
-  bool get enableAssetManagement => getBool(FeatureConfig.enableAssetManagement);
-  Future<bool> setEnableAssetManagement(bool value) => setBool(FeatureConfig.enableAssetManagement, value);
+  bool get enableAssetManagement =>
+      getBool(FeatureConfig.enableAssetManagement);
+  Future<bool> setEnableAssetManagement(bool value) =>
+      setBool(FeatureConfig.enableAssetManagement, value);
 
-  bool get enableBudgetManagement => getBool(FeatureConfig.enableBudgetManagement);
-  Future<bool> setEnableBudgetManagement(bool value) => setBool(FeatureConfig.enableBudgetManagement, value);
+  bool get enableBudgetManagement =>
+      getBool(FeatureConfig.enableBudgetManagement);
+  Future<bool> setEnableBudgetManagement(bool value) =>
+      setBool(FeatureConfig.enableBudgetManagement, value);
 
   bool get enableMultiCurrency => getBool(FeatureConfig.enableMultiCurrency);
-  Future<bool> setEnableMultiCurrency(bool value) => setBool(FeatureConfig.enableMultiCurrency, value);
+  Future<bool> setEnableMultiCurrency(bool value) =>
+      setBool(FeatureConfig.enableMultiCurrency, value);
 
   bool get enableMultiAccount => getBool(FeatureConfig.enableMultiAccount);
-  Future<bool> setEnableMultiAccount(bool value) => setBool(FeatureConfig.enableMultiAccount, value);
+  Future<bool> setEnableMultiAccount(bool value) =>
+      setBool(FeatureConfig.enableMultiAccount, value);
 
   bool get enableMultiLedger => getBool(FeatureConfig.enableMultiLedger);
-  Future<bool> setEnableMultiLedger(bool value) => setBool(FeatureConfig.enableMultiLedger, value);
+  Future<bool> setEnableMultiLedger(bool value) =>
+      setBool(FeatureConfig.enableMultiLedger, value);
 
   bool get enableBiometric => getBool(FeatureConfig.enableBiometric);
-  Future<bool> setEnableBiometric(bool value) => setBool(FeatureConfig.enableBiometric, value);
+  Future<bool> setEnableBiometric(bool value) =>
+      setBool(FeatureConfig.enableBiometric, value);
 
   // 货币配置
-  String get defaultCurrencyCode => getString(CurrencyConfig.defaultCurrencyCode);
-  Future<bool> setDefaultCurrencyCode(String value) => setString(CurrencyConfig.defaultCurrencyCode, value);
+  String get defaultCurrencyCode =>
+      getString(CurrencyConfig.defaultCurrencyCode);
+  Future<bool> setDefaultCurrencyCode(String value) =>
+      setString(CurrencyConfig.defaultCurrencyCode, value);
 
-  List<String> get enabledCurrencyCodes => getStringList(CurrencyConfig.enabledCurrencyCodes);
-  Future<bool> setEnabledCurrencyCodes(List<String> value) => setStringList(CurrencyConfig.enabledCurrencyCodes, value);
+  List<String> get enabledCurrencyCodes =>
+      getStringList(CurrencyConfig.enabledCurrencyCodes);
+  Future<bool> setEnabledCurrencyCodes(List<String> value) =>
+      setStringList(CurrencyConfig.enabledCurrencyCodes, value);
 
   // 账本配置
   int? get currentLedgerId => getNullableInt(LedgerConfig.currentLedgerId);
-  Future<bool> setCurrentLedgerId(int? value) => setNullableInt(LedgerConfig.currentLedgerId, value);
+  Future<bool> setCurrentLedgerId(int? value) =>
+      setNullableInt(LedgerConfig.currentLedgerId, value);
 
   // 外观配置
   String get themeMode => getString(AppearanceConfig.themeMode);
-  Future<bool> setThemeMode(String value) => setString(AppearanceConfig.themeMode, value);
+  Future<bool> setThemeMode(String value) =>
+      setString(AppearanceConfig.themeMode, value);
 
   String get themeColor => getString(AppearanceConfig.themeColor);
-  Future<bool> setThemeColor(String value) => setString(AppearanceConfig.themeColor, value);
+  Future<bool> setThemeColor(String value) =>
+      setString(AppearanceConfig.themeColor, value);
 
   String? get locale => getNullableString(AppearanceConfig.locale);
-  Future<bool> setLocale(String? value) => setNullableString(AppearanceConfig.locale, value);
+  Future<bool> setLocale(String? value) =>
+      setNullableString(AppearanceConfig.locale, value);
 
   // 隐私配置
   int get lockTimeout => getInt(PrivacyConfig.lockTimeout);
-  Future<bool> setLockTimeout(int value) => setInt(PrivacyConfig.lockTimeout, value);
+  Future<bool> setLockTimeout(int value) =>
+      setInt(PrivacyConfig.lockTimeout, value);
 
   bool get hideAmount => getBool(PrivacyConfig.hideAmount);
-  Future<bool> setHideAmount(bool value) => setBool(PrivacyConfig.hideAmount, value);
+  Future<bool> setHideAmount(bool value) =>
+      setBool(PrivacyConfig.hideAmount, value);
 
   // 记账配置
-  int? get defaultAccountId => getNullableInt(TransactionConfig.defaultAccountId);
-  Future<bool> setDefaultAccountId(int? value) => setNullableInt(TransactionConfig.defaultAccountId, value);
+  int? get defaultAccountId =>
+      getNullableInt(TransactionConfig.defaultAccountId);
+  Future<bool> setDefaultAccountId(int? value) =>
+      setNullableInt(TransactionConfig.defaultAccountId, value);
 
-  bool get rememberLastCategory => getBool(TransactionConfig.rememberLastCategory);
-  Future<bool> setRememberLastCategory(bool value) => setBool(TransactionConfig.rememberLastCategory, value);
+  bool get rememberLastCategory =>
+      getBool(TransactionConfig.rememberLastCategory);
+  Future<bool> setRememberLastCategory(bool value) =>
+      setBool(TransactionConfig.rememberLastCategory, value);
 
-  int? get lastExpenseCategoryId => getNullableInt(TransactionConfig.lastExpenseCategoryId);
-  Future<bool> setLastExpenseCategoryId(int? value) => setNullableInt(TransactionConfig.lastExpenseCategoryId, value);
+  int? get lastExpenseCategoryId =>
+      getNullableInt(TransactionConfig.lastExpenseCategoryId);
+  Future<bool> setLastExpenseCategoryId(int? value) =>
+      setNullableInt(TransactionConfig.lastExpenseCategoryId, value);
 
-  int? get lastIncomeCategoryId => getNullableInt(TransactionConfig.lastIncomeCategoryId);
-  Future<bool> setLastIncomeCategoryId(int? value) => setNullableInt(TransactionConfig.lastIncomeCategoryId, value);
+  int? get lastIncomeCategoryId =>
+      getNullableInt(TransactionConfig.lastIncomeCategoryId);
+  Future<bool> setLastIncomeCategoryId(int? value) =>
+      setNullableInt(TransactionConfig.lastIncomeCategoryId, value);
 
   // ==================== 批量操作 ====================
 

@@ -421,6 +421,43 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
     );
   }
 
+  bool _didInitCurrency = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 在第一次 didChangeDependencies 时初始化货币代码
+    if (!_didInitCurrency && _currencyCode == null) {
+      _didInitCurrency = true;
+      final state = ref.read(onboardingProvider);
+      final typeInfo = getAccountTypeInfo(widget.type);
+
+      // 获取可用货币列表
+      List<PreConfigCurrency> availableCurrencies;
+      if (typeInfo.supportsCustomCurrency) {
+        availableCurrencies = state.allAvailableCurrencies;
+      } else {
+        availableCurrencies = state.availableCurrencies
+            .map((code) => findCurrencyByCode(code))
+            .where((c) => c != null)
+            .map((c) => PreConfigCurrency.fromTemplate(c!))
+            .toList();
+      }
+
+      // 设置默认货币
+      if (availableCurrencies.isNotEmpty) {
+        if (state.defaultCurrency != null &&
+            availableCurrencies.any(
+              (c) => c.currencyCode == state.defaultCurrency,
+            )) {
+          _currencyCode = state.defaultCurrency;
+        } else {
+          _currencyCode = availableCurrencies.first.currencyCode;
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -655,28 +692,28 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
           const SizedBox(height: 24),
 
           // 根据账户类型显示额外字段
-          ..._buildTypeSpecificFields(theme),
+          ..._buildTypeSpecificFields(theme, effectiveCurrencyCode),
         ],
       ),
     );
   }
 
-  List<Widget> _buildTypeSpecificFields(ThemeData theme) {
+  List<Widget> _buildTypeSpecificFields(ThemeData theme, String? currencyCode) {
     switch (widget.type) {
       case AccountType.credit:
-        return _buildCreditFields(theme);
+        return _buildCreditFields(theme, currencyCode);
       case AccountType.prepaid:
-        return _buildPrepaidFields(theme);
+        return _buildPrepaidFields(theme, currencyCode);
       case AccountType.invest:
         return _buildInvestFields(theme);
       case AccountType.loan:
-        return _buildLoanFields(theme);
+        return _buildLoanFields(theme, currencyCode);
       default:
         return [];
     }
   }
 
-  List<Widget> _buildCreditFields(ThemeData theme) {
+  List<Widget> _buildCreditFields(ThemeData theme, String? currencyCode) {
     return [
       Text(
         '信用账户设置',
@@ -690,8 +727,8 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
         decoration: InputDecoration(
           labelText: '信用额度',
           border: const OutlineInputBorder(),
-          prefixText: _currencyCode != null
-              ? (findCurrencyByCode(_currencyCode!)?.symbol ?? '')
+          prefixText: currencyCode != null
+              ? (findCurrencyByCode(currencyCode)?.symbol ?? '')
               : '',
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -743,7 +780,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
     ];
   }
 
-  List<Widget> _buildPrepaidFields(ThemeData theme) {
+  List<Widget> _buildPrepaidFields(ThemeData theme, String? currencyCode) {
     return [
       Text(
         '预付账户设置',
@@ -786,8 +823,8 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
           decoration: InputDecoration(
             labelText: '赠送金初始余额',
             border: const OutlineInputBorder(),
-            prefixText: _currencyCode != null
-                ? (findCurrencyByCode(_currencyCode!)?.symbol ?? '')
+            prefixText: currencyCode != null
+                ? (findCurrencyByCode(currencyCode)?.symbol ?? '')
                 : '',
           ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -842,7 +879,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
     ];
   }
 
-  List<Widget> _buildLoanFields(ThemeData theme) {
+  List<Widget> _buildLoanFields(ThemeData theme, String? currencyCode) {
     return [
       Text(
         '借贷账户设置',
@@ -875,8 +912,8 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
         decoration: InputDecoration(
           labelText: '借贷金额',
           border: const OutlineInputBorder(),
-          prefixText: _currencyCode != null
-              ? (findCurrencyByCode(_currencyCode!)?.symbol ?? '')
+          prefixText: currencyCode != null
+              ? (findCurrencyByCode(currencyCode)?.symbol ?? '')
               : '',
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),

@@ -155,9 +155,7 @@ class _AccountListTile extends StatelessWidget {
               backgroundColor: theme.colorScheme.primaryContainer,
               child: Text(
                 account.name.isNotEmpty ? account.name[0] : '?',
-                style: TextStyle(
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
+                style: TextStyle(color: theme.colorScheme.onPrimaryContainer),
               ),
             ),
       title: Text(account.name),

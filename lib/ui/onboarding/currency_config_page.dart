@@ -84,7 +84,6 @@ class _CurrencyConfigPageState extends ConsumerState<CurrencyConfigPage>
   ) {
     final theme = Theme.of(context);
     final currencyCount = state.availableCurrencies.length;
-    final hasDefault = state.defaultCurrency != null;
 
     return Container(
       padding: const EdgeInsets.all(12),

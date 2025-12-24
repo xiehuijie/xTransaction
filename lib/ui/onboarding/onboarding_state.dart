@@ -1,5 +1,5 @@
 /// 初始化流程状态管理
-/// 
+///
 /// 管理应用初始化向导中的所有预配置数据
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,24 +71,24 @@ class PreConfigAccount {
   final AccountType type;
   final String? icon;
   final String description;
-  
+
   /// 初始余额（以最小货币单位存储）
   final int initialBalance;
-  
+
   // 信用账户特有字段
   final int? creditLimit;
   final int? billingCycleDay;
   final int? paymentDueDay;
-  
+
   // 预付账户特有字段
   final bool enableBonus;
   final String? bonusDeductMode; // 'first', 'last', 'same'
   final int? bonusInitialBalance;
-  
+
   // 投资账户特有字段
   final InvestType? investType;
   final String? investCode;
-  
+
   // 借贷账户特有字段
   final AccountLoanType? loanType;
   final int? loanAmount;
@@ -96,7 +96,7 @@ class PreConfigAccount {
   final int? loanStartDate;
   final int? loanEndDate;
   final List<PreConfigLoanPlan>? loanPlans;
-  
+
   // 元数据
   final Map<String, String> metadata;
 
@@ -191,11 +191,7 @@ class PreConfigLoanPlan {
     this.note,
   });
 
-  PreConfigLoanPlan copyWith({
-    int? amount,
-    int? dueDate,
-    String? note,
-  }) {
+  PreConfigLoanPlan copyWith({int? amount, int? dueDate, String? note}) {
     return PreConfigLoanPlan(
       amount: amount ?? this.amount,
       dueDate: dueDate ?? this.dueDate,
@@ -377,7 +373,8 @@ class OnboardingState {
       enableMultiCurrency: enableMultiCurrency ?? this.enableMultiCurrency,
       enableMultiAccount: enableMultiAccount ?? this.enableMultiAccount,
       enableMultiLedger: enableMultiLedger ?? this.enableMultiLedger,
-      enableBudgetManagement: enableBudgetManagement ?? this.enableBudgetManagement,
+      enableBudgetManagement:
+          enableBudgetManagement ?? this.enableBudgetManagement,
       enableBiometric: enableBiometric ?? this.enableBiometric,
       defaultCurrency: defaultCurrency ?? this.defaultCurrency,
       availableCurrencies: availableCurrencies ?? this.availableCurrencies,
@@ -406,12 +403,10 @@ class OnboardingState {
       !enableMultiCurrency || availableCurrencies.length >= 2;
 
   /// 检查是否满足账户要求（至少一个账户）
-  bool get hasEnoughAccounts =>
-      !enableMultiAccount || accounts.isNotEmpty;
+  bool get hasEnoughAccounts => !enableMultiAccount || accounts.isNotEmpty;
 
   /// 检查是否满足账本要求（至少一个账本）
-  bool get hasEnoughLedgers =>
-      !enableMultiLedger || ledgers.isNotEmpty;
+  bool get hasEnoughLedgers => !enableMultiLedger || ledgers.isNotEmpty;
 }
 
 // ==================== 默认分类数据 ====================
@@ -422,12 +417,36 @@ const List<PreConfigCategory> _defaultExpenseCategories = [
     type: CategoryType.expense,
     icon: 'material:restaurant',
     children: [
-      PreConfigCategory(name: '早餐', type: CategoryType.expense, icon: 'emoji:1f373'),
-      PreConfigCategory(name: '午餐', type: CategoryType.expense, icon: 'emoji:1f35c'),
-      PreConfigCategory(name: '晚餐', type: CategoryType.expense, icon: 'emoji:1f35d'),
-      PreConfigCategory(name: '饮料', type: CategoryType.expense, icon: 'emoji:1f9cb'),
-      PreConfigCategory(name: '水果', type: CategoryType.expense, icon: 'emoji:1f34e'),
-      PreConfigCategory(name: '零食', type: CategoryType.expense, icon: 'emoji:1f369'),
+      PreConfigCategory(
+        name: '早餐',
+        type: CategoryType.expense,
+        icon: 'emoji:1f373',
+      ),
+      PreConfigCategory(
+        name: '午餐',
+        type: CategoryType.expense,
+        icon: 'emoji:1f35c',
+      ),
+      PreConfigCategory(
+        name: '晚餐',
+        type: CategoryType.expense,
+        icon: 'emoji:1f35d',
+      ),
+      PreConfigCategory(
+        name: '饮料',
+        type: CategoryType.expense,
+        icon: 'emoji:1f9cb',
+      ),
+      PreConfigCategory(
+        name: '水果',
+        type: CategoryType.expense,
+        icon: 'emoji:1f34e',
+      ),
+      PreConfigCategory(
+        name: '零食',
+        type: CategoryType.expense,
+        icon: 'emoji:1f369',
+      ),
     ],
   ),
   PreConfigCategory(
@@ -435,10 +454,26 @@ const List<PreConfigCategory> _defaultExpenseCategories = [
     type: CategoryType.expense,
     icon: 'material:directions_car',
     children: [
-      PreConfigCategory(name: '公交地铁', type: CategoryType.expense, icon: 'material:directions_bus'),
-      PreConfigCategory(name: '打车', type: CategoryType.expense, icon: 'material:local_taxi'),
-      PreConfigCategory(name: '加油', type: CategoryType.expense, icon: 'material:local_gas_station'),
-      PreConfigCategory(name: '停车', type: CategoryType.expense, icon: 'material:local_parking'),
+      PreConfigCategory(
+        name: '公交地铁',
+        type: CategoryType.expense,
+        icon: 'material:directions_bus',
+      ),
+      PreConfigCategory(
+        name: '打车',
+        type: CategoryType.expense,
+        icon: 'material:local_taxi',
+      ),
+      PreConfigCategory(
+        name: '加油',
+        type: CategoryType.expense,
+        icon: 'material:local_gas_station',
+      ),
+      PreConfigCategory(
+        name: '停车',
+        type: CategoryType.expense,
+        icon: 'material:local_parking',
+      ),
     ],
   ),
   PreConfigCategory(
@@ -446,9 +481,21 @@ const List<PreConfigCategory> _defaultExpenseCategories = [
     type: CategoryType.expense,
     icon: 'material:shopping_cart',
     children: [
-      PreConfigCategory(name: '日用品', type: CategoryType.expense, icon: 'emoji:1f9f4'),
-      PreConfigCategory(name: '服饰', type: CategoryType.expense, icon: 'emoji:1f454'),
-      PreConfigCategory(name: '数码', type: CategoryType.expense, icon: 'emoji:1f4f1'),
+      PreConfigCategory(
+        name: '日用品',
+        type: CategoryType.expense,
+        icon: 'emoji:1f9f4',
+      ),
+      PreConfigCategory(
+        name: '服饰',
+        type: CategoryType.expense,
+        icon: 'emoji:1f454',
+      ),
+      PreConfigCategory(
+        name: '数码',
+        type: CategoryType.expense,
+        icon: 'emoji:1f4f1',
+      ),
     ],
   ),
   PreConfigCategory(
@@ -456,10 +503,26 @@ const List<PreConfigCategory> _defaultExpenseCategories = [
     type: CategoryType.expense,
     icon: 'material:home',
     children: [
-      PreConfigCategory(name: '房租', type: CategoryType.expense, icon: 'material:house'),
-      PreConfigCategory(name: '物业', type: CategoryType.expense, icon: 'material:apartment'),
-      PreConfigCategory(name: '水电燃气', type: CategoryType.expense, icon: 'material:power'),
-      PreConfigCategory(name: '网络通信', type: CategoryType.expense, icon: 'material:wifi'),
+      PreConfigCategory(
+        name: '房租',
+        type: CategoryType.expense,
+        icon: 'material:house',
+      ),
+      PreConfigCategory(
+        name: '物业',
+        type: CategoryType.expense,
+        icon: 'material:apartment',
+      ),
+      PreConfigCategory(
+        name: '水电燃气',
+        type: CategoryType.expense,
+        icon: 'material:power',
+      ),
+      PreConfigCategory(
+        name: '网络通信',
+        type: CategoryType.expense,
+        icon: 'material:wifi',
+      ),
     ],
   ),
   PreConfigCategory(
@@ -467,9 +530,21 @@ const List<PreConfigCategory> _defaultExpenseCategories = [
     type: CategoryType.expense,
     icon: 'material:movie',
     children: [
-      PreConfigCategory(name: '电影', type: CategoryType.expense, icon: 'material:theaters'),
-      PreConfigCategory(name: '游戏', type: CategoryType.expense, icon: 'material:sports_esports'),
-      PreConfigCategory(name: '运动', type: CategoryType.expense, icon: 'material:fitness_center'),
+      PreConfigCategory(
+        name: '电影',
+        type: CategoryType.expense,
+        icon: 'material:theaters',
+      ),
+      PreConfigCategory(
+        name: '游戏',
+        type: CategoryType.expense,
+        icon: 'material:sports_esports',
+      ),
+      PreConfigCategory(
+        name: '运动',
+        type: CategoryType.expense,
+        icon: 'material:fitness_center',
+      ),
     ],
   ),
   PreConfigCategory(
@@ -487,9 +562,21 @@ const List<PreConfigCategory> _defaultExpenseCategories = [
     type: CategoryType.expense,
     icon: 'material:card_giftcard',
     children: [
-      PreConfigCategory(name: '红包', type: CategoryType.expense, icon: 'emoji:1f9e7'),
-      PreConfigCategory(name: '礼物', type: CategoryType.expense, icon: 'emoji:1f381'),
-      PreConfigCategory(name: '请客', type: CategoryType.expense, icon: 'emoji:1f37b'),
+      PreConfigCategory(
+        name: '红包',
+        type: CategoryType.expense,
+        icon: 'emoji:1f9e7',
+      ),
+      PreConfigCategory(
+        name: '礼物',
+        type: CategoryType.expense,
+        icon: 'emoji:1f381',
+      ),
+      PreConfigCategory(
+        name: '请客',
+        type: CategoryType.expense,
+        icon: 'emoji:1f37b',
+      ),
     ],
   ),
   PreConfigCategory(
@@ -505,11 +592,7 @@ const List<PreConfigCategory> _defaultIncomeCategories = [
     type: CategoryType.income,
     icon: 'material:work',
   ),
-  PreConfigCategory(
-    name: '奖金',
-    type: CategoryType.income,
-    icon: 'emoji:1f4b0',
-  ),
+  PreConfigCategory(name: '奖金', type: CategoryType.income, icon: 'emoji:1f4b0'),
   PreConfigCategory(
     name: '投资收益',
     type: CategoryType.income,
@@ -525,11 +608,7 @@ const List<PreConfigCategory> _defaultIncomeCategories = [
     type: CategoryType.income,
     icon: 'material:receipt',
   ),
-  PreConfigCategory(
-    name: '红包',
-    type: CategoryType.income,
-    icon: 'emoji:1f9e7',
-  ),
+  PreConfigCategory(name: '红包', type: CategoryType.income, icon: 'emoji:1f9e7'),
   PreConfigCategory(
     name: '其他收入',
     type: CategoryType.income,
@@ -609,9 +688,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   // ==================== 账户管理 ====================
 
   void addAccount(PreConfigAccount account) {
-    state = state.copyWith(
-      accounts: [...state.accounts, account],
-    );
+    state = state.copyWith(accounts: [...state.accounts, account]);
   }
 
   void updateAccount(int index, PreConfigAccount account) {
@@ -720,9 +797,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   // 税收/手续费分类
   void addCostCategory(PreConfigCategory category) {
-    state = state.copyWith(
-      costCategories: [...state.costCategories, category],
-    );
+    state = state.copyWith(costCategories: [...state.costCategories, category]);
   }
 
   void updateCostCategory(int index, PreConfigCategory category) {
@@ -763,7 +838,10 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(incomeCategories: list);
   }
 
-  void setCategories(List<PreConfigCategory> expense, List<PreConfigCategory> income) {
+  void setCategories(
+    List<PreConfigCategory> expense,
+    List<PreConfigCategory> income,
+  ) {
     state = state.copyWith(
       expenseCategories: expense,
       incomeCategories: income,
@@ -776,9 +854,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     // 如果是第一个账本，设为默认
     final isFirst = state.ledgers.isEmpty;
     final newLedger = isFirst ? ledger.copyWith(isDefault: true) : ledger;
-    state = state.copyWith(
-      ledgers: [...state.ledgers, newLedger],
-    );
+    state = state.copyWith(ledgers: [...state.ledgers, newLedger]);
   }
 
   void updateLedger(int index, PreConfigLedger ledger) {
@@ -835,5 +911,5 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
 final onboardingProvider =
     StateNotifierProvider<OnboardingNotifier, OnboardingState>(
-  (ref) => OnboardingNotifier(),
-);
+      (ref) => OnboardingNotifier(),
+    );

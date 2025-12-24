@@ -2,10 +2,14 @@
 ///
 /// 重新设计的初始化流程，采用分步配置模式
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/database/database.dart';
+import '../../data/database/tables.dart';
+import '../../providers/providers.dart';
 import '../../utils/haptic_service.dart';
 import '../../utils/biometric_service.dart';
 import '../home/home_page.dart';
@@ -17,19 +21,10 @@ import 'ledger_config_page.dart';
 import 'onboarding_state.dart';
 
 /// 步骤类型
-enum StepType {
-  welcome,
-  config,
-  complete,
-}
+enum StepType { welcome, config, complete }
 
 /// 预配置类型
-enum PreConfigType {
-  currencies,
-  accounts,
-  categories,
-  ledgers,
-}
+enum PreConfigType { currencies, accounts, categories, ledgers }
 
 /// 步骤配置
 class _StepConfig {
@@ -135,11 +130,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   void _goToDataRecovery() {
     HapticService.lightImpact();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const DataRecoveryPage(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const DataRecoveryPage()));
   }
 
   void _goToPreConfig(PreConfigType type) {
@@ -159,17 +152,241 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         page = const LedgerConfigPage();
         break;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => page),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
   }
 
   Future<void> _completeSetup() async {
     setState(() => _isSaving = true);
 
     try {
-      // TODO: 保存所有配置到数据库
-      await Future.delayed(const Duration(milliseconds: 500));
+      final state = ref.read(onboardingProvider);
+      final prefs = await ref.read(appPreferencesProvider.future);
+      final currencyDao = ref.read(currencyDaoProvider);
+      final accountDao = ref.read(accountDaoProvider);
+      final categoryDao = ref.read(categoryDaoProvider);
+      final ledgerDao = ref.read(ledgerDaoProvider);
+
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      // 1. 保存自定义货币到数据库
+      for (final currency in state.customCurrencies) {
+        await currencyDao.insertCurrency(
+          CurrencyCompanion.insert(
+            currencyCode: currency.currencyCode,
+            name: currency.name,
+            symbol: currency.symbol,
+            position: Value(
+              currency.position == 'prefix'
+                  ? CurrencyPosition.prefix
+                  : CurrencyPosition.suffix,
+            ),
+            decimal: Value(currency.decimal),
+            icon: Value(currency.icon),
+            source: Value(CurrencySource.custom),
+          ),
+        );
+      }
+
+      // 2. 保存账户到数据库，并记录ID映射
+      final accountIdMap = <int, int>{}; // 索引 -> 数据库ID
+      for (var i = 0; i < state.accounts.length; i++) {
+        final account = state.accounts[i];
+        final accountId = await accountDao.insertAccount(
+          AccountCompanion.insert(
+            name: account.name,
+            currencyCode: account.currencyCode,
+            type: account.type,
+            description: Value(account.description),
+            icon: Value(account.icon ?? ''),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+        accountIdMap[i] = accountId;
+
+        // 保存账户初始余额作为元数据
+        if (account.initialBalance != 0) {
+          await accountDao.upsertAccountMeta(
+            AccountMetaCompanion.insert(
+              accountId: accountId,
+              scope: AccountMetaScope.system,
+              key: 'initial_balance',
+              value: account.initialBalance.toString(),
+            ),
+          );
+        }
+
+        // 保存信用账户详情
+        if (account.type == AccountType.credit &&
+            account.creditLimit != null) {
+          await accountDao.insertCreditAccount(
+            AccountCreditCompanion(
+              accountId: Value(accountId),
+              creditLimit: Value(account.creditLimit!),
+              billingCycleDay: Value(account.billingCycleDay ?? 1),
+              paymentDueDay: Value(account.paymentDueDay ?? 20),
+            ),
+          );
+        }
+
+        // 保存预付账户赠送金账户（如果启用）
+        if (account.type == AccountType.prepaid && account.enableBonus) {
+          // 创建一个关联的赠送金账户
+          final bonusAccountId = await accountDao.insertAccount(
+            AccountCompanion.insert(
+              name: '${account.name} 赠送金',
+              currencyCode: account.currencyCode,
+              type: AccountType.bonus,
+              description: Value('${account.name} 的赠送金账户'),
+              icon: Value(account.icon ?? ''),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+          // 关联赠送金账户
+          await accountDao.insertBonusAccount(
+            AccountBonusCompanion.insert(
+              bonusAccountId: bonusAccountId,
+              prepaidAccountId: accountId,
+            ),
+          );
+
+          // 保存赠送金扣减模式
+          if (account.bonusDeductMode != null) {
+            await accountDao.upsertAccountMeta(
+              AccountMetaCompanion.insert(
+                accountId: accountId,
+                scope: AccountMetaScope.system,
+                key: 'bonus_deduct_mode',
+                value: account.bonusDeductMode!,
+              ),
+            );
+          }
+
+          // 保存赠送金初始余额
+          if (account.bonusInitialBalance != null &&
+              account.bonusInitialBalance != 0) {
+            await accountDao.upsertAccountMeta(
+              AccountMetaCompanion.insert(
+                accountId: bonusAccountId,
+                scope: AccountMetaScope.system,
+                key: 'initial_balance',
+                value: account.bonusInitialBalance.toString(),
+              ),
+            );
+          }
+        }
+      }
+
+      // 3. 保存分类到数据库，并记录ID映射
+      final categoryIdMap = <String, int>{}; // "type_index" -> 数据库ID
+
+      Future<void> saveCategories(
+        List<PreConfigCategory> categories,
+        int? parentId,
+        String keyPrefix,
+      ) async {
+        for (var i = 0; i < categories.length; i++) {
+          final category = categories[i];
+          final categoryId = await categoryDao.insertCategory(
+            CategoryCompanion.insert(
+              name: category.name,
+              type: category.type,
+              parentId: Value(parentId),
+              icon: Value(category.icon ?? ''),
+              order: Value(i),
+            ),
+          );
+          categoryIdMap['${keyPrefix}_$i'] = categoryId;
+
+          // 递归保存子分类
+          if (category.children.isNotEmpty) {
+            await saveCategories(
+              category.children,
+              categoryId,
+              '${keyPrefix}_$i',
+            );
+          }
+        }
+      }
+
+      await saveCategories(state.expenseCategories, null, 'expense');
+      await saveCategories(state.incomeCategories, null, 'income');
+      await saveCategories(state.discountCategories, null, 'discount');
+      await saveCategories(state.costCategories, null, 'cost');
+
+      // 4. 保存账本到数据库
+      int? defaultLedgerId;
+      for (var i = 0; i < state.ledgers.length; i++) {
+        final ledgerConfig = state.ledgers[i];
+        final ledgerId = await ledgerDao.insertLedger(
+          LedgerCompanion.insert(
+            name: ledgerConfig.name,
+            currencyCode: ledgerConfig.currencyCode,
+            description: Value(ledgerConfig.description ?? ''),
+            autoAccount: Value(ledgerConfig.autoAccount),
+            autoCategory: Value(ledgerConfig.autoCategory),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+
+        if (ledgerConfig.isDefault) {
+          defaultLedgerId = ledgerId;
+        }
+
+        // 关联账户到账本
+        if (ledgerConfig.autoAccount) {
+          // 自动包含所有账户
+          for (final accountId in accountIdMap.values) {
+            await accountDao.linkAccountToLedger(accountId, ledgerId);
+          }
+        } else {
+          // 只关联选中的账户
+          for (final selectedId in ledgerConfig.selectedAccountIds) {
+            final index = int.tryParse(selectedId);
+            if (index != null && accountIdMap.containsKey(index)) {
+              await accountDao.linkAccountToLedger(
+                accountIdMap[index]!,
+                ledgerId,
+              );
+            }
+          }
+        }
+
+        // 关联分类到账本
+        if (ledgerConfig.autoCategory) {
+          // 自动包含所有分类
+          for (final categoryId in categoryIdMap.values) {
+            await ledgerDao.linkCategoryToLedger(categoryId, ledgerId);
+          }
+        } else {
+          // 只关联选中的分类
+          for (final selectedId in ledgerConfig.selectedCategoryIds) {
+            if (categoryIdMap.containsKey(selectedId)) {
+              await ledgerDao.linkCategoryToLedger(
+                categoryIdMap[selectedId]!,
+                ledgerId,
+              );
+            }
+          }
+        }
+      }
+
+      // 5. 保存配置到 SharedPreferences
+      await prefs.saveInitConfig(
+        enableAssetManagement: true,
+        enableBudgetManagement: state.enableBudgetManagement,
+        enableMultiCurrency: state.enableMultiCurrency,
+        enableMultiLedger: state.enableMultiLedger,
+        enableBiometric: state.enableBiometric,
+      );
+
+      // 设置当前账本
+      if (defaultLedgerId != null) {
+        await prefs.setCurrentLedgerId(defaultLedgerId);
+      }
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -178,12 +395,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 const HomePage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
-              return FadeThroughTransition(
-                animation: animation,
-                secondaryAnimation: secondaryAnimation,
-                child: child,
-              );
-            },
+                  return FadeThroughTransition(
+                    animation: animation,
+                    secondaryAnimation: secondaryAnimation,
+                    child: child,
+                  );
+                },
           ),
         );
       }
@@ -511,7 +728,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -608,9 +827,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       default:
                         message = '无法启用生物识别';
                     }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(message)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(message)));
                   }
                   return;
                 }
@@ -654,7 +873,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               theme,
               '分类',
               '${_countCategories(state.expenseCategories) + _countCategories(state.incomeCategories)} 个',
-              state.expenseCategories.isNotEmpty || state.incomeCategories.isNotEmpty,
+              state.expenseCategories.isNotEmpty ||
+                  state.incomeCategories.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,

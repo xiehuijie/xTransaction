@@ -183,8 +183,8 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
             Text(
               '暂无分类',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ],
         ),
@@ -221,24 +221,21 @@ class _CategorySelectionPageState extends ConsumerState<CategorySelectionPage>
       children: [
         Material(
           color: depth > 0
-              ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.1 * depth)
+              ? theme.colorScheme.surfaceContainerHighest.withOpacity(
+                  0.1 * depth,
+                )
               : null,
           child: InkWell(
             onTap: _selectAll ? null : () => _toggleCategory(id),
             child: Padding(
-              padding: EdgeInsets.only(
-                left: 16.0 + (depth * 24.0),
-                right: 8.0,
-              ),
+              padding: EdgeInsets.only(left: 16.0 + (depth * 24.0), right: 8.0),
               child: Row(
                 children: [
                   // 展开/折叠按钮
                   if (hasChildren)
                     IconButton(
                       icon: Icon(
-                        isExpanded
-                            ? Icons.expand_more
-                            : Icons.chevron_right,
+                        isExpanded ? Icons.expand_more : Icons.chevron_right,
                         size: 20,
                       ),
                       onPressed: () => _toggleExpand(id),

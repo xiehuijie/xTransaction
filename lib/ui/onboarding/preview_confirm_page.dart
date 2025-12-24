@@ -1,5 +1,5 @@
 /// 预览确认页面
-/// 
+///
 /// 初始化流程的最后一步，展示配置摘要并完成初始化
 
 import 'dart:async';
@@ -14,10 +14,7 @@ import 'onboarding_state.dart';
 class PreviewConfirmPage extends ConsumerStatefulWidget {
   final VoidCallback onConfirm;
 
-  const PreviewConfirmPage({
-    super.key,
-    required this.onConfirm,
-  });
+  const PreviewConfirmPage({super.key, required this.onConfirm});
 
   @override
   ConsumerState<PreviewConfirmPage> createState() => _PreviewConfirmPageState();
@@ -63,21 +60,21 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
 
     for (final (step, progress) in steps) {
       if (!mounted) return;
-      
+
       setState(() {
         _currentStep = step;
       });
 
       // 动画过渡到新进度
       await _animateProgress(_progress, progress);
-      
+
       // 模拟处理时间
       await Future.delayed(const Duration(milliseconds: 300));
     }
 
     // 完成后短暂延迟再跳转
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     if (mounted) {
       widget.onConfirm();
     }
@@ -85,7 +82,7 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
 
   Future<void> _animateProgress(double from, double to) async {
     final completer = Completer<void>();
-    
+
     final animation = Tween<double>(begin: from, end: to).animate(
       CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
     );
@@ -117,10 +114,7 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('配置预览'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('配置预览'), centerTitle: true),
       body: Column(
         children: [
           // 配置摘要
@@ -154,10 +148,7 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
                       '可用货币',
                       '${state.availableCurrencies.length} 种',
                     ),
-                    _ConfigItem(
-                      '自定义货币',
-                      '${state.customCurrencies.length} 种',
-                    ),
+                    _ConfigItem('自定义货币', '${state.customCurrencies.length} 种'),
                     _ConfigItem(
                       '默认货币',
                       state.defaultCurrency ?? '未设置',
@@ -173,15 +164,12 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
                   icon: Icons.account_balance_wallet,
                   title: '账户',
                   items: [
-                    _ConfigItem(
-                      '账户数量',
-                      '${state.accounts.length} 个',
-                    ),
-                    ...state.accounts.take(3).map((a) => _ConfigItem(
-                      a.name,
-                      a.typeName,
-                      icon: a.icon,
-                    )),
+                    _ConfigItem('账户数量', '${state.accounts.length} 个'),
+                    ...state.accounts
+                        .take(3)
+                        .map(
+                          (a) => _ConfigItem(a.name, a.typeName, icon: a.icon),
+                        ),
                     if (state.accounts.length > 3)
                       _ConfigItem('', '还有 ${state.accounts.length - 3} 个账户...'),
                   ],
@@ -212,15 +200,14 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
                   icon: Icons.book,
                   title: '账本',
                   items: [
-                    _ConfigItem(
-                      '账本数量',
-                      '${state.ledgers.length} 个',
+                    _ConfigItem('账本数量', '${state.ledgers.length} 个'),
+                    ...state.ledgers.map(
+                      (l) => _ConfigItem(
+                        l.name,
+                        l.isDefault ? '默认账本' : '',
+                        icon: l.icon,
+                      ),
                     ),
-                    ...state.ledgers.map((l) => _ConfigItem(
-                      l.name,
-                      l.isDefault ? '默认账本' : '',
-                      icon: l.icon,
-                    )),
                   ],
                 ),
               ],
@@ -273,10 +260,7 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
                 builder: (context, value, child) {
                   return Transform.scale(
                     scale: 0.8 + (value * 0.2),
-                    child: Opacity(
-                      opacity: value,
-                      child: child,
-                    ),
+                    child: Opacity(opacity: value, child: child),
                   );
                 },
                 child: Icon(
@@ -336,10 +320,7 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(icon, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   title,
@@ -350,35 +331,34 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
               ],
             ),
             const SizedBox(height: 12),
-            ...items.map((item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  if (item.icon != null) ...[
-                    AppIconWidget.fromString(
-                      item.icon!,
-                      size: 20,
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    if (item.icon != null) ...[
+                      AppIconWidget.fromString(item.icon!, size: 20),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: Text(
+                        item.label,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    Text(
+                      item.value,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: item.isWarning
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.onSurfaceVariant,
+                        fontWeight: item.isWarning ? FontWeight.bold : null,
+                      ),
+                    ),
                   ],
-                  Expanded(
-                    child: Text(
-                      item.label,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ),
-                  Text(
-                    item.value,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: item.isWarning
-                          ? theme.colorScheme.error
-                          : theme.colorScheme.onSurfaceVariant,
-                      fontWeight: item.isWarning ? FontWeight.bold : null,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            )),
+            ),
           ],
         ),
       ),
@@ -400,21 +380,13 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
             '${state.availableCurrencies.length + state.customCurrencies.length}',
             '货币',
           ),
-          _buildStatItem(
-            theme,
-            '${state.accounts.length}',
-            '账户',
-          ),
+          _buildStatItem(theme, '${state.accounts.length}', '账户'),
           _buildStatItem(
             theme,
             '${_countCategories(state.expenseCategories) + _countCategories(state.incomeCategories)}',
             '分类',
           ),
-          _buildStatItem(
-            theme,
-            '${state.ledgers.length}',
-            '账本',
-          ),
+          _buildStatItem(theme, '${state.ledgers.length}', '账本'),
         ],
       ),
     );
@@ -449,6 +421,7 @@ class _PreviewConfirmPageState extends ConsumerState<PreviewConfirmPage>
         countRecursive(cat.children);
       }
     }
+
     countRecursive(categories);
     return count;
   }
@@ -460,5 +433,10 @@ class _ConfigItem {
   final String? icon;
   final bool isWarning;
 
-  const _ConfigItem(this.label, this.value, {this.icon, this.isWarning = false});
+  const _ConfigItem(
+    this.label,
+    this.value, {
+    this.icon,
+    this.isWarning = false,
+  });
 }

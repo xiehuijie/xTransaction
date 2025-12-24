@@ -1,10 +1,10 @@
 /// 通用图标选择页
-/// 
+///
 /// 支持多种图标源的选择：
 /// - Emoji表情
 /// - Material图标
 /// - 国旗图标
-/// 
+///
 /// 使用方式：
 /// ```dart
 /// final result = await Navigator.of(context).push<AppIcon>(
@@ -26,7 +26,7 @@ import '../../utils/haptic_service.dart';
 /// 图标选择结果
 class IconPickerResult {
   final AppIcon icon;
-  
+
   const IconPickerResult({required this.icon});
 }
 
@@ -34,10 +34,10 @@ class IconPickerResult {
 class IconPickerPage extends StatefulWidget {
   /// 初始选中的图标
   final AppIcon? initialIcon;
-  
+
   /// 页面标题
   final String title;
-  
+
   /// 是否显示国旗图标分类
   final bool showFlags;
 
@@ -64,26 +64,18 @@ class _IconPickerPageState extends State<IconPickerPage>
   void initState() {
     super.initState();
     _selectedIcon = widget.initialIcon;
-    
+
     _tabs = [
       const _IconSourceTab(
         id: 'emoji',
         name: 'Emoji',
         icon: Icons.emoji_emotions,
       ),
-      const _IconSourceTab(
-        id: 'material',
-        name: '图标',
-        icon: Icons.category,
-      ),
+      const _IconSourceTab(id: 'material', name: '图标', icon: Icons.category),
       if (widget.showFlags)
-        const _IconSourceTab(
-          id: 'flags',
-          name: '国旗',
-          icon: Icons.flag,
-        ),
+        const _IconSourceTab(id: 'flags', name: '国旗', icon: Icons.flag),
     ];
-    
+
     _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
@@ -110,24 +102,20 @@ class _IconPickerPageState extends State<IconPickerPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          tabs: _tabs.map((tab) => Tab(
-            icon: Icon(tab.icon),
-            text: tab.name,
-          )).toList(),
+          tabs: _tabs
+              .map((tab) => Tab(icon: Icon(tab.icon), text: tab.name))
+              .toList(),
         ),
         actions: [
           if (_selectedIcon != null)
-            TextButton(
-              onPressed: _confirmSelection,
-              child: const Text('确定'),
-            ),
+            TextButton(onPressed: _confirmSelection, child: const Text('确定')),
         ],
       ),
       body: Column(
@@ -145,9 +133,7 @@ class _IconPickerPageState extends State<IconPickerPage>
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Center(
-                      child: _buildIconPreview(_selectedIcon!, 32),
-                    ),
+                    child: Center(child: _buildIconPreview(_selectedIcon!, 32)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -173,9 +159,9 @@ class _IconPickerPageState extends State<IconPickerPage>
                 ],
               ),
             ),
-          
+
           const Divider(height: 1),
-          
+
           // 图标选择区域
           Expanded(
             child: TabBarView(
@@ -192,30 +178,30 @@ class _IconPickerPageState extends State<IconPickerPage>
     switch (tabId) {
       case 'emoji':
         return _EmojiPickerTab(
-          onSelect: (emoji) => _selectIcon(AppIcon(
-            type: IconType.emoji,
-            value: emoji.emoji.runes.map((cp) => cp.toRadixString(16)).join('-'),
-          )),
+          onSelect: (emoji) => _selectIcon(
+            AppIcon(
+              type: IconType.emoji,
+              value: emoji.emoji.runes
+                  .map((cp) => cp.toRadixString(16))
+                  .join('-'),
+            ),
+          ),
         );
       case 'material':
         return _MaterialIconsTab(
           selectedIcon: _selectedIcon?.type == IconType.material
               ? _selectedIcon!.value
               : null,
-          onSelect: (iconKey) => _selectIcon(AppIcon(
-            type: IconType.material,
-            value: iconKey,
-          )),
+          onSelect: (iconKey) =>
+              _selectIcon(AppIcon(type: IconType.material, value: iconKey)),
         );
       case 'flags':
         return _FlagsTab(
           selectedCode: _selectedIcon?.type == IconType.flag
               ? _selectedIcon!.value
               : null,
-          onSelect: (countryCode) => _selectIcon(AppIcon(
-            type: IconType.flag,
-            value: countryCode,
-          )),
+          onSelect: (countryCode) =>
+              _selectIcon(AppIcon(type: IconType.flag, value: countryCode)),
         );
       default:
         return const SizedBox();
@@ -227,10 +213,7 @@ class _IconPickerPageState extends State<IconPickerPage>
       case IconType.emoji:
         final emoji = icon.emojiChar;
         if (emoji != null) {
-          return Text(
-            emoji,
-            style: TextStyle(fontSize: size),
-          );
+          return Text(emoji, style: TextStyle(fontSize: size));
         }
         return Icon(Icons.help_outline, size: size);
       case IconType.material:
@@ -275,7 +258,7 @@ class _EmojiPickerTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return EmojiPicker(
       onEmojiSelected: (category, emoji) => onSelect(emoji),
       config: Config(
@@ -288,10 +271,7 @@ class _EmojiPickerTab extends StatelessWidget {
           horizontalSpacing: 0,
           gridPadding: const EdgeInsets.all(8),
           backgroundColor: theme.scaffoldBackgroundColor,
-          noRecents: const Text(
-            '暂无最近使用',
-            style: TextStyle(fontSize: 14),
-          ),
+          noRecents: const Text('暂无最近使用', style: TextStyle(fontSize: 14)),
         ),
         categoryViewConfig: CategoryViewConfig(
           initCategory: Category.SMILEYS,
@@ -301,9 +281,7 @@ class _EmojiPickerTab extends StatelessWidget {
           iconColorSelected: theme.colorScheme.primary,
           categoryIcons: const CategoryIcons(),
         ),
-        bottomActionBarConfig: const BottomActionBarConfig(
-          enabled: false,
-        ),
+        bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
         searchViewConfig: SearchViewConfig(
           backgroundColor: theme.scaffoldBackgroundColor,
           buttonIconColor: theme.colorScheme.primary,
@@ -322,10 +300,7 @@ class _MaterialIconsTab extends StatefulWidget {
   final String? selectedIcon;
   final void Function(String iconKey) onSelect;
 
-  const _MaterialIconsTab({
-    this.selectedIcon,
-    required this.onSelect,
-  });
+  const _MaterialIconsTab({this.selectedIcon, required this.onSelect});
 
   @override
   State<_MaterialIconsTab> createState() => _MaterialIconsTabState();
@@ -354,7 +329,7 @@ class _MaterialIconsTabState extends State<_MaterialIconsTab> {
             itemBuilder: (context, index) {
               final category = materialIconCategories[index];
               final isSelected = category.id == _selectedCategoryId;
-              
+
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: FilterChip(
@@ -375,9 +350,9 @@ class _MaterialIconsTabState extends State<_MaterialIconsTab> {
             },
           ),
         ),
-        
+
         const Divider(height: 1),
-        
+
         // 图标网格
         Expanded(
           child: GridView.builder(
@@ -392,9 +367,9 @@ class _MaterialIconsTabState extends State<_MaterialIconsTab> {
               final iconKey = selectedCategory.iconKeys[index];
               final iconData = materialIconsMap[iconKey];
               final isSelected = widget.selectedIcon == iconKey;
-              
+
               if (iconData == null) return const SizedBox();
-              
+
               return InkWell(
                 onTap: () => widget.onSelect(iconKey),
                 borderRadius: BorderRadius.circular(8),
@@ -405,10 +380,7 @@ class _MaterialIconsTabState extends State<_MaterialIconsTab> {
                         : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                     border: isSelected
-                        ? Border.all(
-                            color: theme.colorScheme.primary,
-                            width: 2,
-                          )
+                        ? Border.all(color: theme.colorScheme.primary, width: 2)
                         : null,
                   ),
                   child: Icon(
@@ -432,10 +404,7 @@ class _FlagsTab extends StatefulWidget {
   final String? selectedCode;
   final void Function(String countryCode) onSelect;
 
-  const _FlagsTab({
-    this.selectedCode,
-    required this.onSelect,
-  });
+  const _FlagsTab({this.selectedCode, required this.onSelect});
 
   @override
   State<_FlagsTab> createState() => _FlagsTabState();
@@ -443,7 +412,7 @@ class _FlagsTab extends StatefulWidget {
 
 class _FlagsTabState extends State<_FlagsTab> {
   String _searchQuery = '';
-  
+
   // 常用国家/地区代码
   static const List<_CountryInfo> _countries = [
     _CountryInfo('CN', '中国'),
@@ -501,10 +470,13 @@ class _FlagsTabState extends State<_FlagsTab> {
   List<_CountryInfo> get _filteredCountries {
     if (_searchQuery.isEmpty) return _countries;
     final query = _searchQuery.toLowerCase();
-    return _countries.where((c) =>
-      c.name.toLowerCase().contains(query) ||
-      c.code.toLowerCase().contains(query)
-    ).toList();
+    return _countries
+        .where(
+          (c) =>
+              c.name.toLowerCase().contains(query) ||
+              c.code.toLowerCase().contains(query),
+        )
+        .toList();
   }
 
   @override
@@ -530,7 +502,7 @@ class _FlagsTabState extends State<_FlagsTab> {
             },
           ),
         ),
-        
+
         // 国旗网格
         Expanded(
           child: GridView.builder(
@@ -545,7 +517,7 @@ class _FlagsTabState extends State<_FlagsTab> {
             itemBuilder: (context, index) {
               final country = _filteredCountries[index];
               final isSelected = widget.selectedCode == country.code;
-              
+
               return InkWell(
                 onTap: () => widget.onSelect(country.code),
                 borderRadius: BorderRadius.circular(12),
@@ -556,10 +528,7 @@ class _FlagsTabState extends State<_FlagsTab> {
                         : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                     border: isSelected
-                        ? Border.all(
-                            color: theme.colorScheme.primary,
-                            width: 2,
-                          )
+                        ? Border.all(color: theme.colorScheme.primary, width: 2)
                         : null,
                   ),
                   padding: const EdgeInsets.all(8),
@@ -595,6 +564,6 @@ class _FlagsTabState extends State<_FlagsTab> {
 class _CountryInfo {
   final String code;
   final String name;
-  
+
   const _CountryInfo(this.code, this.name);
 }
