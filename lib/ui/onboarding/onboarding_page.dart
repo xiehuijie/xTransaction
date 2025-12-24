@@ -217,8 +217,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         }
 
         // 保存信用账户详情
-        if (account.type == AccountType.credit &&
-            account.creditLimit != null) {
+        if (account.type == AccountType.credit && account.creditLimit != null) {
           await accountDao.insertCreditAccount(
             AccountCreditCompanion(
               accountId: Value(accountId),
