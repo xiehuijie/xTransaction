@@ -42,7 +42,7 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   bool _isReverse = false;
-  NavItemId _previousId = NavItemId.overview;
+  NavItemId? _previousId;
 
   /// 构建导航项列表
   List<NavigationItem> _buildNavigationItems(bool enableAssetManagement) {
@@ -116,7 +116,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         selectedIndex: selectedIndex,
         onDestinationSelected: (index) {
           HapticService.selectionClick();
-          final previousIndex = items.indexWhere((item) => item.id == _previousId);
+          final currentPreviousId = _previousId ?? selectedItemId;
+          final previousIndex = items.indexWhere((item) => item.id == currentPreviousId);
           setState(() {
             _isReverse = index < previousIndex;
             _previousId = items[index].id;

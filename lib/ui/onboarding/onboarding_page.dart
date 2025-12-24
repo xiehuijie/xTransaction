@@ -193,58 +193,60 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> _savePreConfigToDatabase(AppDatabase db, InitConfigState config) async {
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    await db.transaction(() async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    // 保存自定义货币
-    for (final currency in config.preConfigCurrencies) {
-      await db.currencyDao.insertCurrency(
-        CurrencyCompanion.insert(
-          currencyCode: currency.currencyCode,
-          name: currency.name,
-          symbol: currency.symbol,
-          decimal: Value(currency.decimal),
-          source: const Value(CurrencySource.custom),
-        ),
-      );
-    }
-
-    // 保存账本
-    for (final ledger in config.preConfigLedgers) {
-      await db.ledgerDao.insertLedger(
-        LedgerCompanion.insert(
-          name: ledger.name,
-          currencyCode: ledger.currencyCode,
-          description: Value(ledger.description ?? ''),
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-    }
-
-    // 获取创建的第一个账本ID
-    final ledgers = await db.ledgerDao.getAllLedgers();
-    final firstLedgerId = ledgers.isNotEmpty ? ledgers.first.ledgerId : null;
-
-    // 保存账户
-    for (final account in config.preConfigAccounts) {
-      final accountId = await db.accountDao.insertAccount(
-        AccountCompanion.insert(
-          name: account.name,
-          type: AccountType.values.firstWhere(
-            (t) => t.name == account.type,
-            orElse: () => AccountType.balance,
+      // 保存自定义货币
+      for (final currency in config.preConfigCurrencies) {
+        await db.currencyDao.insertCurrency(
+          CurrencyCompanion.insert(
+            currencyCode: currency.currencyCode,
+            name: currency.name,
+            symbol: currency.symbol,
+            decimal: Value(currency.decimal),
+            source: const Value(CurrencySource.custom),
           ),
-          currencyCode: account.currencyCode,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-
-      // 关联到第一个账本
-      if (firstLedgerId != null) {
-        await db.accountDao.linkAccountToLedger(accountId, firstLedgerId);
+        );
       }
-    }
+
+      // 保存账本
+      for (final ledger in config.preConfigLedgers) {
+        await db.ledgerDao.insertLedger(
+          LedgerCompanion.insert(
+            name: ledger.name,
+            currencyCode: ledger.currencyCode,
+            description: Value(ledger.description ?? ''),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+
+      // 获取创建的第一个账本ID
+      final ledgers = await db.ledgerDao.getAllLedgers();
+      final firstLedgerId = ledgers.isNotEmpty ? ledgers.first.ledgerId : null;
+
+      // 保存账户
+      for (final account in config.preConfigAccounts) {
+        final accountId = await db.accountDao.insertAccount(
+          AccountCompanion.insert(
+            name: account.name,
+            type: AccountType.values.firstWhere(
+              (t) => t.name == account.type,
+              orElse: () => AccountType.balance,
+            ),
+            currencyCode: account.currencyCode,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+
+        // 关联到第一个账本
+        if (firstLedgerId != null) {
+          await db.accountDao.linkAccountToLedger(accountId, firstLedgerId);
+        }
+      }
+    });
   }
 
   @override
@@ -432,7 +434,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '从新开始',
+                          '全新开始',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

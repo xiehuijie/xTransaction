@@ -125,14 +125,14 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> {
         });
         break;
       case BiometricResult.notSupported:
-        // 设备不支持，直接进入应用
+        // 设备不支持生物识别，显示错误信息
         setState(() {
-          _isAuthenticated = true;
+          _errorMessage = '设备不支持生物识别，请在设置中关闭生物识别解锁';
         });
         break;
       case BiometricResult.notAvailable:
         setState(() {
-          _errorMessage = '生物识别不可用';
+          _errorMessage = '生物识别不可用，请在设置中关闭生物识别解锁';
         });
         break;
       case BiometricResult.notEnrolled:

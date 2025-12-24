@@ -223,12 +223,17 @@ class InitConfigNotifier extends StateNotifier<InitConfigState> {
     }
   }
 
-  void removeLedger(int index) {
+  /// 删除账本
+  /// 返回 true 表示删除成功，false 表示无法删除（至少保留一个账本）
+  bool removeLedger(int index) {
     final ledgers = List<PreConfigLedger>.from(state.preConfigLedgers);
-    if (index >= 0 && index < ledgers.length) {
-      ledgers.removeAt(index);
-      state = state.copyWith(preConfigLedgers: ledgers);
+    // 验证索引和最小数量
+    if (index < 0 || index >= ledgers.length || ledgers.length <= 1) {
+      return false;
     }
+    ledgers.removeAt(index);
+    state = state.copyWith(preConfigLedgers: ledgers);
+    return true;
   }
 
   // 货币管理

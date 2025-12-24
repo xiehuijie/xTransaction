@@ -230,17 +230,6 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
   }
 
   void _confirmDelete(BuildContext context, int index) {
-    final config = ref.read(initConfigProvider);
-    if (config.preConfigLedgers.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('至少需要保留一个账本'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-      return;
-    }
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -257,8 +246,16 @@ class _PreConfigLedgersPageState extends ConsumerState<PreConfigLedgersPage> {
           FilledButton(
             onPressed: () {
               HapticService.mediumImpact();
-              ref.read(initConfigProvider.notifier).removeLedger(index);
+              final success = ref.read(initConfigProvider.notifier).removeLedger(index);
               Navigator.pop(context);
+              if (!success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('至少需要保留一个账本'),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
             },
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,

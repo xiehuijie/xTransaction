@@ -45,6 +45,9 @@ class BiometricService {
   /// [localizedReason] - 显示给用户的认证原因
   /// [useErrorDialogs] - 是否使用系统错误对话框
   /// [stickyAuth] - 认证是否持久（应用切换后继续）
+  /// 
+  /// 注意: 当设备不支持生物识别时，会允许使用PIN/密码作为备选认证方式。
+  /// 这意味着即使用户启用"生物识别解锁"，设备密码也可用于解锁。
   static Future<BiometricResult> authenticate({
     String localizedReason = '请验证身份以继续使用',
     bool useErrorDialogs = true,
