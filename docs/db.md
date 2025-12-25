@@ -110,6 +110,14 @@
   | updated_at 🕗       | INTEGER  | 更新时间戳         |
   | note                | TEXT     | 备注               |
 
+- #### 投资账户表 (InvestAccount) [account_invest]
+
+  在基础账户表的基础上，扩展投资账户特有的信息。
+
+  | 字段名          | 字段类型 | 描述               |
+  | --------------- | -------- | ------------------ |
+  | account_id 🔑🔗 | INTEGER  | 关联的账户唯一标识 |
+
 - #### 账本表 (Ledger) [ledger]
 
   用于描述账本信息，不同账本下的分类、账户、相关方将被认为是不同的实体，一切的记账活动均基于某个账本进行，例如账户余额统计、消费统计汇总等。
@@ -376,7 +384,9 @@
 
 - #### AccountType
 
-  - `balance` 储值账户
+  账户类型。不同账户类型具有不同的属性和行为。
+
+  - `balance` 余额账户
   - `credit` 信用账户
   - `loan` 借贷账户
   - `invest` 投资账户
@@ -387,6 +397,14 @@
 
   - `system` 系统级元数据
   - `custom` 用户自定义元数据
+
+- #### AccountBonusMode
+
+  赠送金账户扣减方式。
+
+  - `first` 优先使用
+  - `last` 最后使用
+  - `same` 等比例扣减
 
 - #### AccountLoanType
 

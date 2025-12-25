@@ -15,9 +15,9 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   Future<List<CategoryEntity>> getAllCategories() => select(category).get();
 
   /// 根据ID获取分类
-  Future<CategoryEntity?> getCategoryById(int id) =>
-      (select(category)..where((t) => t.categoryId.equals(id)))
-          .getSingleOrNull();
+  Future<CategoryEntity?> getCategoryById(int id) => (select(
+    category,
+  )..where((t) => t.categoryId.equals(id))).getSingleOrNull();
 
   /// 根据类型获取分类
   Future<List<CategoryEntity>> getCategoriesByType(CategoryType type) =>
@@ -61,8 +61,9 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
 
   /// 更新分类排序
   Future<void> updateCategoryOrder(int id, int newOrder) =>
-      (update(category)..where((t) => t.categoryId.equals(id)))
-          .write(CategoryCompanion(order: Value(newOrder)));
+      (update(category)..where((t) => t.categoryId.equals(id))).write(
+        CategoryCompanion(order: Value(newOrder)),
+      );
 
   /// 监听所有分类变化
   Stream<List<CategoryEntity>> watchAllCategories() => select(category).watch();
@@ -78,16 +79,16 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
 
   /// 获取分类关联的账本
   Future<List<LedgerCategoryRelationEntity>> getCategoryLedgers(
-          int categoryId) =>
-      (select(relationCategoryLedger)
-            ..where((t) => t.categoryId.equals(categoryId)))
-          .get();
+    int categoryId,
+  ) => (select(
+    relationCategoryLedger,
+  )..where((t) => t.categoryId.equals(categoryId))).get();
 
   /// 获取账本下的分类ID列表
   Future<List<int>> getCategoryIdsByLedgerId(int ledgerId) async {
-    final relations = await (select(relationCategoryLedger)
-          ..where((t) => t.ledgerId.equals(ledgerId)))
-        .get();
+    final relations = await (select(
+      relationCategoryLedger,
+    )..where((t) => t.ledgerId.equals(ledgerId))).get();
     return relations.map((r) => r.categoryId).toList();
   }
 
@@ -100,8 +101,9 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     if (categoryIds.isEmpty) return [];
 
     return (select(category)
-          ..where((t) =>
-              t.categoryId.isIn(categoryIds) & t.type.equalsValue(type))
+          ..where(
+            (t) => t.categoryId.isIn(categoryIds) & t.type.equalsValue(type),
+          )
           ..orderBy([(t) => OrderingTerm.asc(t.order)]))
         .get();
   }

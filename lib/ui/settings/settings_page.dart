@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/providers.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/haptic_service.dart';
-import '../home/home_page.dart';
+import '../../utils/biometric_service.dart';
 
 /// 设置页面
 class SettingsPage extends ConsumerStatefulWidget {
@@ -57,9 +57,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       case 'enableAssetManagement':
         await prefs.setEnableAssetManagement(value as bool);
         ref.invalidate(enableAssetManagementProvider);
-        // 更新导航索引，确保返回时停留在"我的"页
-        final profileIndex = value ? 3 : 2;
-        ref.read(selectedNavIndexProvider.notifier).state = profileIndex;
+        // 不更新导航索引，保持用户当前位置
         break;
       case 'enableBudgetManagement':
         await prefs.setEnableBudgetManagement(value as bool);
@@ -124,6 +122,54 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     setState(() => _enableAssetManagement = value);
     await _saveSetting('enableAssetManagement', value);
+  }
+
+  Future<void> _handleBiometricChange(bool value) async {
+    HapticService.selectionClick();
+
+    if (value) {
+      // 启用生物识别前，先验证生物识别可用性
+      final canCheck = await BiometricService.canCheckBiometrics();
+      if (!canCheck) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('设备不支持生物识别或未设置生物识别')));
+        }
+        return;
+      }
+
+      // 验证一次生物识别，确保用户有权限开启
+      final result = await BiometricService.authenticate(
+        localizedReason: '验证身份以启用生物识别解锁',
+      );
+
+      if (result != BiometricResult.success) {
+        if (mounted) {
+          String message;
+          switch (result) {
+            case BiometricResult.failed:
+              message = '验证失败';
+              break;
+            case BiometricResult.notEnrolled:
+              message = '请先在设备上设置生物识别';
+              break;
+            case BiometricResult.lockedOut:
+              message = '验证次数过多，请稍后重试';
+              break;
+            default:
+              message = '无法启用生物识别';
+          }
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
+        }
+        return;
+      }
+    }
+
+    setState(() => _enableBiometric = value);
+    await _saveSetting('enableBiometric', value);
   }
 
   Future<void> _handleSwitchChange(
@@ -208,11 +254,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: '生物识别解锁',
             subtitle: '使用指纹或面容解锁应用',
             value: _enableBiometric,
-            onChanged: (value) => _handleSwitchChange(
-              'enableBiometric',
-              value,
-              (v) => setState(() => _enableBiometric = v),
-            ),
+            onChanged: _handleBiometricChange,
           ),
 
           const Divider(height: 32),

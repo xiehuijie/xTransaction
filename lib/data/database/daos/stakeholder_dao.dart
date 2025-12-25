@@ -14,9 +14,9 @@ class StakeholderDao extends DatabaseAccessor<AppDatabase>
       select(stakeholder).get();
 
   /// 根据ID获取相关方
-  Future<StakeholderEntity?> getStakeholderById(int id) =>
-      (select(stakeholder)..where((t) => t.stakeholderId.equals(id)))
-          .getSingleOrNull();
+  Future<StakeholderEntity?> getStakeholderById(int id) => (select(
+    stakeholder,
+  )..where((t) => t.stakeholderId.equals(id))).getSingleOrNull();
 
   /// 根据类型获取相关方
   Future<List<StakeholderEntity>> getStakeholdersByType(StakeholderType type) =>
@@ -44,6 +44,6 @@ class StakeholderDao extends DatabaseAccessor<AppDatabase>
 
   /// 监听特定类型相关方变化
   Stream<List<StakeholderEntity>> watchStakeholdersByType(
-          StakeholderType type) =>
-      (select(stakeholder)..where((t) => t.type.equalsValue(type))).watch();
+    StakeholderType type,
+  ) => (select(stakeholder)..where((t) => t.type.equalsValue(type))).watch();
 }

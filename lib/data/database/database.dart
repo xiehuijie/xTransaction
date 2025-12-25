@@ -188,22 +188,28 @@ class AppDatabase extends _$AppDatabase {
     data['relationCategoryLedger'] = await select(relationCategoryLedger).get();
     data['stakeholder'] = await select(stakeholder).get();
     data['transactions'] = await select(transactions).get();
-    data['transactionAmountDetail'] =
-        await select(transactionAmountDetail).get();
-    data['transactionCategoryDetail'] =
-        await select(transactionCategoryDetail).get();
-    data['transactionInstallmentDetail'] =
-        await select(transactionInstallmentDetail).get();
-    data['transactionInstallmentItem'] =
-        await select(transactionInstallmentItem).get();
+    data['transactionAmountDetail'] = await select(
+      transactionAmountDetail,
+    ).get();
+    data['transactionCategoryDetail'] = await select(
+      transactionCategoryDetail,
+    ).get();
+    data['transactionInstallmentDetail'] = await select(
+      transactionInstallmentDetail,
+    ).get();
+    data['transactionInstallmentItem'] = await select(
+      transactionInstallmentItem,
+    ).get();
     data['transactionReduce'] = await select(transactionReduce).get();
     data['transactionRefund'] = await select(transactionRefund).get();
-    data['relationProjectTransaction'] =
-        await select(relationProjectTransaction).get();
+    data['relationProjectTransaction'] = await select(
+      relationProjectTransaction,
+    ).get();
     data['relationTransaction'] = await select(relationTransaction).get();
     data['reimbursement'] = await select(reimbursement).get();
-    data['reimbursementExpectation'] =
-        await select(reimbursementExpectation).get();
+    data['reimbursementExpectation'] = await select(
+      reimbursementExpectation,
+    ).get();
     data['reimbursementActual'] = await select(reimbursementActual).get();
 
     return data;

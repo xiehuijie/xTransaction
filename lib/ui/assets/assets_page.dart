@@ -82,19 +82,9 @@ class AssetsPage extends ConsumerWidget {
             [],
           ),
           const SizedBox(height: 16),
-          _buildAccountSection(
-            context,
-            '信用账户',
-            Icons.credit_card_rounded,
-            [],
-          ),
+          _buildAccountSection(context, '信用账户', Icons.credit_card_rounded, []),
           const SizedBox(height: 16),
-          _buildAccountSection(
-            context,
-            '投资账户',
-            Icons.trending_up_rounded,
-            [],
-          ),
+          _buildAccountSection(context, '投资账户', Icons.trending_up_rounded, []),
         ],
       ),
     );

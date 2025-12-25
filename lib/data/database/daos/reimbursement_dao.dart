@@ -4,11 +4,9 @@ import '../tables.dart';
 
 part 'reimbursement_dao.g.dart';
 
-@DriftAccessor(tables: [
-  Reimbursement,
-  ReimbursementExpectation,
-  ReimbursementActual,
-])
+@DriftAccessor(
+  tables: [Reimbursement, ReimbursementExpectation, ReimbursementActual],
+)
 class ReimbursementDao extends DatabaseAccessor<AppDatabase>
     with _$ReimbursementDaoMixin {
   ReimbursementDao(super.db);
@@ -20,15 +18,16 @@ class ReimbursementDao extends DatabaseAccessor<AppDatabase>
       select(reimbursement).get();
 
   /// 根据ID获取报销计划
-  Future<ReimbursementEntity?> getReimbursementById(int id) =>
-      (select(reimbursement)..where((t) => t.reimbursementId.equals(id)))
-          .getSingleOrNull();
+  Future<ReimbursementEntity?> getReimbursementById(int id) => (select(
+    reimbursement,
+  )..where((t) => t.reimbursementId.equals(id))).getSingleOrNull();
 
   /// 根据交易ID获取报销计划
   Future<ReimbursementEntity?> getReimbursementByTransactionId(
-          int transactionId) =>
-      (select(reimbursement)..where((t) => t.transactionId.equals(transactionId)))
-          .getSingleOrNull();
+    int transactionId,
+  ) => (select(
+    reimbursement,
+  )..where((t) => t.transactionId.equals(transactionId))).getSingleOrNull();
 
   /// 获取未归档的报销计划
   Future<List<ReimbursementEntity>> getActiveReimbursements() =>
@@ -69,10 +68,10 @@ class ReimbursementDao extends DatabaseAccessor<AppDatabase>
 
   /// 获取报销计划的预期项
   Future<List<ReimbursementExpectationEntity>> getExpectations(
-          int reimbursementId) =>
-      (select(reimbursementExpectation)
-            ..where((t) => t.reimbursementId.equals(reimbursementId)))
-          .get();
+    int reimbursementId,
+  ) => (select(
+    reimbursementExpectation,
+  )..where((t) => t.reimbursementId.equals(reimbursementId))).get();
 
   /// 添加报销预期项
   Future<int> insertExpectation(ReimbursementExpectationCompanion entry) =>
@@ -83,16 +82,15 @@ class ReimbursementDao extends DatabaseAccessor<AppDatabase>
       update(reimbursementExpectation).replace(entry);
 
   /// 删除报销预期项
-  Future<int> deleteExpectation(int id) =>
-      (delete(reimbursementExpectation)
-            ..where((t) => t.reimbursementExpectationId.equals(id)))
-          .go();
+  Future<int> deleteExpectation(int id) => (delete(
+    reimbursementExpectation,
+  )..where((t) => t.reimbursementExpectationId.equals(id))).go();
 
   /// 删除报销计划的所有预期项
   Future<int> deleteExpectationsByReimbursementId(int reimbursementId) =>
-      (delete(reimbursementExpectation)
-            ..where((t) => t.reimbursementId.equals(reimbursementId)))
-          .go();
+      (delete(
+        reimbursementExpectation,
+      )..where((t) => t.reimbursementId.equals(reimbursementId))).go();
 
   // ==================== ReimbursementActual CRUD ====================
 
@@ -112,16 +110,14 @@ class ReimbursementDao extends DatabaseAccessor<AppDatabase>
       update(reimbursementActual).replace(entry);
 
   /// 删除报销实际到账项
-  Future<int> deleteActual(int id) =>
-      (delete(reimbursementActual)
-            ..where((t) => t.reimbursementActualId.equals(id)))
-          .go();
+  Future<int> deleteActual(int id) => (delete(
+    reimbursementActual,
+  )..where((t) => t.reimbursementActualId.equals(id))).go();
 
   /// 删除报销计划的所有实际到账项
-  Future<int> deleteActualsByReimbursementId(int reimbursementId) =>
-      (delete(reimbursementActual)
-            ..where((t) => t.reimbursementId.equals(reimbursementId)))
-          .go();
+  Future<int> deleteActualsByReimbursementId(int reimbursementId) => (delete(
+    reimbursementActual,
+  )..where((t) => t.reimbursementId.equals(reimbursementId))).go();
 
   /// 计算报销计划的预期总金额
   Future<int> calculateExpectedAmount(int reimbursementId) async {

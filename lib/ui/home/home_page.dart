@@ -9,14 +9,19 @@ import '../statistics/statistics_page.dart';
 import '../assets/assets_page.dart';
 import '../profile/profile_page.dart';
 
+/// 导航项标识
+enum NavItemId { overview, statistics, assets, profile }
+
 /// 导航项配置
 class NavigationItem {
+  final NavItemId id;
   final String label;
   final IconData icon;
   final IconData selectedIcon;
   final Widget page;
 
   const NavigationItem({
+    required this.id,
     required this.label,
     required this.icon,
     required this.selectedIcon,
@@ -24,8 +29,10 @@ class NavigationItem {
   });
 }
 
-/// 当前选中的导航索引
-final selectedNavIndexProvider = StateProvider<int>((ref) => 0);
+/// 当前选中的导航项ID
+final selectedNavItemProvider = StateProvider<NavItemId>(
+  (ref) => NavItemId.overview,
+);
 
 /// 主页面
 class HomePage extends ConsumerStatefulWidget {
@@ -37,18 +44,20 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   bool _isReverse = false;
-  int _previousIndex = 0;
+  NavItemId? _previousId;
 
   /// 构建导航项列表
   List<NavigationItem> _buildNavigationItems(bool enableAssetManagement) {
     final items = <NavigationItem>[
       const NavigationItem(
+        id: NavItemId.overview,
         label: '概览',
         icon: Icons.dashboard_outlined,
         selectedIcon: Icons.dashboard_rounded,
         page: OverviewPage(),
       ),
       const NavigationItem(
+        id: NavItemId.statistics,
         label: '统计',
         icon: Icons.bar_chart_outlined,
         selectedIcon: Icons.bar_chart_rounded,
@@ -56,12 +65,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       if (enableAssetManagement)
         const NavigationItem(
+          id: NavItemId.assets,
           label: '资产',
           icon: Icons.account_balance_wallet_outlined,
           selectedIcon: Icons.account_balance_wallet_rounded,
           page: AssetsPage(),
         ),
       const NavigationItem(
+        id: NavItemId.profile,
         label: '我的',
         icon: Icons.person_outline,
         selectedIcon: Icons.person_rounded,
@@ -75,14 +86,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final enableAssetManagement =
         ref.watch(enableAssetManagementProvider).valueOrNull ?? true;
-    final selectedIndex = ref.watch(selectedNavIndexProvider);
+    final selectedItemId = ref.watch(selectedNavItemProvider);
     final items = _buildNavigationItems(enableAssetManagement);
 
-    // 确保索引在有效范围内
-    final safeIndex = selectedIndex.clamp(0, items.length - 1);
-    if (safeIndex != selectedIndex) {
+    // 根据ID找到当前选中项的索引，如果找不到则默认选第一个
+    int selectedIndex = items.indexWhere((item) => item.id == selectedItemId);
+    if (selectedIndex < 0) {
+      selectedIndex = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(selectedNavIndexProvider.notifier).state = safeIndex;
+        ref.read(selectedNavItemProvider.notifier).state = items[0].id;
       });
     }
 
@@ -98,19 +110,23 @@ class _HomePageState extends ConsumerState<HomePage> {
           );
         },
         child: KeyedSubtree(
-          key: ValueKey(safeIndex),
-          child: items[safeIndex].page,
+          key: ValueKey(selectedItemId),
+          child: items[selectedIndex].page,
         ),
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: safeIndex,
+        selectedIndex: selectedIndex,
         onDestinationSelected: (index) {
           HapticService.selectionClick();
+          final currentPreviousId = _previousId ?? selectedItemId;
+          final previousIndex = items.indexWhere(
+            (item) => item.id == currentPreviousId,
+          );
           setState(() {
-            _isReverse = index < _previousIndex;
-            _previousIndex = index;
+            _isReverse = index < previousIndex;
+            _previousId = items[index].id;
           });
-          ref.read(selectedNavIndexProvider.notifier).state = index;
+          ref.read(selectedNavItemProvider.notifier).state = items[index].id;
         },
         destinations: items
             .map(
