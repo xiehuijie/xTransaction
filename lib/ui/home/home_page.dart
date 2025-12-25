@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/providers.dart';
 import '../../utils/haptic_service.dart';
+import '../../l10n/app_localizations.dart';
 import '../overview/overview_page.dart';
 import '../statistics/statistics_page.dart';
 import '../assets/assets_page.dart';
@@ -47,33 +48,34 @@ class _HomePageState extends ConsumerState<HomePage> {
   NavItemId? _previousId;
 
   /// 构建导航项列表
-  List<NavigationItem> _buildNavigationItems(bool enableAssetManagement) {
+  List<NavigationItem> _buildNavigationItems(BuildContext context, bool enableAssetManagement) {
+    final localizations = AppLocalizations.of(context)!;
     final items = <NavigationItem>[
-      const NavigationItem(
+      NavigationItem(
         id: NavItemId.overview,
-        label: '概览',
+        label: localizations.overview,
         icon: Icons.dashboard_outlined,
         selectedIcon: Icons.dashboard_rounded,
         page: OverviewPage(),
       ),
-      const NavigationItem(
+      NavigationItem(
         id: NavItemId.statistics,
-        label: '统计',
+        label: localizations.statistics,
         icon: Icons.bar_chart_outlined,
         selectedIcon: Icons.bar_chart_rounded,
         page: StatisticsPage(),
       ),
       if (enableAssetManagement)
-        const NavigationItem(
+        NavigationItem(
           id: NavItemId.assets,
-          label: '资产',
+          label: localizations.assets,
           icon: Icons.account_balance_wallet_outlined,
           selectedIcon: Icons.account_balance_wallet_rounded,
           page: AssetsPage(),
         ),
-      const NavigationItem(
+      NavigationItem(
         id: NavItemId.profile,
-        label: '我的',
+        label: localizations.profile,
         icon: Icons.person_outline,
         selectedIcon: Icons.person_rounded,
         page: ProfilePage(),
@@ -87,7 +89,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final enableAssetManagement =
         ref.watch(enableAssetManagementProvider).valueOrNull ?? true;
     final selectedItemId = ref.watch(selectedNavItemProvider);
-    final items = _buildNavigationItems(enableAssetManagement);
+    final items = _buildNavigationItems(context, enableAssetManagement);
 
     // 根据ID找到当前选中项的索引，如果找不到则默认选第一个
     int selectedIndex = items.indexWhere((item) => item.id == selectedItemId);

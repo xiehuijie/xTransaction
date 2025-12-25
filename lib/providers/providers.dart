@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/database/database.dart';
 import '../data/preferences/app_preferences.dart';
 import '../utils/app_theme.dart';
+import 'locale_provider.dart';
+
+export 'locale_provider.dart';
 
 /// 数据库 Provider
 final databaseProvider = Provider<AppDatabase>((ref) {

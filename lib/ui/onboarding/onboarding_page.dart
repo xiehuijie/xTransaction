@@ -1,6 +1,7 @@
 /// 初始化流程主页面
 ///
 /// 重新设计的初始化流程，采用分步配置模式
+library;
 
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'account_config_page.dart';
 import 'category_config_page.dart';
 import 'ledger_config_page.dart';
 import 'onboarding_state.dart';
+import '../../l10n/app_localizations.dart'; // Add localization import
 
 /// 步骤类型
 enum StepType { welcome, config, complete }
@@ -58,55 +60,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   bool _isReverse = false;
   bool _isSaving = false;
 
-  final List<_StepConfig> _steps = const [
-    _StepConfig(
-      title: '欢迎使用',
-      subtitle: '让我们开始配置您的记账应用',
-      icon: Icons.waving_hand_rounded,
-      stepType: StepType.welcome,
-    ),
-    _StepConfig(
-      title: '货币设置',
-      subtitle: '配置您需要使用的货币和默认货币',
-      icon: Icons.currency_exchange_rounded,
-      stepType: StepType.config,
-      preConfigType: PreConfigType.currencies,
-    ),
-    _StepConfig(
-      title: '账户设置',
-      subtitle: '添加您的银行卡、钱包等账户',
-      icon: Icons.account_balance_wallet_rounded,
-      stepType: StepType.config,
-      preConfigType: PreConfigType.accounts,
-    ),
-    _StepConfig(
-      title: '分类设置',
-      subtitle: '配置收支分类，支持多层级结构',
-      icon: Icons.category_rounded,
-      stepType: StepType.config,
-      preConfigType: PreConfigType.categories,
-    ),
-    _StepConfig(
-      title: '账本设置',
-      subtitle: '创建账本并选择关联的账户和分类',
-      icon: Icons.library_books_rounded,
-      stepType: StepType.config,
-      preConfigType: PreConfigType.ledgers,
-    ),
-    _StepConfig(
-      title: '生物识别',
-      subtitle: '启用指纹或面容保护您的财务数据',
-      icon: Icons.fingerprint_rounded,
-      configKey: 'enableBiometric',
-      stepType: StepType.config,
-    ),
-    _StepConfig(
-      title: '配置完成',
-      subtitle: '一切就绪，开始您的记账之旅！',
-      icon: Icons.check_circle_rounded,
-      stepType: StepType.complete,
-    ),
-  ];
+  // Steps will be initialized in build method using localized strings
+  late List<_StepConfig> _steps;
+
+  /// 处理语言选择
+  void _selectLanguage(String localeCode) {
+    // 保存语言选择到状态管理
+    ref.read(onboardingProvider.notifier).updateLocale(localeCode);
+    // 更新应用全局语言设置
+    ref.read(localeProvider.notifier).changeLocale(Locale(localeCode));
+    // 跳转到下一步
+    _nextStep();
+  }
 
   void _nextStep() {
     if (_currentStep < _steps.length - 1) {
@@ -158,6 +123,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _completeSetup() async {
     setState(() => _isSaving = true);
 
+    // 在异步操作前保存本地化字符串，避免使用BuildContext
+    final localizations = AppLocalizations.of(context);
+    
     try {
       final state = ref.read(onboardingProvider);
       final prefs = await ref.read(appPreferencesProvider.future);
@@ -404,15 +372,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('初始化失败: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(localizations?.initializationFailed(e.toString()) ?? '初始化失败: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      } finally {
       if (mounted) {
         setState(() => _isSaving = false);
       }
@@ -423,6 +391,65 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(onboardingProvider);
+    final localizations = AppLocalizations.of(context);
+    
+    // 初始化步骤配置
+    _steps = [
+      _StepConfig(
+        title: localizations?.selectLanguage ?? '选择语言',
+        subtitle: localizations?.selectLanguageSubtitle ?? '请选择您偏好的语言',
+        icon: Icons.language_outlined,
+        stepType: StepType.welcome,
+      ),
+      _StepConfig(
+        title: localizations?.onboardingWelcomeTitle ?? '欢迎使用',
+        subtitle: localizations?.onboardingWelcomeSubtitle ?? '开始您的记账之旅',
+        icon: Icons.home_outlined,
+        stepType: StepType.welcome,
+      ),
+      _StepConfig(
+        title: localizations?.onboardingCurrencyTitle ?? '配置货币',
+        subtitle: localizations?.onboardingCurrencySubtitle ?? '选择您常用的货币',
+        icon: Icons.attach_money_outlined,
+        stepType: StepType.config,
+        preConfigType: PreConfigType.currencies,
+      ),
+      _StepConfig(
+        title: localizations?.onboardingAccountTitle ?? '配置账户',
+        subtitle: localizations?.onboardingAccountSubtitle ?? '添加您的账户信息',
+        icon: Icons.account_balance_wallet_outlined,
+        stepType: StepType.config,
+        preConfigType: PreConfigType.accounts,
+      ),
+      _StepConfig(
+        title: localizations?.onboardingCategoryTitle ?? '配置分类',
+        subtitle: localizations?.onboardingCategorySubtitle ?? '设置交易分类',
+        icon: Icons.category_outlined,
+        stepType: StepType.config,
+        preConfigType: PreConfigType.categories,
+      ),
+      _StepConfig(
+        title: localizations?.onboardingLedgerTitle ?? '配置账本',
+        subtitle: localizations?.onboardingLedgerSubtitle ?? '创建您的账本',
+        icon: Icons.book_outlined,
+        stepType: StepType.config,
+        preConfigType: PreConfigType.ledgers,
+      ),
+      _StepConfig(
+        title: localizations?.onboardingBiometricTitle ?? '生物识别',
+        subtitle: localizations?.onboardingBiometricSubtitle ?? '启用生物识别保护您的数据',
+        icon: Icons.fingerprint_outlined,
+        stepType: StepType.config,
+        configKey: 'enableBiometric',
+      ),
+      _StepConfig(
+        title: localizations?.onboardingCompleteTitle ?? '完成',
+        subtitle: localizations?.onboardingCompleteSubtitle ?? '配置完成，开始使用',
+        icon: Icons.check_circle_outlined,
+        stepType: StepType.complete,
+      ),
+    ];
+    
     final step = _steps[_currentStep];
 
     return Scaffold(
@@ -550,7 +577,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             // 欢迎页面特殊内容
             if (step.stepType == StepType.welcome) ...[
               const SizedBox(height: 48),
-              _buildStartupOptions(theme),
+              // 第一个欢迎步骤是语言选择
+              if (_currentStep == 0) _buildLanguageSelection(theme),
+              // 第二个欢迎步骤是恢复/开始选项
+              if (_currentStep == 1) _buildStartupOptions(theme),
             ],
 
             // 配置按钮
@@ -576,7 +606,162 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
+  /// 构建语言选择UI
+  Widget _buildLanguageSelection(ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
+    return Column(
+      children: [
+        // 中文简体选项
+        Card(
+          child: InkWell(
+            onTap: () => _selectLanguage('zh'),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.language_outlined,
+                      color: theme.colorScheme.onPrimaryContainer,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizations?.chineseSimplified ?? '简体中文',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '简体中文',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // 日本語选项
+        Card(
+          child: InkWell(
+            onTap: () => _selectLanguage('ja'),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.language_outlined,
+                      color: theme.colorScheme.onPrimaryContainer,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizations?.japanese ?? '日本語',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '日本語',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // English选项
+        Card(
+          child: InkWell(
+            onTap: () => _selectLanguage('en'),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.language_outlined,
+                      color: theme.colorScheme.onPrimaryContainer,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'English',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'English',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildStartupOptions(ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
     return Column(
       children: [
         Card(
@@ -604,14 +789,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '从新开始',
+                          localizations?.onboardingNewStart ?? '从新开始',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '创建全新的记账环境',
+                          localizations?.onboardingNewStartDesc ?? '创建全新的记账环境',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -654,14 +839,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '从备份恢复',
+                          localizations?.onboardingRestore ?? '从备份恢复',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '从备份文件恢复数据',
+                          localizations?.onboardingRestoreDesc ?? '从备份文件恢复数据',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -687,6 +872,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     OnboardingState state,
     ThemeData theme,
   ) {
+    final localizations = AppLocalizations.of(context);
     String buttonText;
     int itemCount;
     String statusText;
@@ -694,29 +880,29 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     switch (step.preConfigType!) {
       case PreConfigType.currencies:
-        buttonText = '配置货币';
+        buttonText = localizations?.onboardingConfigureCurrency ?? '配置货币';
         itemCount = state.availableCurrencies.length;
-        statusText = '已选择 $itemCount 种货币';
+        statusText = localizations?.onboardingCurrencySelected(itemCount) ?? '已选择 $itemCount 种货币';
         isConfigured = itemCount >= 1;
         break;
       case PreConfigType.accounts:
-        buttonText = '配置账户';
+        buttonText = localizations?.onboardingConfigureAccount ?? '配置账户';
         itemCount = state.accounts.length;
-        statusText = '已添加 $itemCount 个账户';
+        statusText = localizations?.onboardingAccountAdded(itemCount) ?? '已添加 $itemCount 个账户';
         isConfigured = itemCount >= 1;
         break;
       case PreConfigType.categories:
-        buttonText = '配置分类';
+        buttonText = localizations?.onboardingConfigureCategory ?? '配置分类';
         final expenseCount = _countCategories(state.expenseCategories);
         final incomeCount = _countCategories(state.incomeCategories);
         itemCount = expenseCount + incomeCount;
-        statusText = '支出 $expenseCount 个, 收入 $incomeCount 个';
+        statusText = localizations?.onboardingCategoryAdded(expenseCount, incomeCount) ?? '支出 $expenseCount 个, 收入 $incomeCount 个';
         isConfigured = itemCount >= 1;
         break;
       case PreConfigType.ledgers:
-        buttonText = '配置账本';
+        buttonText = localizations?.onboardingConfigureLedger ?? '配置账本';
         itemCount = state.ledgers.length;
-        statusText = '已创建 $itemCount 个账本';
+        statusText = localizations?.onboardingLedgerCreated(itemCount) ?? '已创建 $itemCount 个账本';
         isConfigured = itemCount >= 1;
         break;
     }
@@ -778,6 +964,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Widget _buildBiometricSwitch(bool value, ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
@@ -787,7 +974,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(value ? '已启用' : '未启用', style: theme.textTheme.titleMedium),
+          Text(value ? (localizations?.enabled ?? '已启用') : (localizations?.disabled ?? '未启用'), style: theme.textTheme.titleMedium),
           Switch.adaptive(
             value: value,
             onChanged: (v) async {
@@ -799,7 +986,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 if (!canCheck) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('设备不支持生物识别或未设置生物识别')),
+                      SnackBar(content: Text(localizations?.biometricNotSupportedMessage ?? '设备不支持生物识别或未设置生物识别')),
                     );
                   }
                   return;
@@ -807,7 +994,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
                 // 验证生物识别
                 final result = await BiometricService.authenticate(
-                  localizedReason: '验证身份以启用生物识别解锁',
+                  localizedReason: localizations?.authenticateToEnableBiometric ?? '验证身份以启用生物识别解锁',
                 );
 
                 if (result != BiometricResult.success) {
@@ -815,16 +1002,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     String message;
                     switch (result) {
                       case BiometricResult.failed:
-                        message = '验证失败';
+                        message = localizations?.verificationFailed ?? '验证失败';
                         break;
                       case BiometricResult.notEnrolled:
-                        message = '请先在设备上设置生物识别';
+                        message = localizations?.setupBiometricFirst ?? '请先在设备上设置生物识别';
                         break;
                       case BiometricResult.lockedOut:
-                        message = '验证次数过多，请稍后重试';
+                        message = localizations?.tooManyBiometricAttempts ?? '验证次数过多，请稍后重试';
                         break;
                       default:
-                        message = '无法启用生物识别';
+                        message = localizations?.cannotEnableBiometric ?? '无法启用生物识别';
                     }
                     ScaffoldMessenger.of(
                       context,
@@ -843,6 +1030,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Widget _buildCompleteSummary(OnboardingState state, ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -850,7 +1038,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '配置摘要',
+              localizations?.configurationSummary ?? '配置摘要',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -858,33 +1046,33 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             const SizedBox(height: 16),
             _buildSummaryRow(
               theme,
-              '货币',
+              localizations?.currency ?? '货币',
               '${state.availableCurrencies.length} 种',
               state.availableCurrencies.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '账户',
+              localizations?.account ?? '账户',
               '${state.accounts.length} 个',
               state.accounts.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '分类',
+              localizations?.category ?? '分类',
               '${_countCategories(state.expenseCategories) + _countCategories(state.incomeCategories)} 个',
               state.expenseCategories.isNotEmpty ||
                   state.incomeCategories.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '账本',
+              localizations?.ledger ?? '账本',
               '${state.ledgers.length} 个',
               state.ledgers.isNotEmpty,
             ),
             _buildSummaryRow(
               theme,
-              '生物识别',
-              state.enableBiometric ? '已启用' : '未启用',
+              localizations?.biometrics ?? '生物识别',
+              state.enableBiometric ? (localizations?.enabled ?? '已启用') : (localizations?.disabled ?? '未启用'),
               state.enableBiometric,
             ),
           ],
@@ -927,6 +1115,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Widget _buildBottomButtons(ThemeData theme, _StepConfig step) {
+    final localizations = AppLocalizations.of(context);
+    
     // 欢迎页面没有按钮
     if (step.stepType == StepType.welcome) {
       return const SizedBox(height: 56);
@@ -939,7 +1129,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           child: OutlinedButton.icon(
             onPressed: _previousStep,
             icon: const Icon(Icons.arrow_back),
-            label: const Text('上一步'),
+            label: Text(localizations?.previousStep ?? '上一步'),
           ),
         ),
         const SizedBox(width: 16),
@@ -955,12 +1145,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check),
-                  label: Text(_isSaving ? '保存中...' : '开始使用'),
+                  label: Text(_isSaving ? (localizations?.saving ?? '保存中...') : (localizations?.startUsing ?? '开始使用')),
                 )
               : FilledButton.icon(
                   onPressed: _nextStep,
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('下一步'),
+                  label: Text(localizations?.nextStep ?? '下一步'),
                 ),
         ),
       ],

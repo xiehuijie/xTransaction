@@ -5,6 +5,7 @@ import '../../providers/providers.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/haptic_service.dart';
 import '../../utils/biometric_service.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 设置页面
 class SettingsPage extends ConsumerStatefulWidget {
@@ -92,29 +93,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     HapticService.selectionClick();
 
     if (!value) {
+      // 在异步操作前保存本地化字符串，避免使用BuildContext
+      final warningText = AppLocalizations.of(context)?.warning ?? '关闭资产管理';
+      final cancelText = AppLocalizations.of(context)?.cancel ?? '取消';
+      final yesText = AppLocalizations.of(context)?.yes ?? '确认关闭';
+      
       // 关闭资产管理时显示确认对话框
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('关闭资产管理'),
-          content: const Text('关闭后将隐藏资产页面，但已记录的账户和资产数据不会被删除。\n\n您可以随时重新开启此功能。'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                HapticService.lightImpact();
-                Navigator.pop(context, false);
-              },
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () {
-                HapticService.mediumImpact();
-                Navigator.pop(context, true);
-              },
-              child: const Text('确认关闭'),
-            ),
-          ],
-        ),
+        builder: (context) {
+          final localizations = AppLocalizations.of(context);
+          return AlertDialog(
+            title: Text(warningText),
+            content: Text(localizations?.disableAssetManagementConfirm ?? '关闭后将隐藏资产页面，但已记录的账户和资产数据不会被删除。\n\n您可以随时重新开启此功能。'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  HapticService.lightImpact();
+                  Navigator.pop(context, false);
+                },
+                child: Text(cancelText),
+              ),
+              FilledButton(
+                onPressed: () {
+                  HapticService.mediumImpact();
+                  Navigator.pop(context, true);
+                },
+                child: Text(yesText),
+              ),
+            ],
+          );
+        },
       );
 
       if (confirmed != true) return;
@@ -126,22 +135,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _handleBiometricChange(bool value) async {
     HapticService.selectionClick();
+    // 获取本地化字符串
+    final localizations = AppLocalizations.of(context);
 
     if (value) {
+      // 在异步操作前保存本地化字符串，避免使用BuildContext
+      final biometricNotSupportedText = localizations?.biometricNotSupported ?? '设备不支持生物识别或未设置生物识别';
+      final authenticatingText = localizations?.authenticating ?? '验证身份以启用生物识别解锁';
+      
       // 启用生物识别前，先验证生物识别可用性
       final canCheck = await BiometricService.canCheckBiometrics();
       if (!canCheck) {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('设备不支持生物识别或未设置生物识别')));
+          ).showSnackBar(SnackBar(content: Text(biometricNotSupportedText)));
         }
         return;
       }
-
+      
       // 验证一次生物识别，确保用户有权限开启
       final result = await BiometricService.authenticate(
-        localizedReason: '验证身份以启用生物识别解锁',
+        localizedReason: authenticatingText,
       );
 
       if (result != BiometricResult.success) {
@@ -149,16 +164,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           String message;
           switch (result) {
             case BiometricResult.failed:
-              message = '验证失败';
+              message = localizations?.biometricVerificationFailed ?? '验证失败';
               break;
             case BiometricResult.notEnrolled:
-              message = '请先在设备上设置生物识别';
+              message = localizations?.biometricNotSetUp ?? '请先在设备上设置生物识别';
               break;
             case BiometricResult.lockedOut:
-              message = '验证次数过多，请稍后重试';
+              message = localizations?.biometricTooManyAttempts ?? '验证次数过多，请稍后重试';
               break;
             default:
-              message = '无法启用生物识别';
+              message = localizations?.biometricCannotEnable ?? '无法启用生物识别';
           }
           ScaffoldMessenger.of(
             context,
@@ -185,33 +200,49 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
+    final currentLocale = ref.watch(localeProvider);
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('设置')),
+        appBar: AppBar(title: Text(localizations?.settings ?? '设置')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
+    // 获取当前语言名称
+    String getCurrentLanguageName() {
+      switch (currentLocale.languageCode) {
+        case 'en':
+          return 'English';
+        case 'zh':
+          return '简体中文';
+        case 'ja':
+          return '日本語';
+        default:
+          return 'English';
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('设置'), centerTitle: true),
+      appBar: AppBar(title: Text(localizations?.settings ?? '设置'), centerTitle: true),
       body: ListView(
         children: [
           // 功能设置
-          _buildSectionHeader(context, '功能设置'),
+          _buildSectionHeader(context, localizations?.functionSettings ?? '功能设置'),
           _buildSwitchTile(
             context,
             icon: Icons.account_balance_wallet_outlined,
-            title: '资产管理',
-            subtitle: '查看账户余额和资产分布',
+            title: localizations?.assetManagement ?? '资产管理',
+            subtitle: localizations?.assetManagementDesc ?? '查看账户余额和资产分布',
             value: _enableAssetManagement,
             onChanged: _handleAssetManagementChange,
           ),
           _buildSwitchTile(
             context,
             icon: Icons.pie_chart_outline_rounded,
-            title: '预算管理',
-            subtitle: '设置预算并追踪支出',
+            title: localizations?.budgetManagement ?? '预算管理',
+            subtitle: localizations?.budgetManagementDesc ?? '设置预算并追踪支出',
             value: _enableBudgetManagement,
             onChanged: (value) => _handleSwitchChange(
               'enableBudgetManagement',
@@ -222,8 +253,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _buildSwitchTile(
             context,
             icon: Icons.currency_exchange_outlined,
-            title: '多货币支持',
-            subtitle: '支持多种货币记账和汇率转换',
+            title: localizations?.multiCurrencySupport ?? '多货币支持',
+            subtitle: localizations?.multiCurrencySupportDesc ?? '支持多种货币记账和汇率转换',
             value: _enableMultiCurrency,
             onChanged: (value) => _handleSwitchChange(
               'enableMultiCurrency',
@@ -234,8 +265,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _buildSwitchTile(
             context,
             icon: Icons.library_books_outlined,
-            title: '多账本',
-            subtitle: '创建多个账本分开管理',
+            title: localizations?.multiLedger ?? '多账本',
+            subtitle: localizations?.multiLedgerDesc ?? '创建多个账本分开管理',
             value: _enableMultiLedger,
             onChanged: (value) => _handleSwitchChange(
               'enableMultiLedger',
@@ -247,12 +278,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 32),
 
           // 安全设置
-          _buildSectionHeader(context, '安全设置'),
+          _buildSectionHeader(context, localizations?.securitySettings ?? '安全设置'),
           _buildSwitchTile(
             context,
             icon: Icons.fingerprint_outlined,
-            title: '生物识别解锁',
-            subtitle: '使用指纹或面容解锁应用',
+            title: localizations?.biometricUnlock ?? '生物识别解锁',
+            subtitle: localizations?.biometricUnlockDesc ?? '使用指纹或面容解锁应用',
             value: _enableBiometric,
             onChanged: _handleBiometricChange,
           ),
@@ -260,11 +291,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 32),
 
           // 外观设置
-          _buildSectionHeader(context, '外观设置'),
+          _buildSectionHeader(context, localizations?.appearanceSettings ?? '外观设置'),
           _buildMenuTile(
             context,
             icon: Icons.palette_outlined,
-            title: '主题色',
+            title: localizations?.themeColor ?? '主题色',
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -278,7 +309,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _themeColor.label,
+                  _themeColor.getLocalizedLabel(context),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -293,7 +324,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _buildMenuTile(
             context,
             icon: Icons.brightness_6_outlined,
-            title: '深浅模式',
+            title: localizations?.themeMode ?? '深浅模式',
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -304,7 +335,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _themeMode.label,
+                  _themeMode.getLocalizedLabel(context),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -319,27 +350,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _buildMenuTile(
             context,
             icon: Icons.language_outlined,
-            title: '语言',
+            title: localizations?.language ?? '语言',
             trailing: Text(
-              '简体中文',
+              getCurrentLanguageName(),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             onTap: () {
               HapticService.lightImpact();
-              // TODO: 语言选择
+              _showLanguageDialog(context);
             },
           ),
 
           const Divider(height: 32),
 
           // 数据管理
-          _buildSectionHeader(context, '数据管理'),
+          _buildSectionHeader(context, localizations?.dataManagement ?? '数据管理'),
           _buildMenuTile(
             context,
             icon: Icons.backup_outlined,
-            title: '备份与恢复',
+            title: localizations?.backupAndRestore ?? '备份与恢复',
             onTap: () {
               HapticService.lightImpact();
               // TODO: 备份与恢复
@@ -348,7 +379,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _buildMenuTile(
             context,
             icon: Icons.delete_forever_outlined,
-            title: '重置应用数据',
+            title: localizations?.resetAppData ?? '重置应用数据',
             titleColor: theme.colorScheme.error,
             onTap: () {
               HapticService.mediumImpact();
@@ -394,6 +425,50 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  /// 显示语言选择对话框
+  void _showLanguageDialog(BuildContext context) {
+    final currentLocale = ref.read(localeProvider);
+    final localizations = AppLocalizations.of(context);
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(localizations?.selectLanguage ?? '选择语言'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(localizations?.english ?? 'English'),
+                trailing: currentLocale == const Locale('en') ? const Icon(Icons.check) : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).changeLocale(const Locale('en'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(localizations?.chinese ?? '简体中文'),
+                trailing: currentLocale == const Locale('zh') ? const Icon(Icons.check) : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).changeLocale(const Locale('zh'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(localizations?.japanese ?? '日本語'),
+                trailing: currentLocale == const Locale('ja') ? const Icon(Icons.check) : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).changeLocale(const Locale('ja'));
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildMenuTile(
     BuildContext context, {
     required IconData icon,
@@ -418,10 +493,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showThemeColorDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('选择主题色'),
+          title: Text(localizations?.selectThemeColor ?? '选择主题色'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -442,7 +518,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         : null,
                   ),
                 ),
-                title: Text(color.label),
+                title: Text(color.getLocalizedLabel(context)),
                 trailing: isSelected ? const Icon(Icons.check) : null,
                 onTap: () async {
                   HapticService.selectionClick();
@@ -459,17 +535,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showThemeModeDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('选择深浅模式'),
+          title: Text(localizations?.selectThemeMode ?? '选择深浅模式'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: AppThemeModeOption.values.map((mode) {
             final isSelected = mode == _themeMode;
             return ListTile(
               leading: Icon(mode.icon),
-              title: Text(mode.label),
+              title: Text(mode.getLocalizedLabel(context)),
               trailing: isSelected ? const Icon(Icons.check) : null,
               onTap: () async {
                 HapticService.selectionClick();
@@ -485,18 +562,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showResetDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('重置应用数据'),
-        content: const Text('此操作将清空所有数据，包括账户、交易记录等。此操作不可撤销，确定要继续吗？'),
+        title: Text(localizations?.resetAppDataConfirm ?? '重置应用数据'),
+        content: Text(localizations?.resetAppDataConfirmContent ?? '此操作将清空所有数据，包括账户、交易记录等。此操作不可撤销，确定要继续吗？'),
         actions: [
           TextButton(
             onPressed: () {
               HapticService.lightImpact();
               Navigator.pop(context);
             },
-            child: const Text('取消'),
+            child: Text(localizations?.cancel ?? '取消'),
           ),
           FilledButton(
             onPressed: () async {
@@ -505,12 +583,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               // TODO: 执行重置
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(const SnackBar(content: Text('功能开发中')));
+              ).showSnackBar(SnackBar(content: Text(localizations?.functionInDevelopment ?? '功能开发中')));
             },
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('确认重置'),
+            child: Text(localizations?.confirmReset ?? '确认重置'),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 /// 账户类型相关常量与配置
 ///
 /// 定义各种账户类型的默认配置和说明
+library;
 
 import 'package:flutter/material.dart';
 import '../database/tables.dart';

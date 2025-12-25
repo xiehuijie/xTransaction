@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 /// 主题色枚举
 enum AppThemeColor {
-  blue('蓝色', Colors.blue),
-  purple('紫色', Colors.purple),
-  orange('橙色', Colors.orange),
-  green('绿色', Colors.green),
-  pink('粉红', Colors.pink),
-  teal('青色', Colors.teal);
+  blue('', Colors.blue),
+  purple('', Colors.purple),
+  orange('', Colors.orange),
+  green('', Colors.green),
+  pink('', Colors.pink),
+  teal('', Colors.teal);
 
   final String label;
   final Color color;
@@ -21,13 +22,32 @@ enum AppThemeColor {
       orElse: () => AppThemeColor.teal,
     );
   }
+
+  /// 获取本地化标签
+  String getLocalizedLabel(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    switch (this) {
+      case AppThemeColor.blue:
+        return localizations?.blue ?? 'Blue';
+      case AppThemeColor.purple:
+        return localizations?.purple ?? 'Purple';
+      case AppThemeColor.orange:
+        return localizations?.orange ?? 'Orange';
+      case AppThemeColor.green:
+        return localizations?.green ?? 'Green';
+      case AppThemeColor.pink:
+        return localizations?.pink ?? 'Pink';
+      case AppThemeColor.teal:
+        return localizations?.teal ?? 'Teal';
+    }
+  }
 }
 
 /// 主题模式枚举
 enum AppThemeModeOption {
-  system('跟随系统', Icons.brightness_auto),
-  light('浅色', Icons.light_mode),
-  dark('深色', Icons.dark_mode);
+  system('', Icons.brightness_auto),
+  light('', Icons.light_mode),
+  dark('', Icons.dark_mode);
 
   final String label;
   final IconData icon;
@@ -51,6 +71,19 @@ enum AppThemeModeOption {
         return ThemeMode.light;
       case AppThemeModeOption.dark:
         return ThemeMode.dark;
+    }
+  }
+
+  /// 获取本地化标签
+  String getLocalizedLabel(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    switch (this) {
+      case AppThemeModeOption.system:
+        return localizations?.system ?? 'System';
+      case AppThemeModeOption.light:
+        return localizations?.light ?? 'Light';
+      case AppThemeModeOption.dark:
+        return localizations?.dark ?? 'Dark';
     }
   }
 }

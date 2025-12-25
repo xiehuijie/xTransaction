@@ -1,6 +1,7 @@
 /// 数据恢复页面（从备份恢复）
 ///
 /// 允许用户从本地备份或云端恢复数据
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

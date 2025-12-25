@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:animations/animations.dart';
 
 import 'providers/providers.dart';
@@ -7,6 +8,7 @@ import 'ui/onboarding/onboarding_page.dart';
 import 'ui/home/home_page.dart';
 import 'utils/app_theme.dart';
 import 'utils/biometric_service.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,14 +23,28 @@ class MainApp extends ConsumerWidget {
     // 监听主题设置
     final themeMode = ref.watch(themeModeProvider);
     final themeColor = ref.watch(themeColorProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: 'X Transaction',
+      title: AppLocalizations.of(context)?.appName ?? 'X Transaction',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(themeColor),
       darkTheme: AppTheme.darkTheme(themeColor),
       themeMode: themeMode,
-      home: const AppStartupHandler(),
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: ProviderScope(
+        overrides: [
+          contextProvider.overrideWithValue(context),
+        ],
+        child: const AppStartupHandler(),
+      ),
     );
   }
 }
@@ -104,7 +120,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> {
     });
 
     final result = await BiometricService.authenticate(
-      localizedReason: '请验证身份以解锁应用',
+      localizedReason: AppLocalizations.of(context)?.verificationFailed ?? '请验证身份以解锁应用',
     );
 
     if (!mounted) return;
@@ -121,38 +137,38 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> {
         break;
       case BiometricResult.failed:
         setState(() {
-          _errorMessage = '验证失败，请重试';
+          _errorMessage = AppLocalizations.of(context)?.verificationFailed;
         });
         break;
       case BiometricResult.notSupported:
         // 设备不支持生物识别，显示错误信息
         setState(() {
-          _errorMessage = '设备不支持生物识别，请在设置中关闭生物识别解锁';
+          _errorMessage = AppLocalizations.of(context)?.biometricNotSupported;
         });
         break;
       case BiometricResult.notAvailable:
         setState(() {
-          _errorMessage = '生物识别不可用，请在设置中关闭生物识别解锁';
+          _errorMessage = AppLocalizations.of(context)?.biometricNotAvailable;
         });
         break;
       case BiometricResult.notEnrolled:
         setState(() {
-          _errorMessage = '请先在设备上设置生物识别';
+          _errorMessage = AppLocalizations.of(context)?.biometricNotEnrolled;
         });
         break;
       case BiometricResult.lockedOut:
         setState(() {
-          _errorMessage = '验证次数过多，请稍后重试';
+          _errorMessage = AppLocalizations.of(context)?.biometricLockedOut;
         });
         break;
       case BiometricResult.permanentlyLockedOut:
         setState(() {
-          _errorMessage = '验证已被锁定，请使用设备密码';
+          _errorMessage = AppLocalizations.of(context)?.biometricPermanentlyLockedOut;
         });
         break;
       case BiometricResult.error:
         setState(() {
-          _errorMessage = '发生错误，请重试';
+          _errorMessage = AppLocalizations.of(context)?.biometricError;
         });
         break;
     }
@@ -188,25 +204,25 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> {
               ),
               const SizedBox(height: 32),
               Text(
-                'X Transaction',
+                AppLocalizations.of(context)?.appName ?? 'X Transaction',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                '应用已锁定',
+                AppLocalizations.of(context)?.appLocked ?? '应用已锁定',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 48),
               if (_isAuthenticating)
-                const Column(
+                Column(
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('正在验证...'),
+                    Text(AppLocalizations.of(context)?.authenticating ?? '正在验证...'),
                   ],
                 )
               else ...[
@@ -239,7 +255,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> {
                 FilledButton.icon(
                   onPressed: _authenticate,
                   icon: const Icon(Icons.fingerprint),
-                  label: const Text('重新验证'),
+                  label: Text(AppLocalizations.of(context)?.reauthenticate ?? '重新验证'),
                 ),
               ],
             ],
@@ -278,11 +294,11 @@ class _SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'X Transaction',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                AppLocalizations.of(context)?.appName ?? 'X Transaction',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
             const SizedBox(height: 48),
             const CircularProgressIndicator(),
           ],
@@ -316,7 +332,7 @@ class _ErrorScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                '应用启动失败',
+                AppLocalizations.of(context)?.appFailedToStart ?? '应用启动失败',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

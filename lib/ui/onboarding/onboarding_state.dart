@@ -1,6 +1,7 @@
 /// 初始化流程状态管理
 ///
 /// 管理应用初始化向导中的所有预配置数据
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -293,6 +294,9 @@ class OnboardingState {
   final bool enableBudgetManagement;
   final bool enableBiometric;
 
+  // 语言配置
+  final String? locale; // 选择的语言代码
+
   // 货币配置
   final String? defaultCurrency; // 默认货币代码
   final Set<String> availableCurrencies; // 选中的系统货币代码
@@ -316,6 +320,7 @@ class OnboardingState {
     this.enableMultiLedger = false,
     this.enableBudgetManagement = true,
     this.enableBiometric = false,
+    this.locale = 'zh', // 默认中文
     this.defaultCurrency = 'CNY',
     this.availableCurrencies = const {'CNY', 'USD'},
     this.customCurrencies = const [],
@@ -359,6 +364,7 @@ class OnboardingState {
     bool? enableMultiLedger,
     bool? enableBudgetManagement,
     bool? enableBiometric,
+    String? locale,
     String? defaultCurrency,
     Set<String>? availableCurrencies,
     List<PreConfigCurrency>? customCurrencies,
@@ -373,9 +379,9 @@ class OnboardingState {
       enableMultiCurrency: enableMultiCurrency ?? this.enableMultiCurrency,
       enableMultiAccount: enableMultiAccount ?? this.enableMultiAccount,
       enableMultiLedger: enableMultiLedger ?? this.enableMultiLedger,
-      enableBudgetManagement:
-          enableBudgetManagement ?? this.enableBudgetManagement,
+      enableBudgetManagement: enableBudgetManagement ?? this.enableBudgetManagement,
       enableBiometric: enableBiometric ?? this.enableBiometric,
+      locale: locale ?? this.locale,
       defaultCurrency: defaultCurrency ?? this.defaultCurrency,
       availableCurrencies: availableCurrencies ?? this.availableCurrencies,
       customCurrencies: customCurrencies ?? this.customCurrencies,
@@ -621,6 +627,11 @@ const List<PreConfigCategory> _defaultIncomeCategories = [
 /// 初始化配置 Notifier
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
   OnboardingNotifier() : super(OnboardingState.initial());
+
+  /// 更新语言选择
+  void updateLocale(String localeCode) {
+    state = state.copyWith(locale: localeCode);
+  }
 
   // ==================== 功能开关 ====================
 

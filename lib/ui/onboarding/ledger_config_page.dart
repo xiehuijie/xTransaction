@@ -1,6 +1,7 @@
 /// 账本预配置页面
 ///
 /// 初始化流程的第四步，配置多账本
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
