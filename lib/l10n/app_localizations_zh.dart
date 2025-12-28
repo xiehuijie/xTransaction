@@ -27,7 +27,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appFailedToStart => '应用启动失败';
 
   @override
-  String get verificationFailed => '验证失败';
+  String get verificationFailed => '验证失败，请重试';
 
   @override
   String get biometricNotSupported => '设备不支持生物识别，请在设置中关闭生物识别解锁';
@@ -222,12 +222,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get resetAppData => '重置应用数据';
 
   @override
-  String get selectThemeColor => '选择主题色';
-
-  @override
-  String get selectThemeMode => '选择深浅模式';
-
-  @override
   String get resetAppDataConfirm => '重置应用数据';
 
   @override
@@ -250,16 +244,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '关闭后将隐藏资产页面，但已记录的账户和资产数据不会被删除。\n\n您可以随时重新开启此功能。';
 
   @override
-  String get biometricVerificationFailed => '验证失败';
+  String get selectThemeColor => '选择主题色';
 
   @override
-  String get biometricNotSetUp => '请先在设备上设置生物识别';
-
-  @override
-  String get biometricTooManyAttempts => '验证次数过多，请稍后重试';
-
-  @override
-  String get biometricCannotEnable => '无法启用生物识别';
+  String get selectThemeMode => '选择深浅模式';
 
   @override
   String get resetAppDataConfirmContent =>
@@ -359,25 +347,20 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get enabled => '已启用';
-
-  @override
-  String get disabled => '未启用';
-
-  @override
   String get authenticateToEnable => '验证身份以启用生物识别解锁';
 
   @override
   String get authenticationFailed => '验证失败';
 
   @override
-  String get setupBiometricFirst => '请先在设备上设置生物识别';
+  String get setupBiometricFirst =>
+      'Please set up biometrics on your device first';
 
   @override
   String get tooManyAttempts => '验证次数过多，请稍后重试';
 
   @override
-  String get cannotEnableBiometric => '无法启用生物识别';
+  String get cannotEnableBiometric => 'Cannot enable biometrics';
 
   @override
   String initializationFailed(Object error) {
@@ -385,7 +368,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get configurationSummary => '配置摘要';
+  String get configurationSummary => 'Configuration Summary';
 
   @override
   String get currency => '货币';
@@ -456,13 +439,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dark => '深色';
 
   @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
   String get biometricNotSupportedMessage => '设备不支持生物识别或未设置生物识别';
 
   @override
   String get authenticateToEnableBiometric => '验证身份以启用生物识别解锁';
-
-  @override
-  String get tooManyBiometricAttempts => '验证次数过多，请稍后重试';
 
   @override
   String get onboardingWelcomeTitle => '欢迎使用';
@@ -493,12 +479,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingLedgerSubtitle => '创建您的账本';
-
-  @override
-  String get onboardingBiometricTitle => '生物识别';
-
-  @override
-  String get onboardingBiometricSubtitle => '启用生物识别保护您的数据';
 
   @override
   String get onboardingCompleteTitle => '完成';
@@ -549,4 +529,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String onboardingLedgerCreated(Object count) {
     return '已创建 $count 个账本';
   }
+
+  @override
+  String get onboardingBiometricTitle => '生物识别';
+
+  @override
+  String get onboardingBiometricSubtitle => '启用生物识别保护您的数据';
 }

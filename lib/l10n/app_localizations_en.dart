@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appFailedToStart => 'App failed to start';
 
   @override
-  String get verificationFailed => 'Verification failed';
+  String get verificationFailed => 'Verification failed, please try again';
 
   @override
   String get biometricNotSupported =>
@@ -229,12 +229,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetAppData => 'Reset App Data';
 
   @override
-  String get selectThemeColor => 'Select Theme Color';
-
-  @override
-  String get selectThemeMode => 'Select Theme Mode';
-
-  @override
   String get resetAppDataConfirm => 'Reset App Data';
 
   @override
@@ -257,17 +251,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Disabling will hide the asset page, but recorded account and asset data will not be deleted.\n\nYou can re-enable this feature at any time.';
 
   @override
-  String get biometricVerificationFailed => 'Verification failed';
+  String get selectThemeColor => 'Select Theme Color';
 
   @override
-  String get biometricNotSetUp =>
-      'Please set up biometrics on your device first';
-
-  @override
-  String get biometricTooManyAttempts => 'Too many attempts, please try later';
-
-  @override
-  String get biometricCannotEnable => 'Cannot enable biometric';
+  String get selectThemeMode => 'Select Theme Mode';
 
   @override
   String get resetAppDataConfirmContent =>
@@ -373,12 +360,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get enabled => 'Enabled';
-
-  @override
-  String get disabled => 'Disabled';
-
-  @override
   String get authenticateToEnable => 'Authenticate to enable biometric unlock';
 
   @override
@@ -471,15 +452,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dark => 'Dark';
 
   @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
   String get biometricNotSupportedMessage =>
       'Device does not support biometrics or biometrics not set up';
 
   @override
   String get authenticateToEnableBiometric =>
       'Authenticate to enable biometric unlock';
-
-  @override
-  String get tooManyBiometricAttempts => 'Too many attempts, please try later';
 
   @override
   String get onboardingWelcomeTitle => 'Welcome';
@@ -511,12 +495,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingLedgerSubtitle => 'Create your ledgers';
-
-  @override
-  String get onboardingBiometricTitle => 'Biometrics';
-
-  @override
-  String get onboardingBiometricSubtitle => 'Enable biometric unlock';
 
   @override
   String get onboardingCompleteTitle => 'Complete';
@@ -569,4 +547,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String onboardingLedgerCreated(Object count) {
     return 'Created $count ledgers';
   }
+
+  @override
+  String get onboardingBiometricTitle => 'Biometrics';
+
+  @override
+  String get onboardingBiometricSubtitle => 'Enable biometric unlock';
 }

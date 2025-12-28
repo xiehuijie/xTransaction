@@ -1008,7 +1008,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         message = localizations?.setupBiometricFirst ?? '请先在设备上设置生物识别';
                         break;
                       case BiometricResult.lockedOut:
-                        message = localizations?.tooManyBiometricAttempts ?? '验证次数过多，请稍后重试';
+                        message = localizations?.tooManyAttempts ?? '验证次数过多，请稍后重试';
                         break;
                       default:
                         message = localizations?.cannotEnableBiometric ?? '无法启用生物识别';

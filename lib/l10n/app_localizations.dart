@@ -139,7 +139,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationFailed.
   ///
   /// In en, this message translates to:
-  /// **'Verification failed'**
+  /// **'Verification failed, please try again'**
   String get verificationFailed;
 
   /// No description provided for @biometricNotSupported.
@@ -526,18 +526,6 @@ abstract class AppLocalizations {
   /// **'Reset App Data'**
   String get resetAppData;
 
-  /// No description provided for @selectThemeColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Theme Color'**
-  String get selectThemeColor;
-
-  /// No description provided for @selectThemeMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Theme Mode'**
-  String get selectThemeMode;
-
   /// No description provided for @resetAppDataConfirm.
   ///
   /// In en, this message translates to:
@@ -580,29 +568,17 @@ abstract class AppLocalizations {
   /// **'Disabling will hide the asset page, but recorded account and asset data will not be deleted.\n\nYou can re-enable this feature at any time.'**
   String get disableAssetManagementConfirm;
 
-  /// No description provided for @biometricVerificationFailed.
+  /// No description provided for @selectThemeColor.
   ///
   /// In en, this message translates to:
-  /// **'Verification failed'**
-  String get biometricVerificationFailed;
+  /// **'Select Theme Color'**
+  String get selectThemeColor;
 
-  /// No description provided for @biometricNotSetUp.
+  /// No description provided for @selectThemeMode.
   ///
   /// In en, this message translates to:
-  /// **'Please set up biometrics on your device first'**
-  String get biometricNotSetUp;
-
-  /// No description provided for @biometricTooManyAttempts.
-  ///
-  /// In en, this message translates to:
-  /// **'Too many attempts, please try later'**
-  String get biometricTooManyAttempts;
-
-  /// No description provided for @biometricCannotEnable.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot enable biometric'**
-  String get biometricCannotEnable;
+  /// **'Select Theme Mode'**
+  String get selectThemeMode;
 
   /// No description provided for @resetAppDataConfirmContent.
   ///
@@ -784,18 +760,6 @@ abstract class AppLocalizations {
   /// **'Expense {expenseCount}, Income {incomeCount}'**
   String expenseIncomeCount(Object expenseCount, Object incomeCount);
 
-  /// No description provided for @enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get enabled;
-
-  /// No description provided for @disabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get disabled;
-
   /// No description provided for @authenticateToEnable.
   ///
   /// In en, this message translates to:
@@ -958,6 +922,18 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get dark;
 
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
   /// No description provided for @biometricNotSupportedMessage.
   ///
   /// In en, this message translates to:
@@ -969,12 +945,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Authenticate to enable biometric unlock'**
   String get authenticateToEnableBiometric;
-
-  /// No description provided for @tooManyBiometricAttempts.
-  ///
-  /// In en, this message translates to:
-  /// **'Too many attempts, please try later'**
-  String get tooManyBiometricAttempts;
 
   /// No description provided for @onboardingWelcomeTitle.
   ///
@@ -1035,18 +1005,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create your ledgers'**
   String get onboardingLedgerSubtitle;
-
-  /// No description provided for @onboardingBiometricTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Biometrics'**
-  String get onboardingBiometricTitle;
-
-  /// No description provided for @onboardingBiometricSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable biometric unlock'**
-  String get onboardingBiometricSubtitle;
 
   /// No description provided for @onboardingCompleteTitle.
   ///
@@ -1131,6 +1089,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Created {count} ledgers'**
   String onboardingLedgerCreated(Object count);
+
+  /// No description provided for @onboardingBiometricTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics'**
+  String get onboardingBiometricTitle;
+
+  /// No description provided for @onboardingBiometricSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable biometric unlock'**
+  String get onboardingBiometricSubtitle;
 }
 
 class _AppLocalizationsDelegate

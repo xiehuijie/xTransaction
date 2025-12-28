@@ -27,7 +27,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appFailedToStart => 'アプリの起動に失敗しました';
 
   @override
-  String get verificationFailed => '認証に失敗しました';
+  String get verificationFailed => '認証に失敗しました。もう一度お試しください';
 
   @override
   String get biometricNotSupported =>
@@ -224,12 +224,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get resetAppData => 'アプリデータのリセット';
 
   @override
-  String get selectThemeColor => 'テーマカラーを選択';
-
-  @override
-  String get selectThemeMode => 'テーマモードを選択';
-
-  @override
   String get resetAppDataConfirm => 'アプリデータのリセット';
 
   @override
@@ -252,16 +246,10 @@ class AppLocalizationsJa extends AppLocalizations {
       '無効にすると資産ページが非表示になりますが、記録されたアカウントと資産データは削除されません。\n\nいつでもこの機能を再び有効にすることができます。';
 
   @override
-  String get biometricVerificationFailed => '認証に失敗しました';
+  String get selectThemeColor => 'テーマカラーを選択';
 
   @override
-  String get biometricNotSetUp => 'デバイスにバイオメトリクスを設定してください';
-
-  @override
-  String get biometricTooManyAttempts => '試行回数が多すぎます。後でもう一度お試しください';
-
-  @override
-  String get biometricCannotEnable => 'バイオメトリクスを有効にできません';
+  String get selectThemeMode => 'テーマモードを選択';
 
   @override
   String get resetAppDataConfirmContent =>
@@ -361,12 +349,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get enabled => '有効';
-
-  @override
-  String get disabled => '無効';
-
-  @override
   String get authenticateToEnable => 'バイオメトリクスロックを有効にするには認証してください';
 
   @override
@@ -458,14 +440,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dark => 'ダーク';
 
   @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
   String get biometricNotSupportedMessage =>
       'デバイスはバイオメトリクスをサポートしていないか、バイオメトリクスが設定されていません';
 
   @override
   String get authenticateToEnableBiometric => 'バイオメトリクスロックを有効にするには認証してください';
-
-  @override
-  String get tooManyBiometricAttempts => '試行回数が多すぎます、後で再試行してください';
 
   @override
   String get onboardingWelcomeTitle => 'ようこそ';
@@ -496,12 +481,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingLedgerSubtitle => '台帳を作成してください';
-
-  @override
-  String get onboardingBiometricTitle => '生体認証';
-
-  @override
-  String get onboardingBiometricSubtitle => '生体認証を有効にしてデータを保護します';
 
   @override
   String get onboardingCompleteTitle => '完了';
@@ -552,4 +531,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String onboardingLedgerCreated(Object count) {
     return '$count 個の台帳が作成されました';
   }
+
+  @override
+  String get onboardingBiometricTitle => '生体認証';
+
+  @override
+  String get onboardingBiometricSubtitle => '生体認証を有効にしてデータを保護します';
 }

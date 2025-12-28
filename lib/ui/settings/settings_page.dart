@@ -164,17 +164,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           String message;
           switch (result) {
             case BiometricResult.failed:
-              message = localizations?.biometricVerificationFailed ?? '验证失败';
+              message = localizations?.verificationFailed ?? '验证失败';
               break;
             case BiometricResult.notEnrolled:
-              message = localizations?.biometricNotSetUp ?? '请先在设备上设置生物识别';
+              message = localizations?.setupBiometricFirst ?? '请先在设备上设置生物识别';
               break;
             case BiometricResult.lockedOut:
-              message = localizations?.biometricTooManyAttempts ?? '验证次数过多，请稍后重试';
+              message = localizations?.tooManyAttempts ?? '验证次数过多，请稍后重试';
               break;
             default:
-              message = localizations?.biometricCannotEnable ?? '无法启用生物识别';
-          }
+              message = localizations?.cannotEnableBiometric ?? '无法启用生物识别';
+            }
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(message)));

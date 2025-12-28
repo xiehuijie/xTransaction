@@ -1,4 +1,5 @@
 {
+  "@@locale": "ja",
   "appName": "Xトランザクション",
   "appDescription": "個人取引管理アプリ。",
   "appLocked": "アプリがロックされています",
@@ -51,7 +52,6 @@
   "selectLanguage": "言語を選択",
   "selectLanguageSubtitle": "好みの言語を選択してください",
   "chineseSimplified": "简体中文",
-  "japanese": "日本語",
   "assetManagement": "資産管理",
   "assetManagementDesc": "口座残高と資産分布を確認",
   "budgetManagement": "予算管理",
@@ -83,8 +83,6 @@
   "biometricNotSetUp": "デバイスにバイオメトリクスを設定してください",
   "biometricTooManyAttempts": "試行回数が多すぎます。後でもう一度お試しください",
   "biometricCannotEnable": "バイオメトリクスを有効にできません",
-  "selectThemeColor": "テーマカラーを選択",
-  "selectThemeMode": "テーマモードを選択",
   "resetAppDataConfirmContent": "この操作により、アカウント、取引記録などのすべてのデータが消去されます。この操作は元に戻すことができません。続行してもよろしいですか？",
   "welcomeTitle": "ようこそ",
   "welcomeSubtitle": "取引アプリの設定を始めましょう",
@@ -141,8 +139,6 @@
   "selectedCount": "{count} 項目が選択されました",
   "addedCount": "{count} 項目が追加されました",
   "expenseIncomeCount": "支出 {expenseCount}, 収入 {incomeCount}",
-  "enabled": "有効",
-  "disabled": "無効",
 
   "authenticateToEnable": "バイオメトリクスロックを有効にするには認証してください",
   "authenticationFailed": "認証に失敗しました",
@@ -172,17 +168,7 @@
   "system": "システム",
   "light": "ライト",
   "dark": "ダーク",
-  "enabled": "有効",
-  "disabled": "無効",
   "biometricNotSupportedMessage": "デバイスはバイオメトリクスをサポートしていないか、バイオメトリクスが設定されていません",
   "authenticateToEnableBiometric": "バイオメトリクスロックを有効にするには認証してください",
-  "verificationFailed": "認証に失敗しました",
-  "setupBiometricFirst": "まずデバイスにバイオメトリクスを設定してください",
-  "tooManyBiometricAttempts": "試行回数が多すぎます、後で再試行してください",
-  "cannotEnableBiometric": "バイオメトリクスを有効にできません",
-  "configurationSummary": "設定概要",
-  "previousStep": "前へ",
-  "nextStep": "次へ",
-  "saving": "保存中...",
-  "startUsing": "使用開始"
+  "tooManyBiometricAttempts": "試行回数が多すぎます、後で再試行してください"
 }
