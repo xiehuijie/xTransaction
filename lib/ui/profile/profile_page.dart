@@ -6,6 +6,8 @@ import '../settings/settings_page.dart';
 import '../settings/ledger_manage_page.dart';
 import '../settings/currency_manage_page.dart';
 import '../settings/stakeholder_manage_page.dart';
+import '../settings/category_manage_page.dart';
+import '../settings/project_manage_page.dart';
 import '../account/account_manage_page.dart';
 import '../dev/developer_tools_page.dart';
 
@@ -99,7 +101,11 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.category_outlined,
             title: '分类管理',
             onTap: () {
-              // TODO: 分类管理
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const CategoryManagePage(),
+                ),
+              );
             },
           ),
           _buildMenuItem(
@@ -134,7 +140,11 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.folder_outlined,
             title: '项目管理',
             onTap: () {
-              // TODO: 项目管理
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const ProjectManagePage(),
+                ),
+              );
             },
           ),
           _buildMenuItem(

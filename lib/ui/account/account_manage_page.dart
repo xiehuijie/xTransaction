@@ -73,8 +73,8 @@ class _AccountManagePageState extends ConsumerState<AccountManagePage>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          isScrollable: false,
-          tabAlignment: TabAlignment.fill,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           tabs: _accountTypes.map((type) {
             final info = getAccountTypeInfo(type);
             return Tab(
