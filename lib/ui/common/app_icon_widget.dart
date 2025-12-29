@@ -1,6 +1,7 @@
 /// 通用图标显示组件
 ///
 /// 根据存储格式字符串显示对应的图标
+library;
 
 import 'package:flutter/material.dart';
 import 'package:country_flags/country_flags.dart';

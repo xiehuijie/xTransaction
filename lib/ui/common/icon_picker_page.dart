@@ -15,6 +15,7 @@
 ///   print(result.toStorageString());
 /// }
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';

@@ -2,6 +2,7 @@
 ///
 /// 基于 ISO 4217 标准的世界主流货币数据
 /// 数据源：sealed_currencies 库 + 手动补充
+library;
 
 import 'package:flutter/material.dart';
 

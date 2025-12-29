@@ -167,9 +167,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get chineseSimplified => '简体中文';
 
   @override
-  String get japanese => '日本語';
-
-  @override
   String get assetManagement => '資産管理';
 
   @override
@@ -411,6 +408,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get chinese => '简体中文';
+
+  @override
+  String get japanese => '日本語';
 
   @override
   String get blue => '青';

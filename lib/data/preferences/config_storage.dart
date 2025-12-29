@@ -2,6 +2,7 @@
 ///
 /// 提供类型安全的键值对存储，分门别类管理各种配置项
 /// 每个配置项都有详细说明，便于维护
+library;
 
 import 'package:shared_preferences/shared_preferences.dart';
 

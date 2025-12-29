@@ -412,12 +412,6 @@ abstract class AppLocalizations {
   /// **'简体中文'**
   String get chineseSimplified;
 
-  /// No description provided for @japanese.
-  ///
-  /// In en, this message translates to:
-  /// **'日本語'**
-  String get japanese;
-
   /// No description provided for @assetManagement.
   ///
   /// In en, this message translates to:
@@ -867,6 +861,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'简体中文'**
   String get chinese;
+
+  /// No description provided for @japanese.
+  ///
+  /// In en, this message translates to:
+  /// **'日本語'**
+  String get japanese;
 
   /// No description provided for @blue.
   ///

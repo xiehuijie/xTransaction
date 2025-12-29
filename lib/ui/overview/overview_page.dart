@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/data.dart';
+import '../../providers/providers.dart';
+import '../../utils/haptic_service.dart';
+import '../settings/ledger_manage_page.dart';
+
+/// 当前账本 Provider
+final currentLedgerProvider = FutureProvider<LedgerEntity?>((ref) async {
+  final ledgerId = await ref.watch(currentLedgerIdProvider.future);
+  if (ledgerId == null) return null;
+  final ledgerDao = ref.read(ledgerDaoProvider);
+  return ledgerDao.getLedgerById(ledgerId);
+});
+
 /// 概览页面
 class OverviewPage extends ConsumerWidget {
   const OverviewPage({super.key});
@@ -8,9 +21,19 @@ class OverviewPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final currentLedgerAsync = ref.watch(currentLedgerProvider);
+    final ledgersAsync = ref.watch(allLedgersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('概览'), centerTitle: true),
+      appBar: AppBar(
+        title: _buildLedgerSelector(
+          context,
+          ref,
+          currentLedgerAsync,
+          ledgersAsync,
+        ),
+        centerTitle: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -133,6 +156,176 @@ class OverviewPage extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLedgerSelector(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<LedgerEntity?> currentLedgerAsync,
+    AsyncValue<List<LedgerEntity>> ledgersAsync,
+  ) {
+    final theme = Theme.of(context);
+    final currentLedger = currentLedgerAsync.value;
+    final ledgers = ledgersAsync.value ?? [];
+
+    return InkWell(
+      onTap: ledgers.isEmpty
+          ? null
+          : () => _showLedgerPicker(context, ref, ledgers, currentLedger),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              currentLedger?.name ?? '选择账本',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (ledgers.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.arrow_drop_down,
+                color: theme.colorScheme.onSurface,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showLedgerPicker(
+    BuildContext context,
+    WidgetRef ref,
+    List<LedgerEntity> ledgers,
+    LedgerEntity? currentLedger,
+  ) {
+    HapticService.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => _LedgerPickerSheet(
+        ledgers: ledgers,
+        currentLedgerId: currentLedger?.ledgerId,
+        onLedgerSelected: (ledger) async {
+          Navigator.pop(context);
+          final prefs = await ref.read(appPreferencesProvider.future);
+          await prefs.setCurrentLedgerId(ledger.ledgerId);
+          ref.invalidate(currentLedgerIdProvider);
+          ref.invalidate(currentLedgerProvider);
+        },
+        onManageLedgers: () {
+          Navigator.pop(context);
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const LedgerManagePage()),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 账本选择器底部弹窗
+class _LedgerPickerSheet extends StatelessWidget {
+  final List<LedgerEntity> ledgers;
+  final int? currentLedgerId;
+  final void Function(LedgerEntity) onLedgerSelected;
+  final VoidCallback onManageLedgers;
+
+  const _LedgerPickerSheet({
+    required this.ledgers,
+    required this.currentLedgerId,
+    required this.onLedgerSelected,
+    required this.onManageLedgers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.4,
+      maxChildSize: 0.8,
+      minChildSize: 0.3,
+      expand: false,
+      builder: (context, scrollController) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '切换账本',
+                  style: theme.textTheme.titleMedium,
+                ),
+                TextButton.icon(
+                  onPressed: onManageLedgers,
+                  icon: const Icon(Icons.settings, size: 18),
+                  label: const Text('管理'),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: ledgers.length,
+              itemBuilder: (context, index) {
+                final ledger = ledgers[index];
+                final isSelected = ledger.ledgerId == currentLedgerId;
+
+                return ListTile(
+                  leading: ledger.photo != null && ledger.photo!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: Image.network(
+                              ledger.photo!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => CircleAvatar(
+                                backgroundColor:
+                                    theme.colorScheme.primaryContainer,
+                                child: Icon(
+                                  Icons.book,
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : CircleAvatar(
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          child: Icon(
+                            Icons.book,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                  title: Text(ledger.name),
+                  subtitle: Text(
+                    '本币: ${ledger.currencyCode}',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  trailing: isSelected
+                      ? Icon(Icons.check, color: theme.colorScheme.primary)
+                      : null,
+                  selected: isSelected,
+                  onTap: () {
+                    HapticService.selectionClick();
+                    onLedgerSelected(ledger);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

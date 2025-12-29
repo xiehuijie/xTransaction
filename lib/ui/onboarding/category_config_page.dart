@@ -2,6 +2,7 @@
 ///
 /// 初始化流程的第三步，配置交易分类
 /// 支持4种分类类型：支出、收入、折扣/优惠、税收/手续费
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

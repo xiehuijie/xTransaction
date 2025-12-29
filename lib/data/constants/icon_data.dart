@@ -8,6 +8,7 @@
 /// 示例：
 /// - 货币人民币图标：flag:CN 或 emoji:1f1e8-1f1f3
 /// - 账户钱包图标：emoji:1f4b0 或 material:wallet
+library;
 
 import 'package:flutter/material.dart';
 

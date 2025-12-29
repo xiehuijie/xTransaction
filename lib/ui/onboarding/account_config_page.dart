@@ -1,6 +1,7 @@
 /// 多账户预配置页面
 ///
 /// 初始化流程的第二步，配置多账户功能
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -632,7 +633,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
           // 货币选择
           if (availableCurrencies.isNotEmpty)
             DropdownButtonFormField<String>(
-              value: effectiveCurrencyCode,
+              initialValue: effectiveCurrencyCode,
               decoration: const InputDecoration(
                 labelText: '账户货币',
                 border: OutlineInputBorder(),
@@ -738,7 +739,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
         children: [
           Expanded(
             child: DropdownButtonFormField<int>(
-              value: _billingCycleDay,
+              initialValue: _billingCycleDay,
               decoration: const InputDecoration(
                 labelText: '账单日',
                 border: OutlineInputBorder(),
@@ -758,7 +759,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
           const SizedBox(width: 16),
           Expanded(
             child: DropdownButtonFormField<int>(
-              value: _paymentDueDay,
+              initialValue: _paymentDueDay,
               decoration: const InputDecoration(
                 labelText: '还款日',
                 border: OutlineInputBorder(),
@@ -801,7 +802,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
       if (_enableBonus) ...[
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _bonusDeductMode,
+          initialValue: _bonusDeductMode,
           decoration: const InputDecoration(
             labelText: '赠送金扣减方式',
             border: OutlineInputBorder(),
@@ -843,7 +844,7 @@ class _AccountEditorPageState extends ConsumerState<AccountEditorPage> {
       ),
       const SizedBox(height: 16),
       DropdownButtonFormField<InvestType>(
-        value: _investType,
+        initialValue: _investType,
         decoration: const InputDecoration(
           labelText: '投资类型',
           border: OutlineInputBorder(),

@@ -6,6 +6,7 @@ import '../data/preferences/app_preferences.dart';
 import '../utils/app_theme.dart';
 
 export 'locale_provider.dart';
+export 'account_provider.dart';
 
 /// 数据库 Provider
 final databaseProvider = Provider<AppDatabase>((ref) {

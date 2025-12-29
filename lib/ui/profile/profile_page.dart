@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/haptic_service.dart';
 import '../settings/settings_page.dart';
+import '../settings/ledger_manage_page.dart';
+import '../settings/currency_manage_page.dart';
+import '../settings/stakeholder_manage_page.dart';
+import '../account/account_manage_page.dart';
+import '../dev/developer_tools_page.dart';
 
 /// 个人中心页面
 class ProfilePage extends ConsumerWidget {
@@ -70,7 +75,23 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.book_outlined,
             title: '账本管理',
             onTap: () {
-              // TODO: 账本管理
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const LedgerManagePage(),
+                ),
+              );
+            },
+          ),
+          _buildMenuItem(
+            context,
+            icon: Icons.currency_exchange_outlined,
+            title: '货币管理',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const CurrencyManagePage(),
+                ),
+              );
             },
           ),
           _buildMenuItem(
@@ -86,7 +107,11 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.account_balance_outlined,
             title: '账户管理',
             onTap: () {
-              // TODO: 账户管理
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const AccountManagePage(),
+                ),
+              );
             },
           ),
           _buildMenuItem(
@@ -94,7 +119,11 @@ class ProfilePage extends ConsumerWidget {
             icon: Icons.people_outlined,
             title: '相关方管理',
             onTap: () {
-              // TODO: 相关方管理
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const StakeholderManagePage(),
+                ),
+              );
             },
           ),
 
@@ -121,44 +150,23 @@ class ProfilePage extends ConsumerWidget {
 
           _buildMenuItem(
             context,
-            icon: Icons.download_outlined,
-            title: '数据导出',
-            onTap: () {
-              // TODO: 数据导出
-            },
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.upload_outlined,
-            title: '数据导入',
-            onTap: () {
-              // TODO: 数据导入
-            },
-          ),
-
-          const Divider(),
-
-          _buildMenuItem(
-            context,
             icon: Icons.info_outlined,
             title: '关于',
             onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'X Transaction',
-                applicationVersion: '0.1.0',
-                applicationIcon: const Icon(
-                  Icons.account_balance_wallet,
-                  size: 48,
-                ),
-                children: [const Text('一款简洁高效的个人记账应用')],
-              );
+              _showAboutDialog(context);
             },
           ),
 
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const _AboutDialog(),
     );
   }
 
@@ -179,6 +187,112 @@ class ProfilePage extends ConsumerWidget {
         HapticService.lightImpact();
         onTap();
       },
+    );
+  }
+}
+
+/// 关于对话框（包含隐藏的开发者工具入口）
+class _AboutDialog extends StatefulWidget {
+  const _AboutDialog();
+
+  @override
+  State<_AboutDialog> createState() => _AboutDialogState();
+}
+
+class _AboutDialogState extends State<_AboutDialog> {
+  int _tapCount = 0;
+  static const int _requiredTaps = 10;
+
+  void _onIconTap() {
+    setState(() {
+      _tapCount++;
+    });
+
+    if (_tapCount >= _requiredTaps) {
+      _tapCount = 0;
+      HapticService.heavyImpact();
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DeveloperToolsPage(),
+        ),
+      );
+    } else if (_tapCount >= 5) {
+      HapticService.lightImpact();
+      final remaining = _requiredTaps - _tapCount;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('再点击 $remaining 次开启开发者模式'),
+          duration: const Duration(milliseconds: 800),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: const Text('关于'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: _onIconTap,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.account_balance_wallet,
+                size: 48,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'X Transaction',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '版本 0.1.0',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '一款简洁高效的个人记账应用',
+            style: theme.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            showLicensePage(
+              context: context,
+              applicationName: 'X Transaction',
+              applicationVersion: '0.1.0',
+            );
+          },
+          child: const Text('许可证'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('关闭'),
+        ),
+      ],
     );
   }
 }

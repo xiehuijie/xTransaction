@@ -1,6 +1,7 @@
 /// 货币配置页面
 ///
 /// 初始化流程的货币配置步骤
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -530,7 +530,7 @@ class _LedgerEditorPageState extends ConsumerState<LedgerEditorPage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: DropdownButtonFormField<String>(
-              value: _currencyCode,
+              initialValue: _currencyCode,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(
