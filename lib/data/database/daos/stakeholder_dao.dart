@@ -18,6 +18,10 @@ class StakeholderDao extends DatabaseAccessor<AppDatabase>
     stakeholder,
   )..where((t) => t.stakeholderId.equals(id))).getSingleOrNull();
 
+  /// 根据ID列表获取相关方
+  Future<List<StakeholderEntity>> getStakeholdersByIds(List<int> ids) =>
+      (select(stakeholder)..where((t) => t.stakeholderId.isIn(ids))).get();
+
   /// 根据类型获取相关方
   Future<List<StakeholderEntity>> getStakeholdersByType(StakeholderType type) =>
       (select(stakeholder)..where((t) => t.type.equalsValue(type))).get();

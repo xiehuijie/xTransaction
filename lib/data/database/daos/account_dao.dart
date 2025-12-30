@@ -34,6 +34,10 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   Future<List<AccountEntity>> getAccountsByType(AccountType type) =>
       (select(account)..where((t) => t.type.equalsValue(type))).get();
 
+  /// 根据ID列表获取账户
+  Future<List<AccountEntity>> getAccountsByIds(List<int> ids) =>
+      (select(account)..where((t) => t.accountId.isIn(ids))).get();
+
   /// 添加账户
   Future<int> insertAccount(AccountCompanion entry) =>
       into(account).insert(entry);

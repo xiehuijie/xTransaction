@@ -683,6 +683,53 @@ class AccountService {
     return accountDao.deleteAccount(accountId);
   }
 
+  /// 将账户关联到账本
+  /// 
+  /// 如果提供了 initialBalance，会创建一笔隐藏的初始余额交易
+  Future<void> linkAccountToLedger({
+    required int accountId,
+    required int ledgerId,
+    int initialBalance = 0,
+  }) async {
+    // 先建立关联
+    await accountDao.linkAccountToLedger(accountId, ledgerId);
+
+    // 如果有初始余额，创建隐藏的平账交易
+    // TODO: 在交易服务完善后实现初始余额交易的创建
+    // 当前先存储在元数据中作为临时方案
+    if (initialBalance != 0) {
+      await accountDao.upsertAccountMeta(
+        AccountMetaCompanion.insert(
+          accountId: accountId,
+          scope: AccountMetaScope.system,
+          key: 'ledger_${ledgerId}_initial_balance',
+          value: initialBalance.toString(),
+        ),
+      );
+    }
+  }
+
+  /// 解除账户与账本的关联
+  /// 
+  /// 如果 deleteRelatedTransactions 为 true，会同时删除相关交易
+  Future<int> unlinkAccountFromLedger({
+    required int accountId,
+    required int ledgerId,
+    bool deleteRelatedTransactions = false,
+  }) async {
+    // TODO: 如果需要删除相关交易，在交易服务完善后实现
+    // 当前先直接解除关联
+
+    // 删除初始余额元数据
+    await accountDao.deleteAccountMeta(
+      accountId,
+      AccountMetaScope.system,
+      'ledger_${ledgerId}_initial_balance',
+    );
+
+    return accountDao.unlinkAccountFromLedger(accountId, ledgerId);
+  }
+
   /// 添加借贷计划
   Future<int> addLoanPlan({
     required int accountId,

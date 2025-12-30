@@ -19,6 +19,10 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     category,
   )..where((t) => t.categoryId.equals(id))).getSingleOrNull();
 
+  /// 根据ID列表获取分类
+  Future<List<CategoryEntity>> getCategoriesByIds(List<int> ids) =>
+      (select(category)..where((t) => t.categoryId.isIn(ids))).get();
+
   /// 根据类型获取分类
   Future<List<CategoryEntity>> getCategoriesByType(CategoryType type) =>
       (select(category)

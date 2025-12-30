@@ -5,7 +5,7 @@ import '../tables.dart';
 part 'ledger_dao.g.dart';
 
 @DriftAccessor(
-  tables: [Ledger, Project, RelationAccountLedger, RelationCategoryLedger],
+  tables: [Ledger, Project, RelationAccountLedger, RelationCategoryLedger, RelationStakeholderLedger],
 )
 class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
   LedgerDao(super.db);
@@ -118,6 +118,35 @@ class LedgerDao extends DatabaseAccessor<AppDatabase> with _$LedgerDaoMixin {
       (delete(relationCategoryLedger)..where(
             (t) =>
                 t.categoryId.equals(categoryId) & t.ledgerId.equals(ledgerId),
+          ))
+          .go();
+
+  // ==================== Stakeholder-Ledger Relation ====================
+
+  /// 获取账本关联的所有相关方ID
+  Future<List<int>> getStakeholderIdsByLedgerId(int ledgerId) async {
+    final relations = await (select(
+      relationStakeholderLedger,
+    )..where((t) => t.ledgerId.equals(ledgerId))).get();
+    return relations.map((r) => r.stakeholderId).toList();
+  }
+
+  /// 将相关方关联到账本
+  Future<void> linkStakeholderToLedger(int stakeholderId, int ledgerId) =>
+      into(relationStakeholderLedger).insert(
+        RelationStakeholderLedgerCompanion.insert(
+          stakeholderId: stakeholderId,
+          ledgerId: ledgerId,
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
+
+  /// 解除相关方与账本的关联
+  Future<int> unlinkStakeholderFromLedger(int stakeholderId, int ledgerId) =>
+      (delete(relationStakeholderLedger)..where(
+            (t) =>
+                t.stakeholderId.equals(stakeholderId) &
+                t.ledgerId.equals(ledgerId),
           ))
           .go();
 }

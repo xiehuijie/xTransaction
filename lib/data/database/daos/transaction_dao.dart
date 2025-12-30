@@ -314,4 +314,102 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
                 t.targetTransactionId.equals(targetId),
           ))
           .go();
+
+  // ==================== 依赖检查方法 ====================
+
+  /// 获取账本中使用指定账户的交易数量
+  Future<int> getTransactionCountByAccountInLedger(
+    int accountId,
+    int ledgerId,
+  ) async {
+    // 先获取账本中的所有交易ID
+    final ledgerTransactions = await (select(transactions)
+      ..where((t) => t.ledgerId.equals(ledgerId))
+    ).get();
+    final transactionIds = ledgerTransactions.map((t) => t.transactionId).toList();
+    if (transactionIds.isEmpty) return 0;
+
+    // 检查这些交易中有多少使用了指定账户
+    final count = countAll();
+    final query = selectOnly(transactionAmountDetail)
+      ..addColumns([count])
+      ..where(
+        transactionAmountDetail.accountId.equals(accountId) &
+        transactionAmountDetail.transactionId.isIn(transactionIds),
+      );
+    
+    final result = await query.getSingle();
+    return result.read(count) ?? 0;
+  }
+
+  /// 获取账本中使用指定分类的交易数量
+  Future<int> getTransactionCountByCategoryInLedger(
+    int categoryId,
+    int ledgerId,
+  ) async {
+    // 先获取账本中的所有交易ID
+    final ledgerTransactions = await (select(transactions)
+      ..where((t) => t.ledgerId.equals(ledgerId))
+    ).get();
+    final transactionIds = ledgerTransactions.map((t) => t.transactionId).toList();
+    if (transactionIds.isEmpty) return 0;
+
+    // 检查这些交易中有多少使用了指定分类
+    final count = countAll();
+    final query = selectOnly(transactionCategoryDetail)
+      ..addColumns([count])
+      ..where(
+        transactionCategoryDetail.categoryId.equals(categoryId) &
+        transactionCategoryDetail.transactionId.isIn(transactionIds),
+      );
+    
+    final result = await query.getSingle();
+    return result.read(count) ?? 0;
+  }
+
+  /// 获取账本中使用指定相关方的交易数量
+  Future<int> getTransactionCountByStakeholderInLedger(
+    int stakeholderId,
+    int ledgerId,
+  ) async {
+    final count = countAll();
+    final query = selectOnly(transactions)
+      ..addColumns([count])
+      ..where(
+        transactions.stakeholderId.equals(stakeholderId) &
+        transactions.ledgerId.equals(ledgerId),
+      );
+    
+    final result = await query.getSingle();
+    return result.read(count) ?? 0;
+  }
+
+  /// 清除账本中交易的分类信息
+  Future<int> clearCategoryFromTransactionsInLedger(
+    int categoryId,
+    int ledgerId,
+  ) async {
+    // 先获取账本中的所有交易ID
+    final ledgerTransactions = await (select(transactions)
+      ..where((t) => t.ledgerId.equals(ledgerId))
+    ).get();
+    final transactionIds = ledgerTransactions.map((t) => t.transactionId).toList();
+    if (transactionIds.isEmpty) return 0;
+
+    // 删除这些交易中使用此分类的明细
+    return (delete(transactionCategoryDetail)..where(
+      (t) => t.categoryId.equals(categoryId) & t.transactionId.isIn(transactionIds),
+    )).go();
+  }
+
+  /// 清除账本中交易的相关方信息
+  Future<int> clearStakeholderFromTransactionsInLedger(
+    int stakeholderId,
+    int ledgerId,
+  ) async {
+    // 将使用此相关方的交易的相关方字段设为 null
+    return (update(transactions)..where(
+      (t) => t.stakeholderId.equals(stakeholderId) & t.ledgerId.equals(ledgerId),
+    )).write(const TransactionsCompanion(stakeholderId: Value(null)));
+  }
 }

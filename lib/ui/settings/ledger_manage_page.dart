@@ -13,6 +13,9 @@ import '../../providers/providers.dart';
 import '../../utils/haptic_service.dart';
 import '../common/app_icon_widget.dart';
 import '../common/icon_picker_page.dart';
+import 'ledger_accounts_page.dart';
+import 'ledger_categories_page.dart';
+import 'ledger_stakeholders_page.dart';
 
 /// 账本列表 Provider
 final allLedgersProvider = StreamProvider<List<LedgerEntity>>((ref) {
@@ -540,6 +543,69 @@ class _LedgerFormPageState extends ConsumerState<LedgerFormPage> {
               maxLines: 3,
             ),
             const SizedBox(height: 24),
+
+            // 关联管理入口（仅编辑模式）
+            if (isEditing) ...[
+              Text('关联管理', style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.account_balance_wallet_outlined),
+                      title: const Text('关联账户'),
+                      subtitle: const Text('管理此账本包含的账户'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        HapticService.lightImpact();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => LedgerAccountsPage(
+                              ledger: widget.editLedger!,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.category_outlined),
+                      title: const Text('关联分类'),
+                      subtitle: const Text('管理此账本包含的分类'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        HapticService.lightImpact();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => LedgerCategoriesPage(
+                              ledger: widget.editLedger!,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.people_outline),
+                      title: const Text('关联相关方'),
+                      subtitle: const Text('管理此账本包含的相关方'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        HapticService.lightImpact();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => LedgerStakeholdersPage(
+                              ledger: widget.editLedger!,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // 删除按钮（仅编辑模式）
             if (isEditing)

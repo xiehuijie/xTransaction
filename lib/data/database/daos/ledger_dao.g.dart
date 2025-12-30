@@ -13,4 +13,7 @@ mixin _$LedgerDaoMixin on DatabaseAccessor<AppDatabase> {
   $CategoryTable get category => attachedDatabase.category;
   $RelationCategoryLedgerTable get relationCategoryLedger =>
       attachedDatabase.relationCategoryLedger;
+  $StakeholderTable get stakeholder => attachedDatabase.stakeholder;
+  $RelationStakeholderLedgerTable get relationStakeholderLedger =>
+      attachedDatabase.relationStakeholderLedger;
 }

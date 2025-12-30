@@ -16,9 +16,7 @@ import '../common/icon_picker_page.dart';
 import 'forms/balance_account_form.dart';
 import 'forms/credit_account_form.dart';
 import 'forms/prepaid_account_form.dart';
-import 'forms/loan_account_form.dart';
 import 'forms/invest_account_form.dart';
-import 'widgets/account_meta_editor.dart';
 
 /// 账户表单页面
 class AccountFormPage extends ConsumerStatefulWidget {
@@ -46,19 +44,12 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   late TextEditingController _noteController;
-  late TextEditingController _initialBalanceController;
 
   // 选中的图标
   AppIcon? _selectedIcon;
 
   // 选中的货币
   String _selectedCurrencyCode = 'CNY';
-
-  // 系统级元数据
-  Map<String, String> _systemMeta = {};
-
-  // 自定义元数据
-  Map<String, String> _customMeta = {};
 
   // 子表单的key
   final GlobalKey<BalanceAccountFormState> _balanceFormKey =
@@ -67,8 +58,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
       GlobalKey<CreditAccountFormState>();
   final GlobalKey<PrepaidAccountFormState> _prepaidFormKey =
       GlobalKey<PrepaidAccountFormState>();
-  final GlobalKey<LoanAccountFormState> _loanFormKey =
-      GlobalKey<LoanAccountFormState>();
   final GlobalKey<InvestAccountFormState> _investFormKey =
       GlobalKey<InvestAccountFormState>();
 
@@ -83,44 +72,13 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
     _descriptionController =
         TextEditingController(text: widget.editAccount?.description);
     _noteController = TextEditingController(text: widget.editAccount?.note);
-    _initialBalanceController = TextEditingController();
 
     if (widget.editAccount != null) {
       _selectedCurrencyCode = widget.editAccount!.currencyCode;
       if (widget.editAccount!.icon.isNotEmpty) {
         _selectedIcon = AppIcon.fromString(widget.editAccount!.icon);
       }
-      _loadAccountMeta();
     }
-  }
-
-  Future<void> _loadAccountMeta() async {
-    if (widget.editAccount == null) return;
-
-    final accountDao = ref.read(accountDaoProvider);
-    final metaList = await accountDao.getAccountMeta(widget.editAccount!.accountId);
-
-    final systemMeta = <String, String>{};
-    final customMeta = <String, String>{};
-
-    for (final meta in metaList) {
-      if (meta.scope == AccountMetaScope.system) {
-        systemMeta[meta.key] = meta.value;
-      } else {
-        customMeta[meta.key] = meta.value;
-      }
-    }
-
-    // 设置初始余额
-    if (systemMeta.containsKey(AccountMetaKeys.initialBalance)) {
-      _initialBalanceController.text = systemMeta[AccountMetaKeys.initialBalance]!;
-      systemMeta.remove(AccountMetaKeys.initialBalance);
-    }
-
-    setState(() {
-      _systemMeta = systemMeta;
-      _customMeta = customMeta;
-    });
   }
 
   @override
@@ -128,7 +86,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
     _nameController.dispose();
     _descriptionController.dispose();
     _noteController.dispose();
-    _initialBalanceController.dispose();
     super.dispose();
   }
 
@@ -181,25 +138,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
     }
   }
 
-  Future<void> _editMetadata() async {
-    HapticService.lightImpact();
-    final result = await Navigator.of(context).push<Map<String, Map<String, String>>>(
-      MaterialPageRoute(
-        builder: (_) => AccountMetaEditorPage(
-          systemMeta: Map.from(_systemMeta),
-          customMeta: Map.from(_customMeta),
-        ),
-      ),
-    );
-
-    if (result != null) {
-      setState(() {
-        _systemMeta = result['system'] ?? {};
-        _customMeta = result['custom'] ?? {};
-      });
-    }
-  }
-
   Future<void> _saveAccount() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -213,9 +151,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
       final description = _descriptionController.text.trim();
       final note = _noteController.text.trim();
       final icon = _selectedIcon?.toStorageString() ?? '';
-      final initialBalance = _initialBalanceController.text.isNotEmpty
-          ? int.tryParse(_initialBalanceController.text)
-          : null;
 
       if (isEditing) {
         // 更新账户
@@ -230,9 +165,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
               description: description,
               icon: icon,
               note: note,
-              initialBalance: initialBalance,
-              systemMeta: _systemMeta.isNotEmpty ? _systemMeta : null,
-              customMeta: _customMeta.isNotEmpty ? _customMeta : null,
             );
             break;
 
@@ -250,9 +182,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
               description: description,
               icon: icon,
               note: note,
-              initialBalance: initialBalance,
-              systemMeta: _systemMeta.isNotEmpty ? _systemMeta : null,
-              customMeta: _customMeta.isNotEmpty ? _customMeta : null,
             );
             break;
 
@@ -267,36 +196,11 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
               description: description,
               icon: icon,
               note: note,
-              initialBalance: initialBalance,
               enableBonus: prepaidData.enableBonus,
               bonusDeductMode: prepaidData.bonusDeductMode,
               bonusName: prepaidData.bonusName,
               bonusCurrencyCode: prepaidData.bonusCurrencyCode,
               bonusInitialBalance: prepaidData.bonusInitialBalance,
-              systemMeta: _systemMeta.isNotEmpty ? _systemMeta : null,
-              customMeta: _customMeta.isNotEmpty ? _customMeta : null,
-            );
-            break;
-
-          case AccountType.loan:
-            final loanData = _loanFormKey.currentState?.getFormData();
-            if (loanData == null) {
-              throw Exception('借贷账户配置无效');
-            }
-            await accountService.createFlexLoanAccount(
-              name: name,
-              currencyCode: _selectedCurrencyCode,
-              stakeholderId: loanData.stakeholderId,
-              loanType: loanData.loanType,
-              rate: loanData.rate,
-              startDate: loanData.startDate,
-              endDate: loanData.endDate,
-              description: description,
-              icon: icon,
-              note: note,
-              loanNote: loanData.loanNote,
-              systemMeta: _systemMeta.isNotEmpty ? _systemMeta : null,
-              customMeta: _customMeta.isNotEmpty ? _customMeta : null,
             );
             break;
 
@@ -313,15 +217,16 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
               description: description,
               icon: icon,
               note: note,
-              initialBalance: initialBalance,
-              systemMeta: _systemMeta.isNotEmpty ? _systemMeta : null,
-              customMeta: _customMeta.isNotEmpty ? _customMeta : null,
             );
             break;
 
           case AccountType.bonus:
             // 赠送金账户不允许直接创建
             throw Exception('赠送金账户不允许直接创建');
+
+          case AccountType.loan:
+            // 借贷账户不通过此表单创建
+            throw Exception('借贷账户不通过此表单创建');
         }
       }
 
@@ -374,19 +279,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
     );
     await accountService.updateAccount(updatedAccount);
 
-    // 更新初始余额元数据
-    final initialBalance = _initialBalanceController.text.isNotEmpty
-        ? int.tryParse(_initialBalanceController.text)
-        : null;
-    if (initialBalance != null) {
-      await accountService.updateAccountMeta(
-        accountId: widget.editAccount!.accountId,
-        scope: AccountMetaScope.system,
-        key: AccountMetaKeys.initialBalance,
-        value: initialBalance.toString(),
-      );
-    }
-
     // 根据账户类型更新特定数据
     switch (widget.accountType) {
       case AccountType.credit:
@@ -399,26 +291,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
             paymentDueDay: creditData.paymentDueDay,
           );
           await accountService.updateCreditAccount(creditAccount);
-        }
-        break;
-
-      case AccountType.loan:
-        final loanData = _loanFormKey.currentState?.getFormData();
-        if (loanData != null) {
-          final existingFlexLoan = await ref.read(accountDaoProvider).getFlexLoanAccount(
-                widget.editAccount!.accountId,
-              );
-          if (existingFlexLoan != null) {
-            final updatedFlexLoan = existingFlexLoan.copyWith(
-              stakeholderId: loanData.stakeholderId,
-              type: loanData.loanType,
-              rate: loanData.rate.toDouble(),
-              startDate: loanData.startDate,
-              endDate: loanData.endDate,
-              note: loanData.loanNote,
-            );
-            await accountService.updateFlexLoanAccount(updatedFlexLoan);
-          }
         }
         break;
 
@@ -444,26 +316,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
 
       default:
         break;
-    }
-
-    // 更新系统级元数据
-    for (final entry in _systemMeta.entries) {
-      await accountService.updateAccountMeta(
-        accountId: widget.editAccount!.accountId,
-        scope: AccountMetaScope.system,
-        key: entry.key,
-        value: entry.value,
-      );
-    }
-
-    // 更新自定义元数据
-    for (final entry in _customMeta.entries) {
-      await accountService.updateAccountMeta(
-        accountId: widget.editAccount!.accountId,
-        scope: AccountMetaScope.custom,
-        key: entry.key,
-        value: entry.value,
-      );
     }
   }
 
@@ -641,22 +493,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
               ),
             const SizedBox(height: 16),
 
-            // 初始余额
-            TextFormField(
-              controller: _initialBalanceController,
-              decoration: InputDecoration(
-                labelText: '初始余额',
-                hintText: '创建时的初始金额',
-                prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
-                suffixText: _selectedCurrencyCode,
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-                signed: true,
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // 账户描述
             TextFormField(
               controller: _descriptionController,
@@ -671,16 +507,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
 
             // 根据账户类型显示额外配置
             _buildTypeSpecificForm(),
-
-            // 元数据编辑入口
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _editMetadata,
-              icon: const Icon(Icons.tune),
-              label: Text(_systemMeta.isEmpty && _customMeta.isEmpty
-                  ? '添加扩展信息'
-                  : '编辑扩展信息 (${_systemMeta.length + _customMeta.length})'),
-            ),
             const SizedBox(height: 16),
 
             // 备注
@@ -719,7 +545,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
         return BalanceAccountForm(
           key: _balanceFormKey,
           editAccount: widget.editAccount,
-          systemMeta: _systemMeta,
         );
 
       case AccountType.credit:
@@ -735,12 +560,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
           selectedCurrencyCode: _selectedCurrencyCode,
         );
 
-      case AccountType.loan:
-        return LoanAccountForm(
-          key: _loanFormKey,
-          editAccountId: widget.editAccount?.accountId,
-        );
-
       case AccountType.invest:
         return InvestAccountForm(
           key: _investFormKey,
@@ -748,8 +567,9 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
           selectedCurrencyCode: _selectedCurrencyCode,
         );
 
+      case AccountType.loan:
       case AccountType.bonus:
-        // 赠送金账户不应该有独立表单
+        // 赠送金账户和借贷账户不应该有独立表单
         return const SizedBox.shrink();
     }
   }

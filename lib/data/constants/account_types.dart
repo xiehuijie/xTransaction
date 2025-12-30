@@ -87,12 +87,12 @@ AccountTypeInfo getAccountTypeInfo(AccountType type) {
   return accountTypeInfoMap[type] ?? accountTypeInfoMap[AccountType.balance]!;
 }
 
-/// 可由用户创建的账户类型列表（不包含bonus，因为它是自动创建的）
+/// 可由用户创建的账户类型列表（不包含bonus和loan）
+/// bonus是自动创建的，loan将通过特殊页面管理
 const List<AccountType> creatableAccountTypes = [
   AccountType.balance,
   AccountType.credit,
   AccountType.prepaid,
-  AccountType.loan,
   AccountType.invest,
 ];
 
