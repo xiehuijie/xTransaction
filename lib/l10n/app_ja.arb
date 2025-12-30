@@ -210,7 +210,7 @@
   "loadFailed": "読み込み失敗",
   "retry": "再試行",
   "noData": "データなし",
-  "new": "新規",
+  "addNew": "新規",
   "copied": "コピーしました",
   "copy": "コピー",
   "viewJson": "JSONを表示",

@@ -112,26 +112,6 @@ class AccountBonus extends Table {
   Set<Column> get primaryKey => {bonusAccountId, prepaidAccountId};
 }
 
-/// 借贷账户表
-@DataClassName('LoanAccountEntity')
-class AccountLoan extends Table {
-  IntColumn get accountId =>
-      integer().named('account_id').references(Account, #accountId)();
-  IntColumn get stakeholderId => integer()
-      .named('stakeholder_id')
-      .references(Stakeholder, #stakeholderId)();
-  TextColumn get type => textEnum<AccountLoanType>()();
-  IntColumn get amount => integer()();
-  IntColumn get rate => integer()();
-  IntColumn get startDate => integer().named('start_date')();
-  IntColumn get endDate => integer().named('end_date')();
-  BoolColumn get archived => boolean().withDefault(const Constant(false))();
-  TextColumn get note => text().withDefault(const Constant(''))();
-
-  @override
-  Set<Column> get primaryKey => {accountId};
-}
-
 /// 计划借贷账户表
 @DataClassName('PlanLoanAccountEntity')
 class AccountPlanLoan extends Table {

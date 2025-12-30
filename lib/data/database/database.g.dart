@@ -2482,12 +2482,12 @@ class StakeholderCompanion extends UpdateCompanion<StakeholderEntity> {
   }
 }
 
-class $AccountLoanTable extends AccountLoan
-    with TableInfo<$AccountLoanTable, LoanAccountEntity> {
+class $AccountPlanLoanTable extends AccountPlanLoan
+    with TableInfo<$AccountPlanLoanTable, PlanLoanAccountEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $AccountLoanTable(this.attachedDatabase, [this._alias]);
+  $AccountPlanLoanTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _accountIdMeta = const VerificationMeta(
     'accountId',
   );
@@ -2524,23 +2524,382 @@ class $AccountLoanTable extends AccountLoan
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: true,
-      ).withConverter<AccountLoanType>($AccountLoanTable.$convertertype);
-  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+      ).withConverter<AccountLoanType>($AccountPlanLoanTable.$convertertype);
+  static const VerificationMeta _archivedMeta = const VerificationMeta(
+    'archived',
+  );
   @override
-  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
-    'amount',
+  late final GeneratedColumn<bool> archived = GeneratedColumn<bool>(
+    'archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("archived" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    accountId,
+    stakeholderId,
+    type,
+    archived,
+    note,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_plan_loan';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlanLoanAccountEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    }
+    if (data.containsKey('stakeholder_id')) {
+      context.handle(
+        _stakeholderIdMeta,
+        stakeholderId.isAcceptableOrUnknown(
+          data['stakeholder_id']!,
+          _stakeholderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stakeholderIdMeta);
+    }
+    if (data.containsKey('archived')) {
+      context.handle(
+        _archivedMeta,
+        archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {accountId};
+  @override
+  PlanLoanAccountEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanLoanAccountEntity(
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}account_id'],
+      )!,
+      stakeholderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stakeholder_id'],
+      )!,
+      type: $AccountPlanLoanTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      archived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}archived'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountPlanLoanTable createAlias(String alias) {
+    return $AccountPlanLoanTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<AccountLoanType, String, String> $convertertype =
+      const EnumNameConverter<AccountLoanType>(AccountLoanType.values);
+}
+
+class PlanLoanAccountEntity extends DataClass
+    implements Insertable<PlanLoanAccountEntity> {
+  final int accountId;
+  final int stakeholderId;
+  final AccountLoanType type;
+  final bool archived;
+  final String note;
+  const PlanLoanAccountEntity({
+    required this.accountId,
+    required this.stakeholderId,
+    required this.type,
+    required this.archived,
+    required this.note,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['account_id'] = Variable<int>(accountId);
+    map['stakeholder_id'] = Variable<int>(stakeholderId);
+    {
+      map['type'] = Variable<String>(
+        $AccountPlanLoanTable.$convertertype.toSql(type),
+      );
+    }
+    map['archived'] = Variable<bool>(archived);
+    map['note'] = Variable<String>(note);
+    return map;
+  }
+
+  AccountPlanLoanCompanion toCompanion(bool nullToAbsent) {
+    return AccountPlanLoanCompanion(
+      accountId: Value(accountId),
+      stakeholderId: Value(stakeholderId),
+      type: Value(type),
+      archived: Value(archived),
+      note: Value(note),
+    );
+  }
+
+  factory PlanLoanAccountEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanLoanAccountEntity(
+      accountId: serializer.fromJson<int>(json['accountId']),
+      stakeholderId: serializer.fromJson<int>(json['stakeholderId']),
+      type: $AccountPlanLoanTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      archived: serializer.fromJson<bool>(json['archived']),
+      note: serializer.fromJson<String>(json['note']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'accountId': serializer.toJson<int>(accountId),
+      'stakeholderId': serializer.toJson<int>(stakeholderId),
+      'type': serializer.toJson<String>(
+        $AccountPlanLoanTable.$convertertype.toJson(type),
+      ),
+      'archived': serializer.toJson<bool>(archived),
+      'note': serializer.toJson<String>(note),
+    };
+  }
+
+  PlanLoanAccountEntity copyWith({
+    int? accountId,
+    int? stakeholderId,
+    AccountLoanType? type,
+    bool? archived,
+    String? note,
+  }) => PlanLoanAccountEntity(
+    accountId: accountId ?? this.accountId,
+    stakeholderId: stakeholderId ?? this.stakeholderId,
+    type: type ?? this.type,
+    archived: archived ?? this.archived,
+    note: note ?? this.note,
+  );
+  PlanLoanAccountEntity copyWithCompanion(AccountPlanLoanCompanion data) {
+    return PlanLoanAccountEntity(
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      stakeholderId: data.stakeholderId.present
+          ? data.stakeholderId.value
+          : this.stakeholderId,
+      type: data.type.present ? data.type.value : this.type,
+      archived: data.archived.present ? data.archived.value : this.archived,
+      note: data.note.present ? data.note.value : this.note,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanLoanAccountEntity(')
+          ..write('accountId: $accountId, ')
+          ..write('stakeholderId: $stakeholderId, ')
+          ..write('type: $type, ')
+          ..write('archived: $archived, ')
+          ..write('note: $note')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(accountId, stakeholderId, type, archived, note);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanLoanAccountEntity &&
+          other.accountId == this.accountId &&
+          other.stakeholderId == this.stakeholderId &&
+          other.type == this.type &&
+          other.archived == this.archived &&
+          other.note == this.note);
+}
+
+class AccountPlanLoanCompanion extends UpdateCompanion<PlanLoanAccountEntity> {
+  final Value<int> accountId;
+  final Value<int> stakeholderId;
+  final Value<AccountLoanType> type;
+  final Value<bool> archived;
+  final Value<String> note;
+  const AccountPlanLoanCompanion({
+    this.accountId = const Value.absent(),
+    this.stakeholderId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.archived = const Value.absent(),
+    this.note = const Value.absent(),
+  });
+  AccountPlanLoanCompanion.insert({
+    this.accountId = const Value.absent(),
+    required int stakeholderId,
+    required AccountLoanType type,
+    this.archived = const Value.absent(),
+    this.note = const Value.absent(),
+  }) : stakeholderId = Value(stakeholderId),
+       type = Value(type);
+  static Insertable<PlanLoanAccountEntity> custom({
+    Expression<int>? accountId,
+    Expression<int>? stakeholderId,
+    Expression<String>? type,
+    Expression<bool>? archived,
+    Expression<String>? note,
+  }) {
+    return RawValuesInsertable({
+      if (accountId != null) 'account_id': accountId,
+      if (stakeholderId != null) 'stakeholder_id': stakeholderId,
+      if (type != null) 'type': type,
+      if (archived != null) 'archived': archived,
+      if (note != null) 'note': note,
+    });
+  }
+
+  AccountPlanLoanCompanion copyWith({
+    Value<int>? accountId,
+    Value<int>? stakeholderId,
+    Value<AccountLoanType>? type,
+    Value<bool>? archived,
+    Value<String>? note,
+  }) {
+    return AccountPlanLoanCompanion(
+      accountId: accountId ?? this.accountId,
+      stakeholderId: stakeholderId ?? this.stakeholderId,
+      type: type ?? this.type,
+      archived: archived ?? this.archived,
+      note: note ?? this.note,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (accountId.present) {
+      map['account_id'] = Variable<int>(accountId.value);
+    }
+    if (stakeholderId.present) {
+      map['stakeholder_id'] = Variable<int>(stakeholderId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $AccountPlanLoanTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (archived.present) {
+      map['archived'] = Variable<bool>(archived.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountPlanLoanCompanion(')
+          ..write('accountId: $accountId, ')
+          ..write('stakeholderId: $stakeholderId, ')
+          ..write('type: $type, ')
+          ..write('archived: $archived, ')
+          ..write('note: $note')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AccountFlexLoanTable extends AccountFlexLoan
+    with TableInfo<$AccountFlexLoanTable, FlexLoanAccountEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountFlexLoanTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<int> accountId = GeneratedColumn<int>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account (account_id)',
+    ),
+  );
+  static const VerificationMeta _stakeholderIdMeta = const VerificationMeta(
+    'stakeholderId',
+  );
+  @override
+  late final GeneratedColumn<int> stakeholderId = GeneratedColumn<int>(
+    'stakeholder_id',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES stakeholder (stakeholder_id)',
+    ),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<AccountLoanType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<AccountLoanType>($AccountFlexLoanTable.$convertertype);
   static const VerificationMeta _rateMeta = const VerificationMeta('rate');
   @override
-  late final GeneratedColumn<int> rate = GeneratedColumn<int>(
+  late final GeneratedColumn<double> rate = GeneratedColumn<double>(
     'rate',
     aliasedName,
     false,
-    type: DriftSqlType.int,
+    type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _startDateMeta = const VerificationMeta(
@@ -2595,7 +2954,6 @@ class $AccountLoanTable extends AccountLoan
     accountId,
     stakeholderId,
     type,
-    amount,
     rate,
     startDate,
     endDate,
@@ -2606,10 +2964,10 @@ class $AccountLoanTable extends AccountLoan
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'account_loan';
+  static const String $name = 'account_flex_loan';
   @override
   VerificationContext validateIntegrity(
-    Insertable<LoanAccountEntity> instance, {
+    Insertable<FlexLoanAccountEntity> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -2630,14 +2988,6 @@ class $AccountLoanTable extends AccountLoan
       );
     } else if (isInserting) {
       context.missing(_stakeholderIdMeta);
-    }
-    if (data.containsKey('amount')) {
-      context.handle(
-        _amountMeta,
-        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_amountMeta);
     }
     if (data.containsKey('rate')) {
       context.handle(
@@ -2681,9 +3031,9 @@ class $AccountLoanTable extends AccountLoan
   @override
   Set<GeneratedColumn> get $primaryKey => {accountId};
   @override
-  LoanAccountEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  FlexLoanAccountEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return LoanAccountEntity(
+    return FlexLoanAccountEntity(
       accountId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}account_id'],
@@ -2692,18 +3042,14 @@ class $AccountLoanTable extends AccountLoan
         DriftSqlType.int,
         data['${effectivePrefix}stakeholder_id'],
       )!,
-      type: $AccountLoanTable.$convertertype.fromSql(
+      type: $AccountFlexLoanTable.$convertertype.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}type'],
         )!,
       ),
-      amount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}amount'],
-      )!,
       rate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.double,
         data['${effectivePrefix}rate'],
       )!,
       startDate: attachedDatabase.typeMapping.read(
@@ -2726,30 +3072,28 @@ class $AccountLoanTable extends AccountLoan
   }
 
   @override
-  $AccountLoanTable createAlias(String alias) {
-    return $AccountLoanTable(attachedDatabase, alias);
+  $AccountFlexLoanTable createAlias(String alias) {
+    return $AccountFlexLoanTable(attachedDatabase, alias);
   }
 
   static JsonTypeConverter2<AccountLoanType, String, String> $convertertype =
       const EnumNameConverter<AccountLoanType>(AccountLoanType.values);
 }
 
-class LoanAccountEntity extends DataClass
-    implements Insertable<LoanAccountEntity> {
+class FlexLoanAccountEntity extends DataClass
+    implements Insertable<FlexLoanAccountEntity> {
   final int accountId;
   final int stakeholderId;
   final AccountLoanType type;
-  final int amount;
-  final int rate;
+  final double rate;
   final int startDate;
   final int endDate;
   final bool archived;
   final String note;
-  const LoanAccountEntity({
+  const FlexLoanAccountEntity({
     required this.accountId,
     required this.stakeholderId,
     required this.type,
-    required this.amount,
     required this.rate,
     required this.startDate,
     required this.endDate,
@@ -2763,11 +3107,10 @@ class LoanAccountEntity extends DataClass
     map['stakeholder_id'] = Variable<int>(stakeholderId);
     {
       map['type'] = Variable<String>(
-        $AccountLoanTable.$convertertype.toSql(type),
+        $AccountFlexLoanTable.$convertertype.toSql(type),
       );
     }
-    map['amount'] = Variable<int>(amount);
-    map['rate'] = Variable<int>(rate);
+    map['rate'] = Variable<double>(rate);
     map['start_date'] = Variable<int>(startDate);
     map['end_date'] = Variable<int>(endDate);
     map['archived'] = Variable<bool>(archived);
@@ -2775,12 +3118,11 @@ class LoanAccountEntity extends DataClass
     return map;
   }
 
-  AccountLoanCompanion toCompanion(bool nullToAbsent) {
-    return AccountLoanCompanion(
+  AccountFlexLoanCompanion toCompanion(bool nullToAbsent) {
+    return AccountFlexLoanCompanion(
       accountId: Value(accountId),
       stakeholderId: Value(stakeholderId),
       type: Value(type),
-      amount: Value(amount),
       rate: Value(rate),
       startDate: Value(startDate),
       endDate: Value(endDate),
@@ -2789,19 +3131,18 @@ class LoanAccountEntity extends DataClass
     );
   }
 
-  factory LoanAccountEntity.fromJson(
+  factory FlexLoanAccountEntity.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return LoanAccountEntity(
+    return FlexLoanAccountEntity(
       accountId: serializer.fromJson<int>(json['accountId']),
       stakeholderId: serializer.fromJson<int>(json['stakeholderId']),
-      type: $AccountLoanTable.$convertertype.fromJson(
+      type: $AccountFlexLoanTable.$convertertype.fromJson(
         serializer.fromJson<String>(json['type']),
       ),
-      amount: serializer.fromJson<int>(json['amount']),
-      rate: serializer.fromJson<int>(json['rate']),
+      rate: serializer.fromJson<double>(json['rate']),
       startDate: serializer.fromJson<int>(json['startDate']),
       endDate: serializer.fromJson<int>(json['endDate']),
       archived: serializer.fromJson<bool>(json['archived']),
@@ -2815,10 +3156,9 @@ class LoanAccountEntity extends DataClass
       'accountId': serializer.toJson<int>(accountId),
       'stakeholderId': serializer.toJson<int>(stakeholderId),
       'type': serializer.toJson<String>(
-        $AccountLoanTable.$convertertype.toJson(type),
+        $AccountFlexLoanTable.$convertertype.toJson(type),
       ),
-      'amount': serializer.toJson<int>(amount),
-      'rate': serializer.toJson<int>(rate),
+      'rate': serializer.toJson<double>(rate),
       'startDate': serializer.toJson<int>(startDate),
       'endDate': serializer.toJson<int>(endDate),
       'archived': serializer.toJson<bool>(archived),
@@ -2826,35 +3166,32 @@ class LoanAccountEntity extends DataClass
     };
   }
 
-  LoanAccountEntity copyWith({
+  FlexLoanAccountEntity copyWith({
     int? accountId,
     int? stakeholderId,
     AccountLoanType? type,
-    int? amount,
-    int? rate,
+    double? rate,
     int? startDate,
     int? endDate,
     bool? archived,
     String? note,
-  }) => LoanAccountEntity(
+  }) => FlexLoanAccountEntity(
     accountId: accountId ?? this.accountId,
     stakeholderId: stakeholderId ?? this.stakeholderId,
     type: type ?? this.type,
-    amount: amount ?? this.amount,
     rate: rate ?? this.rate,
     startDate: startDate ?? this.startDate,
     endDate: endDate ?? this.endDate,
     archived: archived ?? this.archived,
     note: note ?? this.note,
   );
-  LoanAccountEntity copyWithCompanion(AccountLoanCompanion data) {
-    return LoanAccountEntity(
+  FlexLoanAccountEntity copyWithCompanion(AccountFlexLoanCompanion data) {
+    return FlexLoanAccountEntity(
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
       stakeholderId: data.stakeholderId.present
           ? data.stakeholderId.value
           : this.stakeholderId,
       type: data.type.present ? data.type.value : this.type,
-      amount: data.amount.present ? data.amount.value : this.amount,
       rate: data.rate.present ? data.rate.value : this.rate,
       startDate: data.startDate.present ? data.startDate.value : this.startDate,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
@@ -2865,11 +3202,10 @@ class LoanAccountEntity extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('LoanAccountEntity(')
+    return (StringBuffer('FlexLoanAccountEntity(')
           ..write('accountId: $accountId, ')
           ..write('stakeholderId: $stakeholderId, ')
           ..write('type: $type, ')
-          ..write('amount: $amount, ')
           ..write('rate: $rate, ')
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
@@ -2884,7 +3220,6 @@ class LoanAccountEntity extends DataClass
     accountId,
     stakeholderId,
     type,
-    amount,
     rate,
     startDate,
     endDate,
@@ -2894,11 +3229,10 @@ class LoanAccountEntity extends DataClass
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is LoanAccountEntity &&
+      (other is FlexLoanAccountEntity &&
           other.accountId == this.accountId &&
           other.stakeholderId == this.stakeholderId &&
           other.type == this.type &&
-          other.amount == this.amount &&
           other.rate == this.rate &&
           other.startDate == this.startDate &&
           other.endDate == this.endDate &&
@@ -2906,49 +3240,44 @@ class LoanAccountEntity extends DataClass
           other.note == this.note);
 }
 
-class AccountLoanCompanion extends UpdateCompanion<LoanAccountEntity> {
+class AccountFlexLoanCompanion extends UpdateCompanion<FlexLoanAccountEntity> {
   final Value<int> accountId;
   final Value<int> stakeholderId;
   final Value<AccountLoanType> type;
-  final Value<int> amount;
-  final Value<int> rate;
+  final Value<double> rate;
   final Value<int> startDate;
   final Value<int> endDate;
   final Value<bool> archived;
   final Value<String> note;
-  const AccountLoanCompanion({
+  const AccountFlexLoanCompanion({
     this.accountId = const Value.absent(),
     this.stakeholderId = const Value.absent(),
     this.type = const Value.absent(),
-    this.amount = const Value.absent(),
     this.rate = const Value.absent(),
     this.startDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.archived = const Value.absent(),
     this.note = const Value.absent(),
   });
-  AccountLoanCompanion.insert({
+  AccountFlexLoanCompanion.insert({
     this.accountId = const Value.absent(),
     required int stakeholderId,
     required AccountLoanType type,
-    required int amount,
-    required int rate,
+    required double rate,
     required int startDate,
     required int endDate,
     this.archived = const Value.absent(),
     this.note = const Value.absent(),
   }) : stakeholderId = Value(stakeholderId),
        type = Value(type),
-       amount = Value(amount),
        rate = Value(rate),
        startDate = Value(startDate),
        endDate = Value(endDate);
-  static Insertable<LoanAccountEntity> custom({
+  static Insertable<FlexLoanAccountEntity> custom({
     Expression<int>? accountId,
     Expression<int>? stakeholderId,
     Expression<String>? type,
-    Expression<int>? amount,
-    Expression<int>? rate,
+    Expression<double>? rate,
     Expression<int>? startDate,
     Expression<int>? endDate,
     Expression<bool>? archived,
@@ -2958,7 +3287,6 @@ class AccountLoanCompanion extends UpdateCompanion<LoanAccountEntity> {
       if (accountId != null) 'account_id': accountId,
       if (stakeholderId != null) 'stakeholder_id': stakeholderId,
       if (type != null) 'type': type,
-      if (amount != null) 'amount': amount,
       if (rate != null) 'rate': rate,
       if (startDate != null) 'start_date': startDate,
       if (endDate != null) 'end_date': endDate,
@@ -2967,22 +3295,20 @@ class AccountLoanCompanion extends UpdateCompanion<LoanAccountEntity> {
     });
   }
 
-  AccountLoanCompanion copyWith({
+  AccountFlexLoanCompanion copyWith({
     Value<int>? accountId,
     Value<int>? stakeholderId,
     Value<AccountLoanType>? type,
-    Value<int>? amount,
-    Value<int>? rate,
+    Value<double>? rate,
     Value<int>? startDate,
     Value<int>? endDate,
     Value<bool>? archived,
     Value<String>? note,
   }) {
-    return AccountLoanCompanion(
+    return AccountFlexLoanCompanion(
       accountId: accountId ?? this.accountId,
       stakeholderId: stakeholderId ?? this.stakeholderId,
       type: type ?? this.type,
-      amount: amount ?? this.amount,
       rate: rate ?? this.rate,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
@@ -3002,14 +3328,11 @@ class AccountLoanCompanion extends UpdateCompanion<LoanAccountEntity> {
     }
     if (type.present) {
       map['type'] = Variable<String>(
-        $AccountLoanTable.$convertertype.toSql(type.value),
+        $AccountFlexLoanTable.$convertertype.toSql(type.value),
       );
     }
-    if (amount.present) {
-      map['amount'] = Variable<int>(amount.value);
-    }
     if (rate.present) {
-      map['rate'] = Variable<int>(rate.value);
+      map['rate'] = Variable<double>(rate.value);
     }
     if (startDate.present) {
       map['start_date'] = Variable<int>(startDate.value);
@@ -3028,16 +3351,275 @@ class AccountLoanCompanion extends UpdateCompanion<LoanAccountEntity> {
 
   @override
   String toString() {
-    return (StringBuffer('AccountLoanCompanion(')
+    return (StringBuffer('AccountFlexLoanCompanion(')
           ..write('accountId: $accountId, ')
           ..write('stakeholderId: $stakeholderId, ')
           ..write('type: $type, ')
-          ..write('amount: $amount, ')
           ..write('rate: $rate, ')
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('archived: $archived, ')
           ..write('note: $note')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AccountInvestTable extends AccountInvest
+    with TableInfo<$AccountInvestTable, InvestAccountEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AccountInvestTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<int> accountId = GeneratedColumn<int>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account (account_id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<AccountInvestType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<AccountInvestType>($AccountInvestTable.$convertertype);
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [accountId, type, code];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'account_invest';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InvestAccountEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {accountId};
+  @override
+  InvestAccountEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InvestAccountEntity(
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}account_id'],
+      )!,
+      type: $AccountInvestTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+    );
+  }
+
+  @override
+  $AccountInvestTable createAlias(String alias) {
+    return $AccountInvestTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<AccountInvestType, String, String> $convertertype =
+      const EnumNameConverter<AccountInvestType>(AccountInvestType.values);
+}
+
+class InvestAccountEntity extends DataClass
+    implements Insertable<InvestAccountEntity> {
+  final int accountId;
+  final AccountInvestType type;
+  final String code;
+  const InvestAccountEntity({
+    required this.accountId,
+    required this.type,
+    required this.code,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['account_id'] = Variable<int>(accountId);
+    {
+      map['type'] = Variable<String>(
+        $AccountInvestTable.$convertertype.toSql(type),
+      );
+    }
+    map['code'] = Variable<String>(code);
+    return map;
+  }
+
+  AccountInvestCompanion toCompanion(bool nullToAbsent) {
+    return AccountInvestCompanion(
+      accountId: Value(accountId),
+      type: Value(type),
+      code: Value(code),
+    );
+  }
+
+  factory InvestAccountEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InvestAccountEntity(
+      accountId: serializer.fromJson<int>(json['accountId']),
+      type: $AccountInvestTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      code: serializer.fromJson<String>(json['code']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'accountId': serializer.toJson<int>(accountId),
+      'type': serializer.toJson<String>(
+        $AccountInvestTable.$convertertype.toJson(type),
+      ),
+      'code': serializer.toJson<String>(code),
+    };
+  }
+
+  InvestAccountEntity copyWith({
+    int? accountId,
+    AccountInvestType? type,
+    String? code,
+  }) => InvestAccountEntity(
+    accountId: accountId ?? this.accountId,
+    type: type ?? this.type,
+    code: code ?? this.code,
+  );
+  InvestAccountEntity copyWithCompanion(AccountInvestCompanion data) {
+    return InvestAccountEntity(
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      type: data.type.present ? data.type.value : this.type,
+      code: data.code.present ? data.code.value : this.code,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InvestAccountEntity(')
+          ..write('accountId: $accountId, ')
+          ..write('type: $type, ')
+          ..write('code: $code')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(accountId, type, code);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InvestAccountEntity &&
+          other.accountId == this.accountId &&
+          other.type == this.type &&
+          other.code == this.code);
+}
+
+class AccountInvestCompanion extends UpdateCompanion<InvestAccountEntity> {
+  final Value<int> accountId;
+  final Value<AccountInvestType> type;
+  final Value<String> code;
+  const AccountInvestCompanion({
+    this.accountId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.code = const Value.absent(),
+  });
+  AccountInvestCompanion.insert({
+    this.accountId = const Value.absent(),
+    required AccountInvestType type,
+    this.code = const Value.absent(),
+  }) : type = Value(type);
+  static Insertable<InvestAccountEntity> custom({
+    Expression<int>? accountId,
+    Expression<String>? type,
+    Expression<String>? code,
+  }) {
+    return RawValuesInsertable({
+      if (accountId != null) 'account_id': accountId,
+      if (type != null) 'type': type,
+      if (code != null) 'code': code,
+    });
+  }
+
+  AccountInvestCompanion copyWith({
+    Value<int>? accountId,
+    Value<AccountInvestType>? type,
+    Value<String>? code,
+  }) {
+    return AccountInvestCompanion(
+      accountId: accountId ?? this.accountId,
+      type: type ?? this.type,
+      code: code ?? this.code,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (accountId.present) {
+      map['account_id'] = Variable<int>(accountId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $AccountInvestTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AccountInvestCompanion(')
+          ..write('accountId: $accountId, ')
+          ..write('type: $type, ')
+          ..write('code: $code')
           ..write(')'))
         .toString();
   }
@@ -4060,6 +4642,21 @@ class $LedgerTable extends Ledger with TableInfo<$LedgerTable, LedgerEntity> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _autoStakeholderMeta = const VerificationMeta(
+    'autoStakeholder',
+  );
+  @override
+  late final GeneratedColumn<bool> autoStakeholder = GeneratedColumn<bool>(
+    'auto_stakeholder',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("auto_stakeholder" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4101,6 +4698,7 @@ class $LedgerTable extends Ledger with TableInfo<$LedgerTable, LedgerEntity> {
     photo,
     autoAccount,
     autoCategory,
+    autoStakeholder,
     createdAt,
     updatedAt,
     note,
@@ -4175,6 +4773,15 @@ class $LedgerTable extends Ledger with TableInfo<$LedgerTable, LedgerEntity> {
         ),
       );
     }
+    if (data.containsKey('auto_stakeholder')) {
+      context.handle(
+        _autoStakeholderMeta,
+        autoStakeholder.isAcceptableOrUnknown(
+          data['auto_stakeholder']!,
+          _autoStakeholderMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4238,6 +4845,10 @@ class $LedgerTable extends Ledger with TableInfo<$LedgerTable, LedgerEntity> {
         DriftSqlType.bool,
         data['${effectivePrefix}auto_category'],
       )!,
+      autoStakeholder: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}auto_stakeholder'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
@@ -4267,6 +4878,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
   final String? photo;
   final bool autoAccount;
   final bool autoCategory;
+  final bool autoStakeholder;
   final int createdAt;
   final int updatedAt;
   final String note;
@@ -4278,6 +4890,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
     this.photo,
     required this.autoAccount,
     required this.autoCategory,
+    required this.autoStakeholder,
     required this.createdAt,
     required this.updatedAt,
     required this.note,
@@ -4294,6 +4907,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
     }
     map['auto_account'] = Variable<bool>(autoAccount);
     map['auto_category'] = Variable<bool>(autoCategory);
+    map['auto_stakeholder'] = Variable<bool>(autoStakeholder);
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
     map['note'] = Variable<String>(note);
@@ -4311,6 +4925,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
           : Value(photo),
       autoAccount: Value(autoAccount),
       autoCategory: Value(autoCategory),
+      autoStakeholder: Value(autoStakeholder),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       note: Value(note),
@@ -4330,6 +4945,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
       photo: serializer.fromJson<String?>(json['photo']),
       autoAccount: serializer.fromJson<bool>(json['autoAccount']),
       autoCategory: serializer.fromJson<bool>(json['autoCategory']),
+      autoStakeholder: serializer.fromJson<bool>(json['autoStakeholder']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
       note: serializer.fromJson<String>(json['note']),
@@ -4346,6 +4962,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
       'photo': serializer.toJson<String?>(photo),
       'autoAccount': serializer.toJson<bool>(autoAccount),
       'autoCategory': serializer.toJson<bool>(autoCategory),
+      'autoStakeholder': serializer.toJson<bool>(autoStakeholder),
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
       'note': serializer.toJson<String>(note),
@@ -4360,6 +4977,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
     Value<String?> photo = const Value.absent(),
     bool? autoAccount,
     bool? autoCategory,
+    bool? autoStakeholder,
     int? createdAt,
     int? updatedAt,
     String? note,
@@ -4371,6 +4989,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
     photo: photo.present ? photo.value : this.photo,
     autoAccount: autoAccount ?? this.autoAccount,
     autoCategory: autoCategory ?? this.autoCategory,
+    autoStakeholder: autoStakeholder ?? this.autoStakeholder,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     note: note ?? this.note,
@@ -4392,6 +5011,9 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
       autoCategory: data.autoCategory.present
           ? data.autoCategory.value
           : this.autoCategory,
+      autoStakeholder: data.autoStakeholder.present
+          ? data.autoStakeholder.value
+          : this.autoStakeholder,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       note: data.note.present ? data.note.value : this.note,
@@ -4408,6 +5030,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
           ..write('photo: $photo, ')
           ..write('autoAccount: $autoAccount, ')
           ..write('autoCategory: $autoCategory, ')
+          ..write('autoStakeholder: $autoStakeholder, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('note: $note')
@@ -4424,6 +5047,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
     photo,
     autoAccount,
     autoCategory,
+    autoStakeholder,
     createdAt,
     updatedAt,
     note,
@@ -4439,6 +5063,7 @@ class LedgerEntity extends DataClass implements Insertable<LedgerEntity> {
           other.photo == this.photo &&
           other.autoAccount == this.autoAccount &&
           other.autoCategory == this.autoCategory &&
+          other.autoStakeholder == this.autoStakeholder &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.note == this.note);
@@ -4452,6 +5077,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
   final Value<String?> photo;
   final Value<bool> autoAccount;
   final Value<bool> autoCategory;
+  final Value<bool> autoStakeholder;
   final Value<int> createdAt;
   final Value<int> updatedAt;
   final Value<String> note;
@@ -4463,6 +5089,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
     this.photo = const Value.absent(),
     this.autoAccount = const Value.absent(),
     this.autoCategory = const Value.absent(),
+    this.autoStakeholder = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.note = const Value.absent(),
@@ -4475,6 +5102,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
     this.photo = const Value.absent(),
     this.autoAccount = const Value.absent(),
     this.autoCategory = const Value.absent(),
+    this.autoStakeholder = const Value.absent(),
     required int createdAt,
     required int updatedAt,
     this.note = const Value.absent(),
@@ -4490,6 +5118,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
     Expression<String>? photo,
     Expression<bool>? autoAccount,
     Expression<bool>? autoCategory,
+    Expression<bool>? autoStakeholder,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<String>? note,
@@ -4502,6 +5131,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
       if (photo != null) 'photo': photo,
       if (autoAccount != null) 'auto_account': autoAccount,
       if (autoCategory != null) 'auto_category': autoCategory,
+      if (autoStakeholder != null) 'auto_stakeholder': autoStakeholder,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (note != null) 'note': note,
@@ -4516,6 +5146,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
     Value<String?>? photo,
     Value<bool>? autoAccount,
     Value<bool>? autoCategory,
+    Value<bool>? autoStakeholder,
     Value<int>? createdAt,
     Value<int>? updatedAt,
     Value<String>? note,
@@ -4528,6 +5159,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
       photo: photo ?? this.photo,
       autoAccount: autoAccount ?? this.autoAccount,
       autoCategory: autoCategory ?? this.autoCategory,
+      autoStakeholder: autoStakeholder ?? this.autoStakeholder,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       note: note ?? this.note,
@@ -4558,6 +5190,9 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
     if (autoCategory.present) {
       map['auto_category'] = Variable<bool>(autoCategory.value);
     }
+    if (autoStakeholder.present) {
+      map['auto_stakeholder'] = Variable<bool>(autoStakeholder.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -4580,6 +5215,7 @@ class LedgerCompanion extends UpdateCompanion<LedgerEntity> {
           ..write('photo: $photo, ')
           ..write('autoAccount: $autoAccount, ')
           ..write('autoCategory: $autoCategory, ')
+          ..write('autoStakeholder: $autoStakeholder, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('note: $note')
@@ -6120,6 +6756,251 @@ class RelationCategoryLedgerCompanion
   }
 }
 
+class $RelationStakeholderLedgerTable extends RelationStakeholderLedger
+    with
+        TableInfo<
+          $RelationStakeholderLedgerTable,
+          LedgerStakeholderRelationEntity
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RelationStakeholderLedgerTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _stakeholderIdMeta = const VerificationMeta(
+    'stakeholderId',
+  );
+  @override
+  late final GeneratedColumn<int> stakeholderId = GeneratedColumn<int>(
+    'stakeholder_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES stakeholder (stakeholder_id)',
+    ),
+  );
+  static const VerificationMeta _ledgerIdMeta = const VerificationMeta(
+    'ledgerId',
+  );
+  @override
+  late final GeneratedColumn<int> ledgerId = GeneratedColumn<int>(
+    'ledger_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES ledger (ledger_id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [stakeholderId, ledgerId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'relation_stakeholder_ledger';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LedgerStakeholderRelationEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('stakeholder_id')) {
+      context.handle(
+        _stakeholderIdMeta,
+        stakeholderId.isAcceptableOrUnknown(
+          data['stakeholder_id']!,
+          _stakeholderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stakeholderIdMeta);
+    }
+    if (data.containsKey('ledger_id')) {
+      context.handle(
+        _ledgerIdMeta,
+        ledgerId.isAcceptableOrUnknown(data['ledger_id']!, _ledgerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ledgerIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {stakeholderId, ledgerId};
+  @override
+  LedgerStakeholderRelationEntity map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LedgerStakeholderRelationEntity(
+      stakeholderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stakeholder_id'],
+      )!,
+      ledgerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ledger_id'],
+      )!,
+    );
+  }
+
+  @override
+  $RelationStakeholderLedgerTable createAlias(String alias) {
+    return $RelationStakeholderLedgerTable(attachedDatabase, alias);
+  }
+}
+
+class LedgerStakeholderRelationEntity extends DataClass
+    implements Insertable<LedgerStakeholderRelationEntity> {
+  final int stakeholderId;
+  final int ledgerId;
+  const LedgerStakeholderRelationEntity({
+    required this.stakeholderId,
+    required this.ledgerId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['stakeholder_id'] = Variable<int>(stakeholderId);
+    map['ledger_id'] = Variable<int>(ledgerId);
+    return map;
+  }
+
+  RelationStakeholderLedgerCompanion toCompanion(bool nullToAbsent) {
+    return RelationStakeholderLedgerCompanion(
+      stakeholderId: Value(stakeholderId),
+      ledgerId: Value(ledgerId),
+    );
+  }
+
+  factory LedgerStakeholderRelationEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LedgerStakeholderRelationEntity(
+      stakeholderId: serializer.fromJson<int>(json['stakeholderId']),
+      ledgerId: serializer.fromJson<int>(json['ledgerId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'stakeholderId': serializer.toJson<int>(stakeholderId),
+      'ledgerId': serializer.toJson<int>(ledgerId),
+    };
+  }
+
+  LedgerStakeholderRelationEntity copyWith({
+    int? stakeholderId,
+    int? ledgerId,
+  }) => LedgerStakeholderRelationEntity(
+    stakeholderId: stakeholderId ?? this.stakeholderId,
+    ledgerId: ledgerId ?? this.ledgerId,
+  );
+  LedgerStakeholderRelationEntity copyWithCompanion(
+    RelationStakeholderLedgerCompanion data,
+  ) {
+    return LedgerStakeholderRelationEntity(
+      stakeholderId: data.stakeholderId.present
+          ? data.stakeholderId.value
+          : this.stakeholderId,
+      ledgerId: data.ledgerId.present ? data.ledgerId.value : this.ledgerId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LedgerStakeholderRelationEntity(')
+          ..write('stakeholderId: $stakeholderId, ')
+          ..write('ledgerId: $ledgerId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(stakeholderId, ledgerId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LedgerStakeholderRelationEntity &&
+          other.stakeholderId == this.stakeholderId &&
+          other.ledgerId == this.ledgerId);
+}
+
+class RelationStakeholderLedgerCompanion
+    extends UpdateCompanion<LedgerStakeholderRelationEntity> {
+  final Value<int> stakeholderId;
+  final Value<int> ledgerId;
+  final Value<int> rowid;
+  const RelationStakeholderLedgerCompanion({
+    this.stakeholderId = const Value.absent(),
+    this.ledgerId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RelationStakeholderLedgerCompanion.insert({
+    required int stakeholderId,
+    required int ledgerId,
+    this.rowid = const Value.absent(),
+  }) : stakeholderId = Value(stakeholderId),
+       ledgerId = Value(ledgerId);
+  static Insertable<LedgerStakeholderRelationEntity> custom({
+    Expression<int>? stakeholderId,
+    Expression<int>? ledgerId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (stakeholderId != null) 'stakeholder_id': stakeholderId,
+      if (ledgerId != null) 'ledger_id': ledgerId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RelationStakeholderLedgerCompanion copyWith({
+    Value<int>? stakeholderId,
+    Value<int>? ledgerId,
+    Value<int>? rowid,
+  }) {
+    return RelationStakeholderLedgerCompanion(
+      stakeholderId: stakeholderId ?? this.stakeholderId,
+      ledgerId: ledgerId ?? this.ledgerId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (stakeholderId.present) {
+      map['stakeholder_id'] = Variable<int>(stakeholderId.value);
+    }
+    if (ledgerId.present) {
+      map['ledger_id'] = Variable<int>(ledgerId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationStakeholderLedgerCompanion(')
+          ..write('stakeholderId: $stakeholderId, ')
+          ..write('ledgerId: $ledgerId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TransactionsTable extends Transactions
     with TableInfo<$TransactionsTable, TransactionEntity> {
   @override
@@ -6239,39 +7120,6 @@ class $TransactionsTable extends Transactions
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _locationNameMeta = const VerificationMeta(
-    'locationName',
-  );
-  @override
-  late final GeneratedColumn<String> locationName = GeneratedColumn<String>(
-    'location_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _locationLatMeta = const VerificationMeta(
-    'locationLat',
-  );
-  @override
-  late final GeneratedColumn<double> locationLat = GeneratedColumn<double>(
-    'location_lat',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _locationLngMeta = const VerificationMeta(
-    'locationLng',
-  );
-  @override
-  late final GeneratedColumn<double> locationLng = GeneratedColumn<double>(
-    'location_lng',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -6293,9 +7141,6 @@ class $TransactionsTable extends Transactions
     stakeholderId,
     hidden,
     excluded,
-    locationName,
-    locationLat,
-    locationLng,
     note,
   ];
   @override
@@ -6372,33 +7217,6 @@ class $TransactionsTable extends Transactions
         excluded.isAcceptableOrUnknown(data['excluded']!, _excludedMeta),
       );
     }
-    if (data.containsKey('location_name')) {
-      context.handle(
-        _locationNameMeta,
-        locationName.isAcceptableOrUnknown(
-          data['location_name']!,
-          _locationNameMeta,
-        ),
-      );
-    }
-    if (data.containsKey('location_lat')) {
-      context.handle(
-        _locationLatMeta,
-        locationLat.isAcceptableOrUnknown(
-          data['location_lat']!,
-          _locationLatMeta,
-        ),
-      );
-    }
-    if (data.containsKey('location_lng')) {
-      context.handle(
-        _locationLngMeta,
-        locationLng.isAcceptableOrUnknown(
-          data['location_lng']!,
-          _locationLngMeta,
-        ),
-      );
-    }
     if (data.containsKey('note')) {
       context.handle(
         _noteMeta,
@@ -6452,18 +7270,6 @@ class $TransactionsTable extends Transactions
         DriftSqlType.bool,
         data['${effectivePrefix}excluded'],
       )!,
-      locationName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}location_name'],
-      ),
-      locationLat: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}location_lat'],
-      ),
-      locationLng: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}location_lng'],
-      ),
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
@@ -6491,9 +7297,6 @@ class TransactionEntity extends DataClass
   final int? stakeholderId;
   final bool hidden;
   final bool excluded;
-  final String? locationName;
-  final double? locationLat;
-  final double? locationLng;
   final String note;
   const TransactionEntity({
     required this.transactionId,
@@ -6505,9 +7308,6 @@ class TransactionEntity extends DataClass
     this.stakeholderId,
     required this.hidden,
     required this.excluded,
-    this.locationName,
-    this.locationLat,
-    this.locationLng,
     required this.note,
   });
   @override
@@ -6528,15 +7328,6 @@ class TransactionEntity extends DataClass
     }
     map['hidden'] = Variable<bool>(hidden);
     map['excluded'] = Variable<bool>(excluded);
-    if (!nullToAbsent || locationName != null) {
-      map['location_name'] = Variable<String>(locationName);
-    }
-    if (!nullToAbsent || locationLat != null) {
-      map['location_lat'] = Variable<double>(locationLat);
-    }
-    if (!nullToAbsent || locationLng != null) {
-      map['location_lng'] = Variable<double>(locationLng);
-    }
     map['note'] = Variable<String>(note);
     return map;
   }
@@ -6554,15 +7345,6 @@ class TransactionEntity extends DataClass
           : Value(stakeholderId),
       hidden: Value(hidden),
       excluded: Value(excluded),
-      locationName: locationName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(locationName),
-      locationLat: locationLat == null && nullToAbsent
-          ? const Value.absent()
-          : Value(locationLat),
-      locationLng: locationLng == null && nullToAbsent
-          ? const Value.absent()
-          : Value(locationLng),
       note: Value(note),
     );
   }
@@ -6584,9 +7366,6 @@ class TransactionEntity extends DataClass
       stakeholderId: serializer.fromJson<int?>(json['stakeholderId']),
       hidden: serializer.fromJson<bool>(json['hidden']),
       excluded: serializer.fromJson<bool>(json['excluded']),
-      locationName: serializer.fromJson<String?>(json['locationName']),
-      locationLat: serializer.fromJson<double?>(json['locationLat']),
-      locationLng: serializer.fromJson<double?>(json['locationLng']),
       note: serializer.fromJson<String>(json['note']),
     );
   }
@@ -6605,9 +7384,6 @@ class TransactionEntity extends DataClass
       'stakeholderId': serializer.toJson<int?>(stakeholderId),
       'hidden': serializer.toJson<bool>(hidden),
       'excluded': serializer.toJson<bool>(excluded),
-      'locationName': serializer.toJson<String?>(locationName),
-      'locationLat': serializer.toJson<double?>(locationLat),
-      'locationLng': serializer.toJson<double?>(locationLng),
       'note': serializer.toJson<String>(note),
     };
   }
@@ -6622,9 +7398,6 @@ class TransactionEntity extends DataClass
     Value<int?> stakeholderId = const Value.absent(),
     bool? hidden,
     bool? excluded,
-    Value<String?> locationName = const Value.absent(),
-    Value<double?> locationLat = const Value.absent(),
-    Value<double?> locationLng = const Value.absent(),
     String? note,
   }) => TransactionEntity(
     transactionId: transactionId ?? this.transactionId,
@@ -6638,9 +7411,6 @@ class TransactionEntity extends DataClass
         : this.stakeholderId,
     hidden: hidden ?? this.hidden,
     excluded: excluded ?? this.excluded,
-    locationName: locationName.present ? locationName.value : this.locationName,
-    locationLat: locationLat.present ? locationLat.value : this.locationLat,
-    locationLng: locationLng.present ? locationLng.value : this.locationLng,
     note: note ?? this.note,
   );
   TransactionEntity copyWithCompanion(TransactionsCompanion data) {
@@ -6658,15 +7428,6 @@ class TransactionEntity extends DataClass
           : this.stakeholderId,
       hidden: data.hidden.present ? data.hidden.value : this.hidden,
       excluded: data.excluded.present ? data.excluded.value : this.excluded,
-      locationName: data.locationName.present
-          ? data.locationName.value
-          : this.locationName,
-      locationLat: data.locationLat.present
-          ? data.locationLat.value
-          : this.locationLat,
-      locationLng: data.locationLng.present
-          ? data.locationLng.value
-          : this.locationLng,
       note: data.note.present ? data.note.value : this.note,
     );
   }
@@ -6683,9 +7444,6 @@ class TransactionEntity extends DataClass
           ..write('stakeholderId: $stakeholderId, ')
           ..write('hidden: $hidden, ')
           ..write('excluded: $excluded, ')
-          ..write('locationName: $locationName, ')
-          ..write('locationLat: $locationLat, ')
-          ..write('locationLng: $locationLng, ')
           ..write('note: $note')
           ..write(')'))
         .toString();
@@ -6702,9 +7460,6 @@ class TransactionEntity extends DataClass
     stakeholderId,
     hidden,
     excluded,
-    locationName,
-    locationLat,
-    locationLng,
     note,
   );
   @override
@@ -6720,9 +7475,6 @@ class TransactionEntity extends DataClass
           other.stakeholderId == this.stakeholderId &&
           other.hidden == this.hidden &&
           other.excluded == this.excluded &&
-          other.locationName == this.locationName &&
-          other.locationLat == this.locationLat &&
-          other.locationLng == this.locationLng &&
           other.note == this.note);
 }
 
@@ -6736,9 +7488,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
   final Value<int?> stakeholderId;
   final Value<bool> hidden;
   final Value<bool> excluded;
-  final Value<String?> locationName;
-  final Value<double?> locationLat;
-  final Value<double?> locationLng;
   final Value<String> note;
   const TransactionsCompanion({
     this.transactionId = const Value.absent(),
@@ -6750,9 +7499,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
     this.stakeholderId = const Value.absent(),
     this.hidden = const Value.absent(),
     this.excluded = const Value.absent(),
-    this.locationName = const Value.absent(),
-    this.locationLat = const Value.absent(),
-    this.locationLng = const Value.absent(),
     this.note = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -6765,9 +7511,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
     this.stakeholderId = const Value.absent(),
     this.hidden = const Value.absent(),
     this.excluded = const Value.absent(),
-    this.locationName = const Value.absent(),
-    this.locationLat = const Value.absent(),
-    this.locationLng = const Value.absent(),
     this.note = const Value.absent(),
   }) : ledgerId = Value(ledgerId),
        type = Value(type),
@@ -6784,9 +7527,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
     Expression<int>? stakeholderId,
     Expression<bool>? hidden,
     Expression<bool>? excluded,
-    Expression<String>? locationName,
-    Expression<double>? locationLat,
-    Expression<double>? locationLng,
     Expression<String>? note,
   }) {
     return RawValuesInsertable({
@@ -6799,9 +7539,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
       if (stakeholderId != null) 'stakeholder_id': stakeholderId,
       if (hidden != null) 'hidden': hidden,
       if (excluded != null) 'excluded': excluded,
-      if (locationName != null) 'location_name': locationName,
-      if (locationLat != null) 'location_lat': locationLat,
-      if (locationLng != null) 'location_lng': locationLng,
       if (note != null) 'note': note,
     });
   }
@@ -6816,9 +7553,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
     Value<int?>? stakeholderId,
     Value<bool>? hidden,
     Value<bool>? excluded,
-    Value<String?>? locationName,
-    Value<double?>? locationLat,
-    Value<double?>? locationLng,
     Value<String>? note,
   }) {
     return TransactionsCompanion(
@@ -6831,9 +7565,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
       stakeholderId: stakeholderId ?? this.stakeholderId,
       hidden: hidden ?? this.hidden,
       excluded: excluded ?? this.excluded,
-      locationName: locationName ?? this.locationName,
-      locationLat: locationLat ?? this.locationLat,
-      locationLng: locationLng ?? this.locationLng,
       note: note ?? this.note,
     );
   }
@@ -6870,15 +7601,6 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
     if (excluded.present) {
       map['excluded'] = Variable<bool>(excluded.value);
     }
-    if (locationName.present) {
-      map['location_name'] = Variable<String>(locationName.value);
-    }
-    if (locationLat.present) {
-      map['location_lat'] = Variable<double>(locationLat.value);
-    }
-    if (locationLng.present) {
-      map['location_lng'] = Variable<double>(locationLng.value);
-    }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
@@ -6897,10 +7619,334 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntity> {
           ..write('stakeholderId: $stakeholderId, ')
           ..write('hidden: $hidden, ')
           ..write('excluded: $excluded, ')
-          ..write('locationName: $locationName, ')
-          ..write('locationLat: $locationLat, ')
-          ..write('locationLng: $locationLng, ')
           ..write('note: $note')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TransactionMetaTable extends TransactionMeta
+    with TableInfo<$TransactionMetaTable, TransactionMetaEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TransactionMetaTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _transactionIdMeta = const VerificationMeta(
+    'transactionId',
+  );
+  @override
+  late final GeneratedColumn<int> transactionId = GeneratedColumn<int>(
+    'transaction_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES transactions (transaction_id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TransactionMetaScope, String>
+  scope = GeneratedColumn<String>(
+    'scope',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<TransactionMetaScope>($TransactionMetaTable.$converterscope);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [transactionId, scope, key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'transaction_meta';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TransactionMetaEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('transaction_id')) {
+      context.handle(
+        _transactionIdMeta,
+        transactionId.isAcceptableOrUnknown(
+          data['transaction_id']!,
+          _transactionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_transactionIdMeta);
+    }
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {transactionId, scope, key};
+  @override
+  TransactionMetaEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TransactionMetaEntity(
+      transactionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}transaction_id'],
+      )!,
+      scope: $TransactionMetaTable.$converterscope.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}scope'],
+        )!,
+      ),
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+    );
+  }
+
+  @override
+  $TransactionMetaTable createAlias(String alias) {
+    return $TransactionMetaTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<TransactionMetaScope, String, String>
+  $converterscope = const EnumNameConverter<TransactionMetaScope>(
+    TransactionMetaScope.values,
+  );
+}
+
+class TransactionMetaEntity extends DataClass
+    implements Insertable<TransactionMetaEntity> {
+  final int transactionId;
+  final TransactionMetaScope scope;
+  final String key;
+  final String value;
+  const TransactionMetaEntity({
+    required this.transactionId,
+    required this.scope,
+    required this.key,
+    required this.value,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['transaction_id'] = Variable<int>(transactionId);
+    {
+      map['scope'] = Variable<String>(
+        $TransactionMetaTable.$converterscope.toSql(scope),
+      );
+    }
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  TransactionMetaCompanion toCompanion(bool nullToAbsent) {
+    return TransactionMetaCompanion(
+      transactionId: Value(transactionId),
+      scope: Value(scope),
+      key: Value(key),
+      value: Value(value),
+    );
+  }
+
+  factory TransactionMetaEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TransactionMetaEntity(
+      transactionId: serializer.fromJson<int>(json['transactionId']),
+      scope: $TransactionMetaTable.$converterscope.fromJson(
+        serializer.fromJson<String>(json['scope']),
+      ),
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'transactionId': serializer.toJson<int>(transactionId),
+      'scope': serializer.toJson<String>(
+        $TransactionMetaTable.$converterscope.toJson(scope),
+      ),
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  TransactionMetaEntity copyWith({
+    int? transactionId,
+    TransactionMetaScope? scope,
+    String? key,
+    String? value,
+  }) => TransactionMetaEntity(
+    transactionId: transactionId ?? this.transactionId,
+    scope: scope ?? this.scope,
+    key: key ?? this.key,
+    value: value ?? this.value,
+  );
+  TransactionMetaEntity copyWithCompanion(TransactionMetaCompanion data) {
+    return TransactionMetaEntity(
+      transactionId: data.transactionId.present
+          ? data.transactionId.value
+          : this.transactionId,
+      scope: data.scope.present ? data.scope.value : this.scope,
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TransactionMetaEntity(')
+          ..write('transactionId: $transactionId, ')
+          ..write('scope: $scope, ')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(transactionId, scope, key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TransactionMetaEntity &&
+          other.transactionId == this.transactionId &&
+          other.scope == this.scope &&
+          other.key == this.key &&
+          other.value == this.value);
+}
+
+class TransactionMetaCompanion extends UpdateCompanion<TransactionMetaEntity> {
+  final Value<int> transactionId;
+  final Value<TransactionMetaScope> scope;
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const TransactionMetaCompanion({
+    this.transactionId = const Value.absent(),
+    this.scope = const Value.absent(),
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TransactionMetaCompanion.insert({
+    required int transactionId,
+    required TransactionMetaScope scope,
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  }) : transactionId = Value(transactionId),
+       scope = Value(scope),
+       key = Value(key),
+       value = Value(value);
+  static Insertable<TransactionMetaEntity> custom({
+    Expression<int>? transactionId,
+    Expression<String>? scope,
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (transactionId != null) 'transaction_id': transactionId,
+      if (scope != null) 'scope': scope,
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TransactionMetaCompanion copyWith({
+    Value<int>? transactionId,
+    Value<TransactionMetaScope>? scope,
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
+    return TransactionMetaCompanion(
+      transactionId: transactionId ?? this.transactionId,
+      scope: scope ?? this.scope,
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (transactionId.present) {
+      map['transaction_id'] = Variable<int>(transactionId.value);
+    }
+    if (scope.present) {
+      map['scope'] = Variable<String>(
+        $TransactionMetaTable.$converterscope.toSql(scope.value),
+      );
+    }
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TransactionMetaCompanion(')
+          ..write('transactionId: $transactionId, ')
+          ..write('scope: $scope, ')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -7800,21 +8846,22 @@ class TransactionCategoryDetailCompanion
   }
 }
 
-class $TransactionInstallmentDetailTable extends TransactionInstallmentDetail
+class $TransactionInstallmentPlanTable extends TransactionInstallmentPlan
     with
         TableInfo<
-          $TransactionInstallmentDetailTable,
-          TransactionInstallmentDetailEntity
+          $TransactionInstallmentPlanTable,
+          TransactionInstallmentPlanEntity
         > {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TransactionInstallmentDetailTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _installmentDetailIdMeta =
-      const VerificationMeta('installmentDetailId');
+  $TransactionInstallmentPlanTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _installmentPlanIdMeta = const VerificationMeta(
+    'installmentPlanId',
+  );
   @override
-  late final GeneratedColumn<int> installmentDetailId = GeneratedColumn<int>(
-    'installment_detail_id',
+  late final GeneratedColumn<int> installmentPlanId = GeneratedColumn<int>(
+    'installment_plan_id',
     aliasedName,
     false,
     hasAutoIncrement: true,
@@ -7868,7 +8915,7 @@ class $TransactionInstallmentDetailTable extends TransactionInstallmentDetail
   );
   @override
   List<GeneratedColumn> get $columns => [
-    installmentDetailId,
+    installmentPlanId,
     transactionId,
     accountId,
     currencyCode,
@@ -7877,20 +8924,20 @@ class $TransactionInstallmentDetailTable extends TransactionInstallmentDetail
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'transaction_installment_detail';
+  static const String $name = 'transaction_installment_plan';
   @override
   VerificationContext validateIntegrity(
-    Insertable<TransactionInstallmentDetailEntity> instance, {
+    Insertable<TransactionInstallmentPlanEntity> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('installment_detail_id')) {
+    if (data.containsKey('installment_plan_id')) {
       context.handle(
-        _installmentDetailIdMeta,
-        installmentDetailId.isAcceptableOrUnknown(
-          data['installment_detail_id']!,
-          _installmentDetailIdMeta,
+        _installmentPlanIdMeta,
+        installmentPlanId.isAcceptableOrUnknown(
+          data['installment_plan_id']!,
+          _installmentPlanIdMeta,
         ),
       );
     }
@@ -7928,17 +8975,17 @@ class $TransactionInstallmentDetailTable extends TransactionInstallmentDetail
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {installmentDetailId};
+  Set<GeneratedColumn> get $primaryKey => {installmentPlanId};
   @override
-  TransactionInstallmentDetailEntity map(
+  TransactionInstallmentPlanEntity map(
     Map<String, dynamic> data, {
     String? tablePrefix,
   }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TransactionInstallmentDetailEntity(
-      installmentDetailId: attachedDatabase.typeMapping.read(
+    return TransactionInstallmentPlanEntity(
+      installmentPlanId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}installment_detail_id'],
+        data['${effectivePrefix}installment_plan_id'],
       )!,
       transactionId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -7956,19 +9003,19 @@ class $TransactionInstallmentDetailTable extends TransactionInstallmentDetail
   }
 
   @override
-  $TransactionInstallmentDetailTable createAlias(String alias) {
-    return $TransactionInstallmentDetailTable(attachedDatabase, alias);
+  $TransactionInstallmentPlanTable createAlias(String alias) {
+    return $TransactionInstallmentPlanTable(attachedDatabase, alias);
   }
 }
 
-class TransactionInstallmentDetailEntity extends DataClass
-    implements Insertable<TransactionInstallmentDetailEntity> {
-  final int installmentDetailId;
+class TransactionInstallmentPlanEntity extends DataClass
+    implements Insertable<TransactionInstallmentPlanEntity> {
+  final int installmentPlanId;
   final int transactionId;
   final int accountId;
   final String currencyCode;
-  const TransactionInstallmentDetailEntity({
-    required this.installmentDetailId,
+  const TransactionInstallmentPlanEntity({
+    required this.installmentPlanId,
     required this.transactionId,
     required this.accountId,
     required this.currencyCode,
@@ -7976,31 +9023,29 @@ class TransactionInstallmentDetailEntity extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['installment_detail_id'] = Variable<int>(installmentDetailId);
+    map['installment_plan_id'] = Variable<int>(installmentPlanId);
     map['transaction_id'] = Variable<int>(transactionId);
     map['account_id'] = Variable<int>(accountId);
     map['currency_code'] = Variable<String>(currencyCode);
     return map;
   }
 
-  TransactionInstallmentDetailCompanion toCompanion(bool nullToAbsent) {
-    return TransactionInstallmentDetailCompanion(
-      installmentDetailId: Value(installmentDetailId),
+  TransactionInstallmentPlanCompanion toCompanion(bool nullToAbsent) {
+    return TransactionInstallmentPlanCompanion(
+      installmentPlanId: Value(installmentPlanId),
       transactionId: Value(transactionId),
       accountId: Value(accountId),
       currencyCode: Value(currencyCode),
     );
   }
 
-  factory TransactionInstallmentDetailEntity.fromJson(
+  factory TransactionInstallmentPlanEntity.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TransactionInstallmentDetailEntity(
-      installmentDetailId: serializer.fromJson<int>(
-        json['installmentDetailId'],
-      ),
+    return TransactionInstallmentPlanEntity(
+      installmentPlanId: serializer.fromJson<int>(json['installmentPlanId']),
       transactionId: serializer.fromJson<int>(json['transactionId']),
       accountId: serializer.fromJson<int>(json['accountId']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
@@ -8010,31 +9055,31 @@ class TransactionInstallmentDetailEntity extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'installmentDetailId': serializer.toJson<int>(installmentDetailId),
+      'installmentPlanId': serializer.toJson<int>(installmentPlanId),
       'transactionId': serializer.toJson<int>(transactionId),
       'accountId': serializer.toJson<int>(accountId),
       'currencyCode': serializer.toJson<String>(currencyCode),
     };
   }
 
-  TransactionInstallmentDetailEntity copyWith({
-    int? installmentDetailId,
+  TransactionInstallmentPlanEntity copyWith({
+    int? installmentPlanId,
     int? transactionId,
     int? accountId,
     String? currencyCode,
-  }) => TransactionInstallmentDetailEntity(
-    installmentDetailId: installmentDetailId ?? this.installmentDetailId,
+  }) => TransactionInstallmentPlanEntity(
+    installmentPlanId: installmentPlanId ?? this.installmentPlanId,
     transactionId: transactionId ?? this.transactionId,
     accountId: accountId ?? this.accountId,
     currencyCode: currencyCode ?? this.currencyCode,
   );
-  TransactionInstallmentDetailEntity copyWithCompanion(
-    TransactionInstallmentDetailCompanion data,
+  TransactionInstallmentPlanEntity copyWithCompanion(
+    TransactionInstallmentPlanCompanion data,
   ) {
-    return TransactionInstallmentDetailEntity(
-      installmentDetailId: data.installmentDetailId.present
-          ? data.installmentDetailId.value
-          : this.installmentDetailId,
+    return TransactionInstallmentPlanEntity(
+      installmentPlanId: data.installmentPlanId.present
+          ? data.installmentPlanId.value
+          : this.installmentPlanId,
       transactionId: data.transactionId.present
           ? data.transactionId.value
           : this.transactionId,
@@ -8047,8 +9092,8 @@ class TransactionInstallmentDetailEntity extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('TransactionInstallmentDetailEntity(')
-          ..write('installmentDetailId: $installmentDetailId, ')
+    return (StringBuffer('TransactionInstallmentPlanEntity(')
+          ..write('installmentPlanId: $installmentPlanId, ')
           ..write('transactionId: $transactionId, ')
           ..write('accountId: $accountId, ')
           ..write('currencyCode: $currencyCode')
@@ -8058,60 +9103,59 @@ class TransactionInstallmentDetailEntity extends DataClass
 
   @override
   int get hashCode =>
-      Object.hash(installmentDetailId, transactionId, accountId, currencyCode);
+      Object.hash(installmentPlanId, transactionId, accountId, currencyCode);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is TransactionInstallmentDetailEntity &&
-          other.installmentDetailId == this.installmentDetailId &&
+      (other is TransactionInstallmentPlanEntity &&
+          other.installmentPlanId == this.installmentPlanId &&
           other.transactionId == this.transactionId &&
           other.accountId == this.accountId &&
           other.currencyCode == this.currencyCode);
 }
 
-class TransactionInstallmentDetailCompanion
-    extends UpdateCompanion<TransactionInstallmentDetailEntity> {
-  final Value<int> installmentDetailId;
+class TransactionInstallmentPlanCompanion
+    extends UpdateCompanion<TransactionInstallmentPlanEntity> {
+  final Value<int> installmentPlanId;
   final Value<int> transactionId;
   final Value<int> accountId;
   final Value<String> currencyCode;
-  const TransactionInstallmentDetailCompanion({
-    this.installmentDetailId = const Value.absent(),
+  const TransactionInstallmentPlanCompanion({
+    this.installmentPlanId = const Value.absent(),
     this.transactionId = const Value.absent(),
     this.accountId = const Value.absent(),
     this.currencyCode = const Value.absent(),
   });
-  TransactionInstallmentDetailCompanion.insert({
-    this.installmentDetailId = const Value.absent(),
+  TransactionInstallmentPlanCompanion.insert({
+    this.installmentPlanId = const Value.absent(),
     required int transactionId,
     required int accountId,
     required String currencyCode,
   }) : transactionId = Value(transactionId),
        accountId = Value(accountId),
        currencyCode = Value(currencyCode);
-  static Insertable<TransactionInstallmentDetailEntity> custom({
-    Expression<int>? installmentDetailId,
+  static Insertable<TransactionInstallmentPlanEntity> custom({
+    Expression<int>? installmentPlanId,
     Expression<int>? transactionId,
     Expression<int>? accountId,
     Expression<String>? currencyCode,
   }) {
     return RawValuesInsertable({
-      if (installmentDetailId != null)
-        'installment_detail_id': installmentDetailId,
+      if (installmentPlanId != null) 'installment_plan_id': installmentPlanId,
       if (transactionId != null) 'transaction_id': transactionId,
       if (accountId != null) 'account_id': accountId,
       if (currencyCode != null) 'currency_code': currencyCode,
     });
   }
 
-  TransactionInstallmentDetailCompanion copyWith({
-    Value<int>? installmentDetailId,
+  TransactionInstallmentPlanCompanion copyWith({
+    Value<int>? installmentPlanId,
     Value<int>? transactionId,
     Value<int>? accountId,
     Value<String>? currencyCode,
   }) {
-    return TransactionInstallmentDetailCompanion(
-      installmentDetailId: installmentDetailId ?? this.installmentDetailId,
+    return TransactionInstallmentPlanCompanion(
+      installmentPlanId: installmentPlanId ?? this.installmentPlanId,
       transactionId: transactionId ?? this.transactionId,
       accountId: accountId ?? this.accountId,
       currencyCode: currencyCode ?? this.currencyCode,
@@ -8121,8 +9165,8 @@ class TransactionInstallmentDetailCompanion
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (installmentDetailId.present) {
-      map['installment_detail_id'] = Variable<int>(installmentDetailId.value);
+    if (installmentPlanId.present) {
+      map['installment_plan_id'] = Variable<int>(installmentPlanId.value);
     }
     if (transactionId.present) {
       map['transaction_id'] = Variable<int>(transactionId.value);
@@ -8138,8 +9182,8 @@ class TransactionInstallmentDetailCompanion
 
   @override
   String toString() {
-    return (StringBuffer('TransactionInstallmentDetailCompanion(')
-          ..write('installmentDetailId: $installmentDetailId, ')
+    return (StringBuffer('TransactionInstallmentPlanCompanion(')
+          ..write('installmentPlanId: $installmentPlanId, ')
           ..write('transactionId: $transactionId, ')
           ..write('accountId: $accountId, ')
           ..write('currencyCode: $currencyCode')
@@ -8173,17 +9217,18 @@ class $TransactionInstallmentItemTable extends TransactionInstallmentItem
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _installmentDetailIdMeta =
-      const VerificationMeta('installmentDetailId');
+  static const VerificationMeta _installmentPlanIdMeta = const VerificationMeta(
+    'installmentPlanId',
+  );
   @override
-  late final GeneratedColumn<int> installmentDetailId = GeneratedColumn<int>(
-    'installment_detail_id',
+  late final GeneratedColumn<int> installmentPlanId = GeneratedColumn<int>(
+    'installment_plan_id',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES transaction_installment_detail (installment_detail_id)',
+      'REFERENCES transaction_installment_plan (installment_plan_id)',
     ),
   );
   static const VerificationMeta _installmentNumberMeta = const VerificationMeta(
@@ -8254,7 +9299,7 @@ class $TransactionInstallmentItemTable extends TransactionInstallmentItem
   @override
   List<GeneratedColumn> get $columns => [
     installmentItemId,
-    installmentDetailId,
+    installmentPlanId,
     installmentNumber,
     dueDate,
     capitalAmount,
@@ -8283,16 +9328,16 @@ class $TransactionInstallmentItemTable extends TransactionInstallmentItem
         ),
       );
     }
-    if (data.containsKey('installment_detail_id')) {
+    if (data.containsKey('installment_plan_id')) {
       context.handle(
-        _installmentDetailIdMeta,
-        installmentDetailId.isAcceptableOrUnknown(
-          data['installment_detail_id']!,
-          _installmentDetailIdMeta,
+        _installmentPlanIdMeta,
+        installmentPlanId.isAcceptableOrUnknown(
+          data['installment_plan_id']!,
+          _installmentPlanIdMeta,
         ),
       );
     } else if (isInserting) {
-      context.missing(_installmentDetailIdMeta);
+      context.missing(_installmentPlanIdMeta);
     }
     if (data.containsKey('installment_number')) {
       context.handle(
@@ -8373,9 +9418,9 @@ class $TransactionInstallmentItemTable extends TransactionInstallmentItem
         DriftSqlType.int,
         data['${effectivePrefix}installment_item_id'],
       )!,
-      installmentDetailId: attachedDatabase.typeMapping.read(
+      installmentPlanId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}installment_detail_id'],
+        data['${effectivePrefix}installment_plan_id'],
       )!,
       installmentNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -8413,7 +9458,7 @@ class $TransactionInstallmentItemTable extends TransactionInstallmentItem
 class TransactionInstallmentItemEntity extends DataClass
     implements Insertable<TransactionInstallmentItemEntity> {
   final int installmentItemId;
-  final int installmentDetailId;
+  final int installmentPlanId;
   final int installmentNumber;
   final int dueDate;
   final int capitalAmount;
@@ -8422,7 +9467,7 @@ class TransactionInstallmentItemEntity extends DataClass
   final int realInterestAmount;
   const TransactionInstallmentItemEntity({
     required this.installmentItemId,
-    required this.installmentDetailId,
+    required this.installmentPlanId,
     required this.installmentNumber,
     required this.dueDate,
     required this.capitalAmount,
@@ -8434,7 +9479,7 @@ class TransactionInstallmentItemEntity extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['installment_item_id'] = Variable<int>(installmentItemId);
-    map['installment_detail_id'] = Variable<int>(installmentDetailId);
+    map['installment_plan_id'] = Variable<int>(installmentPlanId);
     map['installment_number'] = Variable<int>(installmentNumber);
     map['due_date'] = Variable<int>(dueDate);
     map['capital_amount'] = Variable<int>(capitalAmount);
@@ -8447,7 +9492,7 @@ class TransactionInstallmentItemEntity extends DataClass
   TransactionInstallmentItemCompanion toCompanion(bool nullToAbsent) {
     return TransactionInstallmentItemCompanion(
       installmentItemId: Value(installmentItemId),
-      installmentDetailId: Value(installmentDetailId),
+      installmentPlanId: Value(installmentPlanId),
       installmentNumber: Value(installmentNumber),
       dueDate: Value(dueDate),
       capitalAmount: Value(capitalAmount),
@@ -8464,9 +9509,7 @@ class TransactionInstallmentItemEntity extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TransactionInstallmentItemEntity(
       installmentItemId: serializer.fromJson<int>(json['installmentItemId']),
-      installmentDetailId: serializer.fromJson<int>(
-        json['installmentDetailId'],
-      ),
+      installmentPlanId: serializer.fromJson<int>(json['installmentPlanId']),
       installmentNumber: serializer.fromJson<int>(json['installmentNumber']),
       dueDate: serializer.fromJson<int>(json['dueDate']),
       capitalAmount: serializer.fromJson<int>(json['capitalAmount']),
@@ -8480,7 +9523,7 @@ class TransactionInstallmentItemEntity extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'installmentItemId': serializer.toJson<int>(installmentItemId),
-      'installmentDetailId': serializer.toJson<int>(installmentDetailId),
+      'installmentPlanId': serializer.toJson<int>(installmentPlanId),
       'installmentNumber': serializer.toJson<int>(installmentNumber),
       'dueDate': serializer.toJson<int>(dueDate),
       'capitalAmount': serializer.toJson<int>(capitalAmount),
@@ -8492,7 +9535,7 @@ class TransactionInstallmentItemEntity extends DataClass
 
   TransactionInstallmentItemEntity copyWith({
     int? installmentItemId,
-    int? installmentDetailId,
+    int? installmentPlanId,
     int? installmentNumber,
     int? dueDate,
     int? capitalAmount,
@@ -8501,7 +9544,7 @@ class TransactionInstallmentItemEntity extends DataClass
     int? realInterestAmount,
   }) => TransactionInstallmentItemEntity(
     installmentItemId: installmentItemId ?? this.installmentItemId,
-    installmentDetailId: installmentDetailId ?? this.installmentDetailId,
+    installmentPlanId: installmentPlanId ?? this.installmentPlanId,
     installmentNumber: installmentNumber ?? this.installmentNumber,
     dueDate: dueDate ?? this.dueDate,
     capitalAmount: capitalAmount ?? this.capitalAmount,
@@ -8516,9 +9559,9 @@ class TransactionInstallmentItemEntity extends DataClass
       installmentItemId: data.installmentItemId.present
           ? data.installmentItemId.value
           : this.installmentItemId,
-      installmentDetailId: data.installmentDetailId.present
-          ? data.installmentDetailId.value
-          : this.installmentDetailId,
+      installmentPlanId: data.installmentPlanId.present
+          ? data.installmentPlanId.value
+          : this.installmentPlanId,
       installmentNumber: data.installmentNumber.present
           ? data.installmentNumber.value
           : this.installmentNumber,
@@ -8542,7 +9585,7 @@ class TransactionInstallmentItemEntity extends DataClass
   String toString() {
     return (StringBuffer('TransactionInstallmentItemEntity(')
           ..write('installmentItemId: $installmentItemId, ')
-          ..write('installmentDetailId: $installmentDetailId, ')
+          ..write('installmentPlanId: $installmentPlanId, ')
           ..write('installmentNumber: $installmentNumber, ')
           ..write('dueDate: $dueDate, ')
           ..write('capitalAmount: $capitalAmount, ')
@@ -8556,7 +9599,7 @@ class TransactionInstallmentItemEntity extends DataClass
   @override
   int get hashCode => Object.hash(
     installmentItemId,
-    installmentDetailId,
+    installmentPlanId,
     installmentNumber,
     dueDate,
     capitalAmount,
@@ -8569,7 +9612,7 @@ class TransactionInstallmentItemEntity extends DataClass
       identical(this, other) ||
       (other is TransactionInstallmentItemEntity &&
           other.installmentItemId == this.installmentItemId &&
-          other.installmentDetailId == this.installmentDetailId &&
+          other.installmentPlanId == this.installmentPlanId &&
           other.installmentNumber == this.installmentNumber &&
           other.dueDate == this.dueDate &&
           other.capitalAmount == this.capitalAmount &&
@@ -8581,7 +9624,7 @@ class TransactionInstallmentItemEntity extends DataClass
 class TransactionInstallmentItemCompanion
     extends UpdateCompanion<TransactionInstallmentItemEntity> {
   final Value<int> installmentItemId;
-  final Value<int> installmentDetailId;
+  final Value<int> installmentPlanId;
   final Value<int> installmentNumber;
   final Value<int> dueDate;
   final Value<int> capitalAmount;
@@ -8590,7 +9633,7 @@ class TransactionInstallmentItemCompanion
   final Value<int> realInterestAmount;
   const TransactionInstallmentItemCompanion({
     this.installmentItemId = const Value.absent(),
-    this.installmentDetailId = const Value.absent(),
+    this.installmentPlanId = const Value.absent(),
     this.installmentNumber = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.capitalAmount = const Value.absent(),
@@ -8600,14 +9643,14 @@ class TransactionInstallmentItemCompanion
   });
   TransactionInstallmentItemCompanion.insert({
     this.installmentItemId = const Value.absent(),
-    required int installmentDetailId,
+    required int installmentPlanId,
     required int installmentNumber,
     required int dueDate,
     required int capitalAmount,
     required int realCapitalAmount,
     required int interestAmount,
     required int realInterestAmount,
-  }) : installmentDetailId = Value(installmentDetailId),
+  }) : installmentPlanId = Value(installmentPlanId),
        installmentNumber = Value(installmentNumber),
        dueDate = Value(dueDate),
        capitalAmount = Value(capitalAmount),
@@ -8616,7 +9659,7 @@ class TransactionInstallmentItemCompanion
        realInterestAmount = Value(realInterestAmount);
   static Insertable<TransactionInstallmentItemEntity> custom({
     Expression<int>? installmentItemId,
-    Expression<int>? installmentDetailId,
+    Expression<int>? installmentPlanId,
     Expression<int>? installmentNumber,
     Expression<int>? dueDate,
     Expression<int>? capitalAmount,
@@ -8626,8 +9669,7 @@ class TransactionInstallmentItemCompanion
   }) {
     return RawValuesInsertable({
       if (installmentItemId != null) 'installment_item_id': installmentItemId,
-      if (installmentDetailId != null)
-        'installment_detail_id': installmentDetailId,
+      if (installmentPlanId != null) 'installment_plan_id': installmentPlanId,
       if (installmentNumber != null) 'installment_number': installmentNumber,
       if (dueDate != null) 'due_date': dueDate,
       if (capitalAmount != null) 'capital_amount': capitalAmount,
@@ -8640,7 +9682,7 @@ class TransactionInstallmentItemCompanion
 
   TransactionInstallmentItemCompanion copyWith({
     Value<int>? installmentItemId,
-    Value<int>? installmentDetailId,
+    Value<int>? installmentPlanId,
     Value<int>? installmentNumber,
     Value<int>? dueDate,
     Value<int>? capitalAmount,
@@ -8650,7 +9692,7 @@ class TransactionInstallmentItemCompanion
   }) {
     return TransactionInstallmentItemCompanion(
       installmentItemId: installmentItemId ?? this.installmentItemId,
-      installmentDetailId: installmentDetailId ?? this.installmentDetailId,
+      installmentPlanId: installmentPlanId ?? this.installmentPlanId,
       installmentNumber: installmentNumber ?? this.installmentNumber,
       dueDate: dueDate ?? this.dueDate,
       capitalAmount: capitalAmount ?? this.capitalAmount,
@@ -8666,8 +9708,8 @@ class TransactionInstallmentItemCompanion
     if (installmentItemId.present) {
       map['installment_item_id'] = Variable<int>(installmentItemId.value);
     }
-    if (installmentDetailId.present) {
-      map['installment_detail_id'] = Variable<int>(installmentDetailId.value);
+    if (installmentPlanId.present) {
+      map['installment_plan_id'] = Variable<int>(installmentPlanId.value);
     }
     if (installmentNumber.present) {
       map['installment_number'] = Variable<int>(installmentNumber.value);
@@ -8694,7 +9736,7 @@ class TransactionInstallmentItemCompanion
   String toString() {
     return (StringBuffer('TransactionInstallmentItemCompanion(')
           ..write('installmentItemId: $installmentItemId, ')
-          ..write('installmentDetailId: $installmentDetailId, ')
+          ..write('installmentPlanId: $installmentPlanId, ')
           ..write('installmentNumber: $installmentNumber, ')
           ..write('dueDate: $dueDate, ')
           ..write('capitalAmount: $capitalAmount, ')
@@ -11870,7 +12912,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AccountCreditTable accountCredit = $AccountCreditTable(this);
   late final $AccountBonusTable accountBonus = $AccountBonusTable(this);
   late final $StakeholderTable stakeholder = $StakeholderTable(this);
-  late final $AccountLoanTable accountLoan = $AccountLoanTable(this);
+  late final $AccountPlanLoanTable accountPlanLoan = $AccountPlanLoanTable(
+    this,
+  );
+  late final $AccountFlexLoanTable accountFlexLoan = $AccountFlexLoanTable(
+    this,
+  );
+  late final $AccountInvestTable accountInvest = $AccountInvestTable(this);
   late final $LoanPlanTable loanPlan = $LoanPlanTable(this);
   late final $LoanRecordTable loanRecord = $LoanRecordTable(this);
   late final $LedgerTable ledger = $LedgerTable(this);
@@ -11880,13 +12928,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoryTable category = $CategoryTable(this);
   late final $RelationCategoryLedgerTable relationCategoryLedger =
       $RelationCategoryLedgerTable(this);
+  late final $RelationStakeholderLedgerTable relationStakeholderLedger =
+      $RelationStakeholderLedgerTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
+  late final $TransactionMetaTable transactionMeta = $TransactionMetaTable(
+    this,
+  );
   late final $TransactionAmountDetailTable transactionAmountDetail =
       $TransactionAmountDetailTable(this);
   late final $TransactionCategoryDetailTable transactionCategoryDetail =
       $TransactionCategoryDetailTable(this);
-  late final $TransactionInstallmentDetailTable transactionInstallmentDetail =
-      $TransactionInstallmentDetailTable(this);
+  late final $TransactionInstallmentPlanTable transactionInstallmentPlan =
+      $TransactionInstallmentPlanTable(this);
   late final $TransactionInstallmentItemTable transactionInstallmentItem =
       $TransactionInstallmentItemTable(this);
   late final $TransactionReduceTable transactionReduce =
@@ -11926,7 +12979,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     accountCredit,
     accountBonus,
     stakeholder,
-    accountLoan,
+    accountPlanLoan,
+    accountFlexLoan,
+    accountInvest,
     loanPlan,
     loanRecord,
     ledger,
@@ -11934,10 +12989,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     project,
     category,
     relationCategoryLedger,
+    relationStakeholderLedger,
     transactions,
+    transactionMeta,
     transactionAmountDetail,
     transactionCategoryDetail,
-    transactionInstallmentDetail,
+    transactionInstallmentPlan,
     transactionInstallmentItem,
     transactionReduce,
     transactionRefund,
@@ -12088,24 +13145,24 @@ final class $$CurrencyTableReferences
   }
 
   static MultiTypedResultKey<
-    $TransactionInstallmentDetailTable,
-    List<TransactionInstallmentDetailEntity>
+    $TransactionInstallmentPlanTable,
+    List<TransactionInstallmentPlanEntity>
   >
-  _transactionInstallmentDetailRefsTable(_$AppDatabase db) =>
+  _transactionInstallmentPlanRefsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
-        db.transactionInstallmentDetail,
+        db.transactionInstallmentPlan,
         aliasName: $_aliasNameGenerator(
           db.currency.currencyCode,
-          db.transactionInstallmentDetail.currencyCode,
+          db.transactionInstallmentPlan.currencyCode,
         ),
       );
 
-  $$TransactionInstallmentDetailTableProcessedTableManager
-  get transactionInstallmentDetailRefs {
+  $$TransactionInstallmentPlanTableProcessedTableManager
+  get transactionInstallmentPlanRefs {
     final manager =
-        $$TransactionInstallmentDetailTableTableManager(
+        $$TransactionInstallmentPlanTableTableManager(
           $_db,
-          $_db.transactionInstallmentDetail,
+          $_db.transactionInstallmentPlan,
         ).filter(
           (f) => f.currencyCode.currencyCode.sqlEquals(
             $_itemColumn<String>('currency_code')!,
@@ -12113,7 +13170,7 @@ final class $$CurrencyTableReferences
         );
 
     final cache = $_typedResult.readTableOrNull(
-      _transactionInstallmentDetailRefsTable($_db),
+      _transactionInstallmentPlanRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -12399,26 +13456,24 @@ class $$CurrencyTableFilterComposer
     return f(composer);
   }
 
-  Expression<bool> transactionInstallmentDetailRefs(
-    Expression<bool> Function(
-      $$TransactionInstallmentDetailTableFilterComposer f,
-    )
+  Expression<bool> transactionInstallmentPlanRefs(
+    Expression<bool> Function($$TransactionInstallmentPlanTableFilterComposer f)
     f,
   ) {
-    final $$TransactionInstallmentDetailTableFilterComposer composer =
+    final $$TransactionInstallmentPlanTableFilterComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.currencyCode,
-          referencedTable: $db.transactionInstallmentDetail,
+          referencedTable: $db.transactionInstallmentPlan,
           getReferencedColumn: (t) => t.currencyCode,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableFilterComposer(
+              }) => $$TransactionInstallmentPlanTableFilterComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -12712,26 +13767,26 @@ class $$CurrencyTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> transactionInstallmentDetailRefs<T extends Object>(
+  Expression<T> transactionInstallmentPlanRefs<T extends Object>(
     Expression<T> Function(
-      $$TransactionInstallmentDetailTableAnnotationComposer a,
+      $$TransactionInstallmentPlanTableAnnotationComposer a,
     )
     f,
   ) {
-    final $$TransactionInstallmentDetailTableAnnotationComposer composer =
+    final $$TransactionInstallmentPlanTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.currencyCode,
-          referencedTable: $db.transactionInstallmentDetail,
+          referencedTable: $db.transactionInstallmentPlan,
           getReferencedColumn: (t) => t.currencyCode,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableAnnotationComposer(
+              }) => $$TransactionInstallmentPlanTableAnnotationComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -12865,7 +13920,7 @@ class $$CurrencyTableTableManager
             bool ledgerRefs,
             bool transactionAmountDetailRefs,
             bool transactionCategoryDetailRefs,
-            bool transactionInstallmentDetailRefs,
+            bool transactionInstallmentPlanRefs,
             bool transactionReduceRefs,
             bool transactionRefundRefs,
             bool reimbursementExpectationRefs,
@@ -12937,7 +13992,7 @@ class $$CurrencyTableTableManager
                 ledgerRefs = false,
                 transactionAmountDetailRefs = false,
                 transactionCategoryDetailRefs = false,
-                transactionInstallmentDetailRefs = false,
+                transactionInstallmentPlanRefs = false,
                 transactionReduceRefs = false,
                 transactionRefundRefs = false,
                 reimbursementExpectationRefs = false,
@@ -12951,8 +14006,8 @@ class $$CurrencyTableTableManager
                     if (transactionAmountDetailRefs) db.transactionAmountDetail,
                     if (transactionCategoryDetailRefs)
                       db.transactionCategoryDetail,
-                    if (transactionInstallmentDetailRefs)
-                      db.transactionInstallmentDetail,
+                    if (transactionInstallmentPlanRefs)
+                      db.transactionInstallmentPlan,
                     if (transactionReduceRefs) db.transactionReduce,
                     if (transactionRefundRefs) db.transactionRefund,
                     if (reimbursementExpectationRefs)
@@ -13046,21 +14101,21 @@ class $$CurrencyTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (transactionInstallmentDetailRefs)
+                      if (transactionInstallmentPlanRefs)
                         await $_getPrefetchedData<
                           CurrencyEntity,
                           $CurrencyTable,
-                          TransactionInstallmentDetailEntity
+                          TransactionInstallmentPlanEntity
                         >(
                           currentTable: table,
                           referencedTable: $$CurrencyTableReferences
-                              ._transactionInstallmentDetailRefsTable(db),
+                              ._transactionInstallmentPlanRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$CurrencyTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).transactionInstallmentDetailRefs,
+                              ).transactionInstallmentPlanRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.currencyCode == item.currencyCode,
@@ -13176,7 +14231,7 @@ typedef $$CurrencyTableProcessedTableManager =
         bool ledgerRefs,
         bool transactionAmountDetailRefs,
         bool transactionCategoryDetailRefs,
-        bool transactionInstallmentDetailRefs,
+        bool transactionInstallmentPlanRefs,
         bool transactionReduceRefs,
         bool transactionRefundRefs,
         bool reimbursementExpectationRefs,
@@ -13275,23 +14330,71 @@ final class $$AccountTableReferences
     );
   }
 
-  static MultiTypedResultKey<$AccountLoanTable, List<LoanAccountEntity>>
-  _accountLoanRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.accountLoan,
+  static MultiTypedResultKey<$AccountPlanLoanTable, List<PlanLoanAccountEntity>>
+  _accountPlanLoanRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountPlanLoan,
     aliasName: $_aliasNameGenerator(
       db.account.accountId,
-      db.accountLoan.accountId,
+      db.accountPlanLoan.accountId,
     ),
   );
 
-  $$AccountLoanTableProcessedTableManager get accountLoanRefs {
-    final manager = $$AccountLoanTableTableManager($_db, $_db.accountLoan)
+  $$AccountPlanLoanTableProcessedTableManager get accountPlanLoanRefs {
+    final manager =
+        $$AccountPlanLoanTableTableManager($_db, $_db.accountPlanLoan).filter(
+          (f) =>
+              f.accountId.accountId.sqlEquals($_itemColumn<int>('account_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _accountPlanLoanRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AccountFlexLoanTable, List<FlexLoanAccountEntity>>
+  _accountFlexLoanRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountFlexLoan,
+    aliasName: $_aliasNameGenerator(
+      db.account.accountId,
+      db.accountFlexLoan.accountId,
+    ),
+  );
+
+  $$AccountFlexLoanTableProcessedTableManager get accountFlexLoanRefs {
+    final manager =
+        $$AccountFlexLoanTableTableManager($_db, $_db.accountFlexLoan).filter(
+          (f) =>
+              f.accountId.accountId.sqlEquals($_itemColumn<int>('account_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _accountFlexLoanRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AccountInvestTable, List<InvestAccountEntity>>
+  _accountInvestRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountInvest,
+    aliasName: $_aliasNameGenerator(
+      db.account.accountId,
+      db.accountInvest.accountId,
+    ),
+  );
+
+  $$AccountInvestTableProcessedTableManager get accountInvestRefs {
+    final manager = $$AccountInvestTableTableManager($_db, $_db.accountInvest)
         .filter(
           (f) =>
               f.accountId.accountId.sqlEquals($_itemColumn<int>('account_id')!),
         );
 
-    final cache = $_typedResult.readTableOrNull(_accountLoanRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(_accountInvestRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -13402,31 +14505,31 @@ final class $$AccountTableReferences
   }
 
   static MultiTypedResultKey<
-    $TransactionInstallmentDetailTable,
-    List<TransactionInstallmentDetailEntity>
+    $TransactionInstallmentPlanTable,
+    List<TransactionInstallmentPlanEntity>
   >
-  _transactionInstallmentDetailRefsTable(_$AppDatabase db) =>
+  _transactionInstallmentPlanRefsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
-        db.transactionInstallmentDetail,
+        db.transactionInstallmentPlan,
         aliasName: $_aliasNameGenerator(
           db.account.accountId,
-          db.transactionInstallmentDetail.accountId,
+          db.transactionInstallmentPlan.accountId,
         ),
       );
 
-  $$TransactionInstallmentDetailTableProcessedTableManager
-  get transactionInstallmentDetailRefs {
+  $$TransactionInstallmentPlanTableProcessedTableManager
+  get transactionInstallmentPlanRefs {
     final manager =
-        $$TransactionInstallmentDetailTableTableManager(
+        $$TransactionInstallmentPlanTableTableManager(
           $_db,
-          $_db.transactionInstallmentDetail,
+          $_db.transactionInstallmentPlan,
         ).filter(
           (f) =>
               f.accountId.accountId.sqlEquals($_itemColumn<int>('account_id')!),
         );
 
     final cache = $_typedResult.readTableOrNull(
-      _transactionInstallmentDetailRefsTable($_db),
+      _transactionInstallmentPlanRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -13619,22 +14722,72 @@ class $$AccountTableFilterComposer
     return f(composer);
   }
 
-  Expression<bool> accountLoanRefs(
-    Expression<bool> Function($$AccountLoanTableFilterComposer f) f,
+  Expression<bool> accountPlanLoanRefs(
+    Expression<bool> Function($$AccountPlanLoanTableFilterComposer f) f,
   ) {
-    final $$AccountLoanTableFilterComposer composer = $composerBuilder(
+    final $$AccountPlanLoanTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.accountLoan,
+      referencedTable: $db.accountPlanLoan,
       getReferencedColumn: (t) => t.accountId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$AccountLoanTableFilterComposer(
+          }) => $$AccountPlanLoanTableFilterComposer(
             $db: $db,
-            $table: $db.accountLoan,
+            $table: $db.accountPlanLoan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> accountFlexLoanRefs(
+    Expression<bool> Function($$AccountFlexLoanTableFilterComposer f) f,
+  ) {
+    final $$AccountFlexLoanTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accountFlexLoan,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountFlexLoanTableFilterComposer(
+            $db: $db,
+            $table: $db.accountFlexLoan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> accountInvestRefs(
+    Expression<bool> Function($$AccountInvestTableFilterComposer f) f,
+  ) {
+    final $$AccountInvestTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accountInvest,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountInvestTableFilterComposer(
+            $db: $db,
+            $table: $db.accountInvest,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -13746,26 +14899,24 @@ class $$AccountTableFilterComposer
     return f(composer);
   }
 
-  Expression<bool> transactionInstallmentDetailRefs(
-    Expression<bool> Function(
-      $$TransactionInstallmentDetailTableFilterComposer f,
-    )
+  Expression<bool> transactionInstallmentPlanRefs(
+    Expression<bool> Function($$TransactionInstallmentPlanTableFilterComposer f)
     f,
   ) {
-    final $$TransactionInstallmentDetailTableFilterComposer composer =
+    final $$TransactionInstallmentPlanTableFilterComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.accountId,
-          referencedTable: $db.transactionInstallmentDetail,
+          referencedTable: $db.transactionInstallmentPlan,
           getReferencedColumn: (t) => t.accountId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableFilterComposer(
+              }) => $$TransactionInstallmentPlanTableFilterComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -14007,22 +15158,72 @@ class $$AccountTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> accountLoanRefs<T extends Object>(
-    Expression<T> Function($$AccountLoanTableAnnotationComposer a) f,
+  Expression<T> accountPlanLoanRefs<T extends Object>(
+    Expression<T> Function($$AccountPlanLoanTableAnnotationComposer a) f,
   ) {
-    final $$AccountLoanTableAnnotationComposer composer = $composerBuilder(
+    final $$AccountPlanLoanTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.accountLoan,
+      referencedTable: $db.accountPlanLoan,
       getReferencedColumn: (t) => t.accountId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$AccountLoanTableAnnotationComposer(
+          }) => $$AccountPlanLoanTableAnnotationComposer(
             $db: $db,
-            $table: $db.accountLoan,
+            $table: $db.accountPlanLoan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> accountFlexLoanRefs<T extends Object>(
+    Expression<T> Function($$AccountFlexLoanTableAnnotationComposer a) f,
+  ) {
+    final $$AccountFlexLoanTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accountFlexLoan,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountFlexLoanTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accountFlexLoan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> accountInvestRefs<T extends Object>(
+    Expression<T> Function($$AccountInvestTableAnnotationComposer a) f,
+  ) {
+    final $$AccountInvestTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.accountInvest,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountInvestTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accountInvest,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -14135,26 +15336,26 @@ class $$AccountTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> transactionInstallmentDetailRefs<T extends Object>(
+  Expression<T> transactionInstallmentPlanRefs<T extends Object>(
     Expression<T> Function(
-      $$TransactionInstallmentDetailTableAnnotationComposer a,
+      $$TransactionInstallmentPlanTableAnnotationComposer a,
     )
     f,
   ) {
-    final $$TransactionInstallmentDetailTableAnnotationComposer composer =
+    final $$TransactionInstallmentPlanTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.accountId,
-          referencedTable: $db.transactionInstallmentDetail,
+          referencedTable: $db.transactionInstallmentPlan,
           getReferencedColumn: (t) => t.accountId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableAnnotationComposer(
+              }) => $$TransactionInstallmentPlanTableAnnotationComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -14234,12 +15435,14 @@ class $$AccountTableTableManager
             bool currencyCode,
             bool accountMetaRefs,
             bool accountCreditRefs,
-            bool accountLoanRefs,
+            bool accountPlanLoanRefs,
+            bool accountFlexLoanRefs,
+            bool accountInvestRefs,
             bool loanPlanRefs,
             bool loanRecordRefs,
             bool relationAccountLedgerRefs,
             bool transactionAmountDetailRefs,
-            bool transactionInstallmentDetailRefs,
+            bool transactionInstallmentPlanRefs,
             bool transactionRefundRefs,
             bool reimbursementActualRefs,
           })
@@ -14312,12 +15515,14 @@ class $$AccountTableTableManager
                 currencyCode = false,
                 accountMetaRefs = false,
                 accountCreditRefs = false,
-                accountLoanRefs = false,
+                accountPlanLoanRefs = false,
+                accountFlexLoanRefs = false,
+                accountInvestRefs = false,
                 loanPlanRefs = false,
                 loanRecordRefs = false,
                 relationAccountLedgerRefs = false,
                 transactionAmountDetailRefs = false,
-                transactionInstallmentDetailRefs = false,
+                transactionInstallmentPlanRefs = false,
                 transactionRefundRefs = false,
                 reimbursementActualRefs = false,
               }) {
@@ -14326,13 +15531,15 @@ class $$AccountTableTableManager
                   explicitlyWatchedTables: [
                     if (accountMetaRefs) db.accountMeta,
                     if (accountCreditRefs) db.accountCredit,
-                    if (accountLoanRefs) db.accountLoan,
+                    if (accountPlanLoanRefs) db.accountPlanLoan,
+                    if (accountFlexLoanRefs) db.accountFlexLoan,
+                    if (accountInvestRefs) db.accountInvest,
                     if (loanPlanRefs) db.loanPlan,
                     if (loanRecordRefs) db.loanRecord,
                     if (relationAccountLedgerRefs) db.relationAccountLedger,
                     if (transactionAmountDetailRefs) db.transactionAmountDetail,
-                    if (transactionInstallmentDetailRefs)
-                      db.transactionInstallmentDetail,
+                    if (transactionInstallmentPlanRefs)
+                      db.transactionInstallmentPlan,
                     if (transactionRefundRefs) db.transactionRefund,
                     if (reimbursementActualRefs) db.reimbursementActual,
                   ],
@@ -14412,21 +15619,63 @@ class $$AccountTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (accountLoanRefs)
+                      if (accountPlanLoanRefs)
                         await $_getPrefetchedData<
                           AccountEntity,
                           $AccountTable,
-                          LoanAccountEntity
+                          PlanLoanAccountEntity
                         >(
                           currentTable: table,
                           referencedTable: $$AccountTableReferences
-                              ._accountLoanRefsTable(db),
+                              ._accountPlanLoanRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$AccountTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).accountLoanRefs,
+                              ).accountPlanLoanRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.accountId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (accountFlexLoanRefs)
+                        await $_getPrefetchedData<
+                          AccountEntity,
+                          $AccountTable,
+                          FlexLoanAccountEntity
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountTableReferences
+                              ._accountFlexLoanRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountFlexLoanRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.accountId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (accountInvestRefs)
+                        await $_getPrefetchedData<
+                          AccountEntity,
+                          $AccountTable,
+                          InvestAccountEntity
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AccountTableReferences
+                              ._accountInvestRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountInvestRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.accountId == item.accountId,
@@ -14517,21 +15766,21 @@ class $$AccountTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (transactionInstallmentDetailRefs)
+                      if (transactionInstallmentPlanRefs)
                         await $_getPrefetchedData<
                           AccountEntity,
                           $AccountTable,
-                          TransactionInstallmentDetailEntity
+                          TransactionInstallmentPlanEntity
                         >(
                           currentTable: table,
                           referencedTable: $$AccountTableReferences
-                              ._transactionInstallmentDetailRefsTable(db),
+                              ._transactionInstallmentPlanRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$AccountTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).transactionInstallmentDetailRefs,
+                              ).transactionInstallmentPlanRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.accountId == item.accountId,
@@ -14604,12 +15853,14 @@ typedef $$AccountTableProcessedTableManager =
         bool currencyCode,
         bool accountMetaRefs,
         bool accountCreditRefs,
-        bool accountLoanRefs,
+        bool accountPlanLoanRefs,
+        bool accountFlexLoanRefs,
+        bool accountInvestRefs,
         bool loanPlanRefs,
         bool loanRecordRefs,
         bool relationAccountLedgerRefs,
         bool transactionAmountDetailRefs,
-        bool transactionInstallmentDetailRefs,
+        bool transactionInstallmentPlanRefs,
         bool transactionRefundRefs,
         bool reimbursementActualRefs,
       })
@@ -15617,24 +16868,84 @@ final class $$StakeholderTableReferences
         BaseReferences<_$AppDatabase, $StakeholderTable, StakeholderEntity> {
   $$StakeholderTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$AccountLoanTable, List<LoanAccountEntity>>
-  _accountLoanRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.accountLoan,
+  static MultiTypedResultKey<$AccountPlanLoanTable, List<PlanLoanAccountEntity>>
+  _accountPlanLoanRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountPlanLoan,
     aliasName: $_aliasNameGenerator(
       db.stakeholder.stakeholderId,
-      db.accountLoan.stakeholderId,
+      db.accountPlanLoan.stakeholderId,
     ),
   );
 
-  $$AccountLoanTableProcessedTableManager get accountLoanRefs {
-    final manager = $$AccountLoanTableTableManager($_db, $_db.accountLoan)
-        .filter(
+  $$AccountPlanLoanTableProcessedTableManager get accountPlanLoanRefs {
+    final manager =
+        $$AccountPlanLoanTableTableManager($_db, $_db.accountPlanLoan).filter(
           (f) => f.stakeholderId.stakeholderId.sqlEquals(
             $_itemColumn<int>('stakeholder_id')!,
           ),
         );
 
-    final cache = $_typedResult.readTableOrNull(_accountLoanRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(
+      _accountPlanLoanRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AccountFlexLoanTable, List<FlexLoanAccountEntity>>
+  _accountFlexLoanRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountFlexLoan,
+    aliasName: $_aliasNameGenerator(
+      db.stakeholder.stakeholderId,
+      db.accountFlexLoan.stakeholderId,
+    ),
+  );
+
+  $$AccountFlexLoanTableProcessedTableManager get accountFlexLoanRefs {
+    final manager =
+        $$AccountFlexLoanTableTableManager($_db, $_db.accountFlexLoan).filter(
+          (f) => f.stakeholderId.stakeholderId.sqlEquals(
+            $_itemColumn<int>('stakeholder_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _accountFlexLoanRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $RelationStakeholderLedgerTable,
+    List<LedgerStakeholderRelationEntity>
+  >
+  _relationStakeholderLedgerRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.relationStakeholderLedger,
+        aliasName: $_aliasNameGenerator(
+          db.stakeholder.stakeholderId,
+          db.relationStakeholderLedger.stakeholderId,
+        ),
+      );
+
+  $$RelationStakeholderLedgerTableProcessedTableManager
+  get relationStakeholderLedgerRefs {
+    final manager =
+        $$RelationStakeholderLedgerTableTableManager(
+          $_db,
+          $_db.relationStakeholderLedger,
+        ).filter(
+          (f) => f.stakeholderId.stakeholderId.sqlEquals(
+            $_itemColumn<int>('stakeholder_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _relationStakeholderLedgerRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -15752,28 +17063,80 @@ class $$StakeholderTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  Expression<bool> accountLoanRefs(
-    Expression<bool> Function($$AccountLoanTableFilterComposer f) f,
+  Expression<bool> accountPlanLoanRefs(
+    Expression<bool> Function($$AccountPlanLoanTableFilterComposer f) f,
   ) {
-    final $$AccountLoanTableFilterComposer composer = $composerBuilder(
+    final $$AccountPlanLoanTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.stakeholderId,
-      referencedTable: $db.accountLoan,
+      referencedTable: $db.accountPlanLoan,
       getReferencedColumn: (t) => t.stakeholderId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$AccountLoanTableFilterComposer(
+          }) => $$AccountPlanLoanTableFilterComposer(
             $db: $db,
-            $table: $db.accountLoan,
+            $table: $db.accountPlanLoan,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> accountFlexLoanRefs(
+    Expression<bool> Function($$AccountFlexLoanTableFilterComposer f) f,
+  ) {
+    final $$AccountFlexLoanTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.accountFlexLoan,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountFlexLoanTableFilterComposer(
+            $db: $db,
+            $table: $db.accountFlexLoan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> relationStakeholderLedgerRefs(
+    Expression<bool> Function($$RelationStakeholderLedgerTableFilterComposer f)
+    f,
+  ) {
+    final $$RelationStakeholderLedgerTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.stakeholderId,
+          referencedTable: $db.relationStakeholderLedger,
+          getReferencedColumn: (t) => t.stakeholderId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$RelationStakeholderLedgerTableFilterComposer(
+                $db: $db,
+                $table: $db.relationStakeholderLedger,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
@@ -15925,28 +17288,80 @@ class $$StakeholderTableAnnotationComposer
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
 
-  Expression<T> accountLoanRefs<T extends Object>(
-    Expression<T> Function($$AccountLoanTableAnnotationComposer a) f,
+  Expression<T> accountPlanLoanRefs<T extends Object>(
+    Expression<T> Function($$AccountPlanLoanTableAnnotationComposer a) f,
   ) {
-    final $$AccountLoanTableAnnotationComposer composer = $composerBuilder(
+    final $$AccountPlanLoanTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.stakeholderId,
-      referencedTable: $db.accountLoan,
+      referencedTable: $db.accountPlanLoan,
       getReferencedColumn: (t) => t.stakeholderId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$AccountLoanTableAnnotationComposer(
+          }) => $$AccountPlanLoanTableAnnotationComposer(
             $db: $db,
-            $table: $db.accountLoan,
+            $table: $db.accountPlanLoan,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<T> accountFlexLoanRefs<T extends Object>(
+    Expression<T> Function($$AccountFlexLoanTableAnnotationComposer a) f,
+  ) {
+    final $$AccountFlexLoanTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.accountFlexLoan,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountFlexLoanTableAnnotationComposer(
+            $db: $db,
+            $table: $db.accountFlexLoan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> relationStakeholderLedgerRefs<T extends Object>(
+    Expression<T> Function($$RelationStakeholderLedgerTableAnnotationComposer a)
+    f,
+  ) {
+    final $$RelationStakeholderLedgerTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.stakeholderId,
+          referencedTable: $db.relationStakeholderLedger,
+          getReferencedColumn: (t) => t.stakeholderId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$RelationStakeholderLedgerTableAnnotationComposer(
+                $db: $db,
+                $table: $db.relationStakeholderLedger,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
@@ -16017,7 +17432,9 @@ class $$StakeholderTableTableManager
           (StakeholderEntity, $$StakeholderTableReferences),
           StakeholderEntity,
           PrefetchHooks Function({
-            bool accountLoanRefs,
+            bool accountPlanLoanRefs,
+            bool accountFlexLoanRefs,
+            bool relationStakeholderLedgerRefs,
             bool transactionsRefs,
             bool reimbursementExpectationRefs,
           })
@@ -16087,14 +17504,19 @@ class $$StakeholderTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                accountLoanRefs = false,
+                accountPlanLoanRefs = false,
+                accountFlexLoanRefs = false,
+                relationStakeholderLedgerRefs = false,
                 transactionsRefs = false,
                 reimbursementExpectationRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
-                    if (accountLoanRefs) db.accountLoan,
+                    if (accountPlanLoanRefs) db.accountPlanLoan,
+                    if (accountFlexLoanRefs) db.accountFlexLoan,
+                    if (relationStakeholderLedgerRefs)
+                      db.relationStakeholderLedger,
                     if (transactionsRefs) db.transactions,
                     if (reimbursementExpectationRefs)
                       db.reimbursementExpectation,
@@ -16102,21 +17524,63 @@ class $$StakeholderTableTableManager
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
-                      if (accountLoanRefs)
+                      if (accountPlanLoanRefs)
                         await $_getPrefetchedData<
                           StakeholderEntity,
                           $StakeholderTable,
-                          LoanAccountEntity
+                          PlanLoanAccountEntity
                         >(
                           currentTable: table,
                           referencedTable: $$StakeholderTableReferences
-                              ._accountLoanRefsTable(db),
+                              ._accountPlanLoanRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$StakeholderTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).accountLoanRefs,
+                              ).accountPlanLoanRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.stakeholderId == item.stakeholderId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (accountFlexLoanRefs)
+                        await $_getPrefetchedData<
+                          StakeholderEntity,
+                          $StakeholderTable,
+                          FlexLoanAccountEntity
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StakeholderTableReferences
+                              ._accountFlexLoanRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StakeholderTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountFlexLoanRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.stakeholderId == item.stakeholderId,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (relationStakeholderLedgerRefs)
+                        await $_getPrefetchedData<
+                          StakeholderEntity,
+                          $StakeholderTable,
+                          LedgerStakeholderRelationEntity
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StakeholderTableReferences
+                              ._relationStakeholderLedgerRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StakeholderTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).relationStakeholderLedgerRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.stakeholderId == item.stakeholderId,
@@ -16186,44 +17650,49 @@ typedef $$StakeholderTableProcessedTableManager =
       (StakeholderEntity, $$StakeholderTableReferences),
       StakeholderEntity,
       PrefetchHooks Function({
-        bool accountLoanRefs,
+        bool accountPlanLoanRefs,
+        bool accountFlexLoanRefs,
+        bool relationStakeholderLedgerRefs,
         bool transactionsRefs,
         bool reimbursementExpectationRefs,
       })
     >;
-typedef $$AccountLoanTableCreateCompanionBuilder =
-    AccountLoanCompanion Function({
+typedef $$AccountPlanLoanTableCreateCompanionBuilder =
+    AccountPlanLoanCompanion Function({
       Value<int> accountId,
       required int stakeholderId,
       required AccountLoanType type,
-      required int amount,
-      required int rate,
-      required int startDate,
-      required int endDate,
       Value<bool> archived,
       Value<String> note,
     });
-typedef $$AccountLoanTableUpdateCompanionBuilder =
-    AccountLoanCompanion Function({
+typedef $$AccountPlanLoanTableUpdateCompanionBuilder =
+    AccountPlanLoanCompanion Function({
       Value<int> accountId,
       Value<int> stakeholderId,
       Value<AccountLoanType> type,
-      Value<int> amount,
-      Value<int> rate,
-      Value<int> startDate,
-      Value<int> endDate,
       Value<bool> archived,
       Value<String> note,
     });
 
-final class $$AccountLoanTableReferences
+final class $$AccountPlanLoanTableReferences
     extends
-        BaseReferences<_$AppDatabase, $AccountLoanTable, LoanAccountEntity> {
-  $$AccountLoanTableReferences(super.$_db, super.$_table, super.$_typedResult);
+        BaseReferences<
+          _$AppDatabase,
+          $AccountPlanLoanTable,
+          PlanLoanAccountEntity
+        > {
+  $$AccountPlanLoanTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
   static $AccountTable _accountIdTable(_$AppDatabase db) =>
       db.account.createAlias(
-        $_aliasNameGenerator(db.accountLoan.accountId, db.account.accountId),
+        $_aliasNameGenerator(
+          db.accountPlanLoan.accountId,
+          db.account.accountId,
+        ),
       );
 
   $$AccountTableProcessedTableManager get accountId {
@@ -16243,7 +17712,7 @@ final class $$AccountLoanTableReferences
   static $StakeholderTable _stakeholderIdTable(_$AppDatabase db) =>
       db.stakeholder.createAlias(
         $_aliasNameGenerator(
-          db.accountLoan.stakeholderId,
+          db.accountPlanLoan.stakeholderId,
           db.stakeholder.stakeholderId,
         ),
       );
@@ -16263,9 +17732,9 @@ final class $$AccountLoanTableReferences
   }
 }
 
-class $$AccountLoanTableFilterComposer
-    extends Composer<_$AppDatabase, $AccountLoanTable> {
-  $$AccountLoanTableFilterComposer({
+class $$AccountPlanLoanTableFilterComposer
+    extends Composer<_$AppDatabase, $AccountPlanLoanTable> {
+  $$AccountPlanLoanTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -16278,12 +17747,436 @@ class $$AccountLoanTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<int> get amount => $composableBuilder(
-    column: $table.amount,
+  ColumnFilters<bool> get archived => $composableBuilder(
+    column: $table.archived,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get rate => $composableBuilder(
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountTableFilterComposer get accountId {
+    final $$AccountTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.account,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTableFilterComposer(
+            $db: $db,
+            $table: $db.account,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StakeholderTableFilterComposer get stakeholderId {
+    final $$StakeholderTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.stakeholder,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StakeholderTableFilterComposer(
+            $db: $db,
+            $table: $db.stakeholder,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountPlanLoanTableOrderingComposer
+    extends Composer<_$AppDatabase, $AccountPlanLoanTable> {
+  $$AccountPlanLoanTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get archived => $composableBuilder(
+    column: $table.archived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountTableOrderingComposer get accountId {
+    final $$AccountTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.account,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTableOrderingComposer(
+            $db: $db,
+            $table: $db.account,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StakeholderTableOrderingComposer get stakeholderId {
+    final $$StakeholderTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.stakeholder,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StakeholderTableOrderingComposer(
+            $db: $db,
+            $table: $db.stakeholder,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountPlanLoanTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AccountPlanLoanTable> {
+  $$AccountPlanLoanTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<AccountLoanType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<bool> get archived =>
+      $composableBuilder(column: $table.archived, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  $$AccountTableAnnotationComposer get accountId {
+    final $$AccountTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.account,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTableAnnotationComposer(
+            $db: $db,
+            $table: $db.account,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StakeholderTableAnnotationComposer get stakeholderId {
+    final $$StakeholderTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.stakeholder,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StakeholderTableAnnotationComposer(
+            $db: $db,
+            $table: $db.stakeholder,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountPlanLoanTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AccountPlanLoanTable,
+          PlanLoanAccountEntity,
+          $$AccountPlanLoanTableFilterComposer,
+          $$AccountPlanLoanTableOrderingComposer,
+          $$AccountPlanLoanTableAnnotationComposer,
+          $$AccountPlanLoanTableCreateCompanionBuilder,
+          $$AccountPlanLoanTableUpdateCompanionBuilder,
+          (PlanLoanAccountEntity, $$AccountPlanLoanTableReferences),
+          PlanLoanAccountEntity,
+          PrefetchHooks Function({bool accountId, bool stakeholderId})
+        > {
+  $$AccountPlanLoanTableTableManager(
+    _$AppDatabase db,
+    $AccountPlanLoanTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountPlanLoanTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountPlanLoanTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountPlanLoanTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> accountId = const Value.absent(),
+                Value<int> stakeholderId = const Value.absent(),
+                Value<AccountLoanType> type = const Value.absent(),
+                Value<bool> archived = const Value.absent(),
+                Value<String> note = const Value.absent(),
+              }) => AccountPlanLoanCompanion(
+                accountId: accountId,
+                stakeholderId: stakeholderId,
+                type: type,
+                archived: archived,
+                note: note,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> accountId = const Value.absent(),
+                required int stakeholderId,
+                required AccountLoanType type,
+                Value<bool> archived = const Value.absent(),
+                Value<String> note = const Value.absent(),
+              }) => AccountPlanLoanCompanion.insert(
+                accountId: accountId,
+                stakeholderId: stakeholderId,
+                type: type,
+                archived: archived,
+                note: note,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AccountPlanLoanTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountId = false, stakeholderId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (accountId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.accountId,
+                                referencedTable:
+                                    $$AccountPlanLoanTableReferences
+                                        ._accountIdTable(db),
+                                referencedColumn:
+                                    $$AccountPlanLoanTableReferences
+                                        ._accountIdTable(db)
+                                        .accountId,
+                              )
+                              as T;
+                    }
+                    if (stakeholderId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.stakeholderId,
+                                referencedTable:
+                                    $$AccountPlanLoanTableReferences
+                                        ._stakeholderIdTable(db),
+                                referencedColumn:
+                                    $$AccountPlanLoanTableReferences
+                                        ._stakeholderIdTable(db)
+                                        .stakeholderId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AccountPlanLoanTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AccountPlanLoanTable,
+      PlanLoanAccountEntity,
+      $$AccountPlanLoanTableFilterComposer,
+      $$AccountPlanLoanTableOrderingComposer,
+      $$AccountPlanLoanTableAnnotationComposer,
+      $$AccountPlanLoanTableCreateCompanionBuilder,
+      $$AccountPlanLoanTableUpdateCompanionBuilder,
+      (PlanLoanAccountEntity, $$AccountPlanLoanTableReferences),
+      PlanLoanAccountEntity,
+      PrefetchHooks Function({bool accountId, bool stakeholderId})
+    >;
+typedef $$AccountFlexLoanTableCreateCompanionBuilder =
+    AccountFlexLoanCompanion Function({
+      Value<int> accountId,
+      required int stakeholderId,
+      required AccountLoanType type,
+      required double rate,
+      required int startDate,
+      required int endDate,
+      Value<bool> archived,
+      Value<String> note,
+    });
+typedef $$AccountFlexLoanTableUpdateCompanionBuilder =
+    AccountFlexLoanCompanion Function({
+      Value<int> accountId,
+      Value<int> stakeholderId,
+      Value<AccountLoanType> type,
+      Value<double> rate,
+      Value<int> startDate,
+      Value<int> endDate,
+      Value<bool> archived,
+      Value<String> note,
+    });
+
+final class $$AccountFlexLoanTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AccountFlexLoanTable,
+          FlexLoanAccountEntity
+        > {
+  $$AccountFlexLoanTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountTable _accountIdTable(_$AppDatabase db) =>
+      db.account.createAlias(
+        $_aliasNameGenerator(
+          db.accountFlexLoan.accountId,
+          db.account.accountId,
+        ),
+      );
+
+  $$AccountTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<int>('account_id')!;
+
+    final manager = $$AccountTableTableManager(
+      $_db,
+      $_db.account,
+    ).filter((f) => f.accountId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $StakeholderTable _stakeholderIdTable(_$AppDatabase db) =>
+      db.stakeholder.createAlias(
+        $_aliasNameGenerator(
+          db.accountFlexLoan.stakeholderId,
+          db.stakeholder.stakeholderId,
+        ),
+      );
+
+  $$StakeholderTableProcessedTableManager get stakeholderId {
+    final $_column = $_itemColumn<int>('stakeholder_id')!;
+
+    final manager = $$StakeholderTableTableManager(
+      $_db,
+      $_db.stakeholder,
+    ).filter((f) => f.stakeholderId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_stakeholderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AccountFlexLoanTableFilterComposer
+    extends Composer<_$AppDatabase, $AccountFlexLoanTable> {
+  $$AccountFlexLoanTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<AccountLoanType, AccountLoanType, String>
+  get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<double> get rate => $composableBuilder(
     column: $table.rate,
     builder: (column) => ColumnFilters(column),
   );
@@ -16355,9 +18248,9 @@ class $$AccountLoanTableFilterComposer
   }
 }
 
-class $$AccountLoanTableOrderingComposer
-    extends Composer<_$AppDatabase, $AccountLoanTable> {
-  $$AccountLoanTableOrderingComposer({
+class $$AccountFlexLoanTableOrderingComposer
+    extends Composer<_$AppDatabase, $AccountFlexLoanTable> {
+  $$AccountFlexLoanTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -16369,12 +18262,7 @@ class $$AccountLoanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get amount => $composableBuilder(
-    column: $table.amount,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get rate => $composableBuilder(
+  ColumnOrderings<double> get rate => $composableBuilder(
     column: $table.rate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -16446,9 +18334,9 @@ class $$AccountLoanTableOrderingComposer
   }
 }
 
-class $$AccountLoanTableAnnotationComposer
-    extends Composer<_$AppDatabase, $AccountLoanTable> {
-  $$AccountLoanTableAnnotationComposer({
+class $$AccountFlexLoanTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AccountFlexLoanTable> {
+  $$AccountFlexLoanTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -16458,10 +18346,7 @@ class $$AccountLoanTableAnnotationComposer
   GeneratedColumnWithTypeConverter<AccountLoanType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<int> get amount =>
-      $composableBuilder(column: $table.amount, builder: (column) => column);
-
-  GeneratedColumn<int> get rate =>
+  GeneratedColumn<double> get rate =>
       $composableBuilder(column: $table.rate, builder: (column) => column);
 
   GeneratedColumn<int> get startDate =>
@@ -16523,48 +18408,48 @@ class $$AccountLoanTableAnnotationComposer
   }
 }
 
-class $$AccountLoanTableTableManager
+class $$AccountFlexLoanTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $AccountLoanTable,
-          LoanAccountEntity,
-          $$AccountLoanTableFilterComposer,
-          $$AccountLoanTableOrderingComposer,
-          $$AccountLoanTableAnnotationComposer,
-          $$AccountLoanTableCreateCompanionBuilder,
-          $$AccountLoanTableUpdateCompanionBuilder,
-          (LoanAccountEntity, $$AccountLoanTableReferences),
-          LoanAccountEntity,
+          $AccountFlexLoanTable,
+          FlexLoanAccountEntity,
+          $$AccountFlexLoanTableFilterComposer,
+          $$AccountFlexLoanTableOrderingComposer,
+          $$AccountFlexLoanTableAnnotationComposer,
+          $$AccountFlexLoanTableCreateCompanionBuilder,
+          $$AccountFlexLoanTableUpdateCompanionBuilder,
+          (FlexLoanAccountEntity, $$AccountFlexLoanTableReferences),
+          FlexLoanAccountEntity,
           PrefetchHooks Function({bool accountId, bool stakeholderId})
         > {
-  $$AccountLoanTableTableManager(_$AppDatabase db, $AccountLoanTable table)
-    : super(
+  $$AccountFlexLoanTableTableManager(
+    _$AppDatabase db,
+    $AccountFlexLoanTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$AccountLoanTableFilterComposer($db: db, $table: table),
+              $$AccountFlexLoanTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$AccountLoanTableOrderingComposer($db: db, $table: table),
+              $$AccountFlexLoanTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$AccountLoanTableAnnotationComposer($db: db, $table: table),
+              $$AccountFlexLoanTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> accountId = const Value.absent(),
                 Value<int> stakeholderId = const Value.absent(),
                 Value<AccountLoanType> type = const Value.absent(),
-                Value<int> amount = const Value.absent(),
-                Value<int> rate = const Value.absent(),
+                Value<double> rate = const Value.absent(),
                 Value<int> startDate = const Value.absent(),
                 Value<int> endDate = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
                 Value<String> note = const Value.absent(),
-              }) => AccountLoanCompanion(
+              }) => AccountFlexLoanCompanion(
                 accountId: accountId,
                 stakeholderId: stakeholderId,
                 type: type,
-                amount: amount,
                 rate: rate,
                 startDate: startDate,
                 endDate: endDate,
@@ -16576,17 +18461,15 @@ class $$AccountLoanTableTableManager
                 Value<int> accountId = const Value.absent(),
                 required int stakeholderId,
                 required AccountLoanType type,
-                required int amount,
-                required int rate,
+                required double rate,
                 required int startDate,
                 required int endDate,
                 Value<bool> archived = const Value.absent(),
                 Value<String> note = const Value.absent(),
-              }) => AccountLoanCompanion.insert(
+              }) => AccountFlexLoanCompanion.insert(
                 accountId: accountId,
                 stakeholderId: stakeholderId,
                 type: type,
-                amount: amount,
                 rate: rate,
                 startDate: startDate,
                 endDate: endDate,
@@ -16597,7 +18480,7 @@ class $$AccountLoanTableTableManager
               .map(
                 (e) => (
                   e.readTable(table),
-                  $$AccountLoanTableReferences(db, table, e),
+                  $$AccountFlexLoanTableReferences(db, table, e),
                 ),
               )
               .toList(),
@@ -16626,11 +18509,13 @@ class $$AccountLoanTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.accountId,
-                                referencedTable: $$AccountLoanTableReferences
-                                    ._accountIdTable(db),
-                                referencedColumn: $$AccountLoanTableReferences
-                                    ._accountIdTable(db)
-                                    .accountId,
+                                referencedTable:
+                                    $$AccountFlexLoanTableReferences
+                                        ._accountIdTable(db),
+                                referencedColumn:
+                                    $$AccountFlexLoanTableReferences
+                                        ._accountIdTable(db)
+                                        .accountId,
                               )
                               as T;
                     }
@@ -16639,11 +18524,13 @@ class $$AccountLoanTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.stakeholderId,
-                                referencedTable: $$AccountLoanTableReferences
-                                    ._stakeholderIdTable(db),
-                                referencedColumn: $$AccountLoanTableReferences
-                                    ._stakeholderIdTable(db)
-                                    .stakeholderId,
+                                referencedTable:
+                                    $$AccountFlexLoanTableReferences
+                                        ._stakeholderIdTable(db),
+                                referencedColumn:
+                                    $$AccountFlexLoanTableReferences
+                                        ._stakeholderIdTable(db)
+                                        .stakeholderId,
                               )
                               as T;
                     }
@@ -16659,19 +18546,304 @@ class $$AccountLoanTableTableManager
       );
 }
 
-typedef $$AccountLoanTableProcessedTableManager =
+typedef $$AccountFlexLoanTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $AccountLoanTable,
-      LoanAccountEntity,
-      $$AccountLoanTableFilterComposer,
-      $$AccountLoanTableOrderingComposer,
-      $$AccountLoanTableAnnotationComposer,
-      $$AccountLoanTableCreateCompanionBuilder,
-      $$AccountLoanTableUpdateCompanionBuilder,
-      (LoanAccountEntity, $$AccountLoanTableReferences),
-      LoanAccountEntity,
+      $AccountFlexLoanTable,
+      FlexLoanAccountEntity,
+      $$AccountFlexLoanTableFilterComposer,
+      $$AccountFlexLoanTableOrderingComposer,
+      $$AccountFlexLoanTableAnnotationComposer,
+      $$AccountFlexLoanTableCreateCompanionBuilder,
+      $$AccountFlexLoanTableUpdateCompanionBuilder,
+      (FlexLoanAccountEntity, $$AccountFlexLoanTableReferences),
+      FlexLoanAccountEntity,
       PrefetchHooks Function({bool accountId, bool stakeholderId})
+    >;
+typedef $$AccountInvestTableCreateCompanionBuilder =
+    AccountInvestCompanion Function({
+      Value<int> accountId,
+      required AccountInvestType type,
+      Value<String> code,
+    });
+typedef $$AccountInvestTableUpdateCompanionBuilder =
+    AccountInvestCompanion Function({
+      Value<int> accountId,
+      Value<AccountInvestType> type,
+      Value<String> code,
+    });
+
+final class $$AccountInvestTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AccountInvestTable,
+          InvestAccountEntity
+        > {
+  $$AccountInvestTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AccountTable _accountIdTable(_$AppDatabase db) =>
+      db.account.createAlias(
+        $_aliasNameGenerator(db.accountInvest.accountId, db.account.accountId),
+      );
+
+  $$AccountTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<int>('account_id')!;
+
+    final manager = $$AccountTableTableManager(
+      $_db,
+      $_db.account,
+    ).filter((f) => f.accountId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AccountInvestTableFilterComposer
+    extends Composer<_$AppDatabase, $AccountInvestTable> {
+  $$AccountInvestTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<AccountInvestType, AccountInvestType, String>
+  get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AccountTableFilterComposer get accountId {
+    final $$AccountTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.account,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTableFilterComposer(
+            $db: $db,
+            $table: $db.account,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountInvestTableOrderingComposer
+    extends Composer<_$AppDatabase, $AccountInvestTable> {
+  $$AccountInvestTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AccountTableOrderingComposer get accountId {
+    final $$AccountTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.account,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTableOrderingComposer(
+            $db: $db,
+            $table: $db.account,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountInvestTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AccountInvestTable> {
+  $$AccountInvestTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<AccountInvestType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  $$AccountTableAnnotationComposer get accountId {
+    final $$AccountTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.accountId,
+      referencedTable: $db.account,
+      getReferencedColumn: (t) => t.accountId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountTableAnnotationComposer(
+            $db: $db,
+            $table: $db.account,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AccountInvestTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AccountInvestTable,
+          InvestAccountEntity,
+          $$AccountInvestTableFilterComposer,
+          $$AccountInvestTableOrderingComposer,
+          $$AccountInvestTableAnnotationComposer,
+          $$AccountInvestTableCreateCompanionBuilder,
+          $$AccountInvestTableUpdateCompanionBuilder,
+          (InvestAccountEntity, $$AccountInvestTableReferences),
+          InvestAccountEntity,
+          PrefetchHooks Function({bool accountId})
+        > {
+  $$AccountInvestTableTableManager(_$AppDatabase db, $AccountInvestTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AccountInvestTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AccountInvestTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AccountInvestTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> accountId = const Value.absent(),
+                Value<AccountInvestType> type = const Value.absent(),
+                Value<String> code = const Value.absent(),
+              }) => AccountInvestCompanion(
+                accountId: accountId,
+                type: type,
+                code: code,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> accountId = const Value.absent(),
+                required AccountInvestType type,
+                Value<String> code = const Value.absent(),
+              }) => AccountInvestCompanion.insert(
+                accountId: accountId,
+                type: type,
+                code: code,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AccountInvestTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (accountId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.accountId,
+                                referencedTable: $$AccountInvestTableReferences
+                                    ._accountIdTable(db),
+                                referencedColumn: $$AccountInvestTableReferences
+                                    ._accountIdTable(db)
+                                    .accountId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AccountInvestTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AccountInvestTable,
+      InvestAccountEntity,
+      $$AccountInvestTableFilterComposer,
+      $$AccountInvestTableOrderingComposer,
+      $$AccountInvestTableAnnotationComposer,
+      $$AccountInvestTableCreateCompanionBuilder,
+      $$AccountInvestTableUpdateCompanionBuilder,
+      (InvestAccountEntity, $$AccountInvestTableReferences),
+      InvestAccountEntity,
+      PrefetchHooks Function({bool accountId})
     >;
 typedef $$LoanPlanTableCreateCompanionBuilder =
     LoanPlanCompanion Function({
@@ -17388,6 +19560,7 @@ typedef $$LedgerTableCreateCompanionBuilder =
       Value<String?> photo,
       Value<bool> autoAccount,
       Value<bool> autoCategory,
+      Value<bool> autoStakeholder,
       required int createdAt,
       required int updatedAt,
       Value<String> note,
@@ -17401,6 +19574,7 @@ typedef $$LedgerTableUpdateCompanionBuilder =
       Value<String?> photo,
       Value<bool> autoAccount,
       Value<bool> autoCategory,
+      Value<bool> autoStakeholder,
       Value<int> createdAt,
       Value<int> updatedAt,
       Value<String> note,
@@ -17508,6 +19682,37 @@ final class $$LedgerTableReferences
     );
   }
 
+  static MultiTypedResultKey<
+    $RelationStakeholderLedgerTable,
+    List<LedgerStakeholderRelationEntity>
+  >
+  _relationStakeholderLedgerRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.relationStakeholderLedger,
+        aliasName: $_aliasNameGenerator(
+          db.ledger.ledgerId,
+          db.relationStakeholderLedger.ledgerId,
+        ),
+      );
+
+  $$RelationStakeholderLedgerTableProcessedTableManager
+  get relationStakeholderLedgerRefs {
+    final manager =
+        $$RelationStakeholderLedgerTableTableManager(
+          $_db,
+          $_db.relationStakeholderLedger,
+        ).filter(
+          (f) => f.ledgerId.ledgerId.sqlEquals($_itemColumn<int>('ledger_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _relationStakeholderLedgerRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$TransactionsTable, List<TransactionEntity>>
   _transactionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.transactions,
@@ -17566,6 +19771,11 @@ class $$LedgerTableFilterComposer
 
   ColumnFilters<bool> get autoCategory => $composableBuilder(
     column: $table.autoCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get autoStakeholder => $composableBuilder(
+    column: $table.autoStakeholder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17684,6 +19894,33 @@ class $$LedgerTableFilterComposer
     return f(composer);
   }
 
+  Expression<bool> relationStakeholderLedgerRefs(
+    Expression<bool> Function($$RelationStakeholderLedgerTableFilterComposer f)
+    f,
+  ) {
+    final $$RelationStakeholderLedgerTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.ledgerId,
+          referencedTable: $db.relationStakeholderLedger,
+          getReferencedColumn: (t) => t.ledgerId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$RelationStakeholderLedgerTableFilterComposer(
+                $db: $db,
+                $table: $db.relationStakeholderLedger,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
   Expression<bool> transactionsRefs(
     Expression<bool> Function($$TransactionsTableFilterComposer f) f,
   ) {
@@ -17746,6 +19983,11 @@ class $$LedgerTableOrderingComposer
 
   ColumnOrderings<bool> get autoCategory => $composableBuilder(
     column: $table.autoCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get autoStakeholder => $composableBuilder(
+    column: $table.autoStakeholder,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -17818,6 +20060,11 @@ class $$LedgerTableAnnotationComposer
 
   GeneratedColumn<bool> get autoCategory => $composableBuilder(
     column: $table.autoCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get autoStakeholder => $composableBuilder(
+    column: $table.autoStakeholder,
     builder: (column) => column,
   );
 
@@ -17930,6 +20177,33 @@ class $$LedgerTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> relationStakeholderLedgerRefs<T extends Object>(
+    Expression<T> Function($$RelationStakeholderLedgerTableAnnotationComposer a)
+    f,
+  ) {
+    final $$RelationStakeholderLedgerTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.ledgerId,
+          referencedTable: $db.relationStakeholderLedger,
+          getReferencedColumn: (t) => t.ledgerId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$RelationStakeholderLedgerTableAnnotationComposer(
+                $db: $db,
+                $table: $db.relationStakeholderLedger,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
   ) {
@@ -17974,6 +20248,7 @@ class $$LedgerTableTableManager
             bool relationAccountLedgerRefs,
             bool projectRefs,
             bool relationCategoryLedgerRefs,
+            bool relationStakeholderLedgerRefs,
             bool transactionsRefs,
           })
         > {
@@ -17997,6 +20272,7 @@ class $$LedgerTableTableManager
                 Value<String?> photo = const Value.absent(),
                 Value<bool> autoAccount = const Value.absent(),
                 Value<bool> autoCategory = const Value.absent(),
+                Value<bool> autoStakeholder = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
                 Value<String> note = const Value.absent(),
@@ -18008,6 +20284,7 @@ class $$LedgerTableTableManager
                 photo: photo,
                 autoAccount: autoAccount,
                 autoCategory: autoCategory,
+                autoStakeholder: autoStakeholder,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 note: note,
@@ -18021,6 +20298,7 @@ class $$LedgerTableTableManager
                 Value<String?> photo = const Value.absent(),
                 Value<bool> autoAccount = const Value.absent(),
                 Value<bool> autoCategory = const Value.absent(),
+                Value<bool> autoStakeholder = const Value.absent(),
                 required int createdAt,
                 required int updatedAt,
                 Value<String> note = const Value.absent(),
@@ -18032,6 +20310,7 @@ class $$LedgerTableTableManager
                 photo: photo,
                 autoAccount: autoAccount,
                 autoCategory: autoCategory,
+                autoStakeholder: autoStakeholder,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 note: note,
@@ -18048,6 +20327,7 @@ class $$LedgerTableTableManager
                 relationAccountLedgerRefs = false,
                 projectRefs = false,
                 relationCategoryLedgerRefs = false,
+                relationStakeholderLedgerRefs = false,
                 transactionsRefs = false,
               }) {
                 return PrefetchHooks(
@@ -18056,6 +20336,8 @@ class $$LedgerTableTableManager
                     if (relationAccountLedgerRefs) db.relationAccountLedger,
                     if (projectRefs) db.project,
                     if (relationCategoryLedgerRefs) db.relationCategoryLedger,
+                    if (relationStakeholderLedgerRefs)
+                      db.relationStakeholderLedger,
                     if (transactionsRefs) db.transactions,
                   ],
                   addJoins:
@@ -18155,6 +20437,27 @@ class $$LedgerTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (relationStakeholderLedgerRefs)
+                        await $_getPrefetchedData<
+                          LedgerEntity,
+                          $LedgerTable,
+                          LedgerStakeholderRelationEntity
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LedgerTableReferences
+                              ._relationStakeholderLedgerRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LedgerTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).relationStakeholderLedgerRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ledgerId == item.ledgerId,
+                              ),
+                          typedResults: items,
+                        ),
                       if (transactionsRefs)
                         await $_getPrefetchedData<
                           LedgerEntity,
@@ -18201,6 +20504,7 @@ typedef $$LedgerTableProcessedTableManager =
         bool relationAccountLedgerRefs,
         bool projectRefs,
         bool relationCategoryLedgerRefs,
+        bool relationStakeholderLedgerRefs,
         bool transactionsRefs,
       })
     >;
@@ -20185,6 +22489,391 @@ typedef $$RelationCategoryLedgerTableProcessedTableManager =
       LedgerCategoryRelationEntity,
       PrefetchHooks Function({bool categoryId, bool ledgerId})
     >;
+typedef $$RelationStakeholderLedgerTableCreateCompanionBuilder =
+    RelationStakeholderLedgerCompanion Function({
+      required int stakeholderId,
+      required int ledgerId,
+      Value<int> rowid,
+    });
+typedef $$RelationStakeholderLedgerTableUpdateCompanionBuilder =
+    RelationStakeholderLedgerCompanion Function({
+      Value<int> stakeholderId,
+      Value<int> ledgerId,
+      Value<int> rowid,
+    });
+
+final class $$RelationStakeholderLedgerTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $RelationStakeholderLedgerTable,
+          LedgerStakeholderRelationEntity
+        > {
+  $$RelationStakeholderLedgerTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $StakeholderTable _stakeholderIdTable(_$AppDatabase db) =>
+      db.stakeholder.createAlias(
+        $_aliasNameGenerator(
+          db.relationStakeholderLedger.stakeholderId,
+          db.stakeholder.stakeholderId,
+        ),
+      );
+
+  $$StakeholderTableProcessedTableManager get stakeholderId {
+    final $_column = $_itemColumn<int>('stakeholder_id')!;
+
+    final manager = $$StakeholderTableTableManager(
+      $_db,
+      $_db.stakeholder,
+    ).filter((f) => f.stakeholderId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_stakeholderIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $LedgerTable _ledgerIdTable(_$AppDatabase db) => db.ledger.createAlias(
+    $_aliasNameGenerator(
+      db.relationStakeholderLedger.ledgerId,
+      db.ledger.ledgerId,
+    ),
+  );
+
+  $$LedgerTableProcessedTableManager get ledgerId {
+    final $_column = $_itemColumn<int>('ledger_id')!;
+
+    final manager = $$LedgerTableTableManager(
+      $_db,
+      $_db.ledger,
+    ).filter((f) => f.ledgerId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ledgerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$RelationStakeholderLedgerTableFilterComposer
+    extends Composer<_$AppDatabase, $RelationStakeholderLedgerTable> {
+  $$RelationStakeholderLedgerTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$StakeholderTableFilterComposer get stakeholderId {
+    final $$StakeholderTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.stakeholder,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StakeholderTableFilterComposer(
+            $db: $db,
+            $table: $db.stakeholder,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LedgerTableFilterComposer get ledgerId {
+    final $$LedgerTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ledgerId,
+      referencedTable: $db.ledger,
+      getReferencedColumn: (t) => t.ledgerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LedgerTableFilterComposer(
+            $db: $db,
+            $table: $db.ledger,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RelationStakeholderLedgerTableOrderingComposer
+    extends Composer<_$AppDatabase, $RelationStakeholderLedgerTable> {
+  $$RelationStakeholderLedgerTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$StakeholderTableOrderingComposer get stakeholderId {
+    final $$StakeholderTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.stakeholder,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StakeholderTableOrderingComposer(
+            $db: $db,
+            $table: $db.stakeholder,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LedgerTableOrderingComposer get ledgerId {
+    final $$LedgerTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ledgerId,
+      referencedTable: $db.ledger,
+      getReferencedColumn: (t) => t.ledgerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LedgerTableOrderingComposer(
+            $db: $db,
+            $table: $db.ledger,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RelationStakeholderLedgerTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RelationStakeholderLedgerTable> {
+  $$RelationStakeholderLedgerTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$StakeholderTableAnnotationComposer get stakeholderId {
+    final $$StakeholderTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stakeholderId,
+      referencedTable: $db.stakeholder,
+      getReferencedColumn: (t) => t.stakeholderId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StakeholderTableAnnotationComposer(
+            $db: $db,
+            $table: $db.stakeholder,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LedgerTableAnnotationComposer get ledgerId {
+    final $$LedgerTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ledgerId,
+      referencedTable: $db.ledger,
+      getReferencedColumn: (t) => t.ledgerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LedgerTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ledger,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RelationStakeholderLedgerTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RelationStakeholderLedgerTable,
+          LedgerStakeholderRelationEntity,
+          $$RelationStakeholderLedgerTableFilterComposer,
+          $$RelationStakeholderLedgerTableOrderingComposer,
+          $$RelationStakeholderLedgerTableAnnotationComposer,
+          $$RelationStakeholderLedgerTableCreateCompanionBuilder,
+          $$RelationStakeholderLedgerTableUpdateCompanionBuilder,
+          (
+            LedgerStakeholderRelationEntity,
+            $$RelationStakeholderLedgerTableReferences,
+          ),
+          LedgerStakeholderRelationEntity,
+          PrefetchHooks Function({bool stakeholderId, bool ledgerId})
+        > {
+  $$RelationStakeholderLedgerTableTableManager(
+    _$AppDatabase db,
+    $RelationStakeholderLedgerTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RelationStakeholderLedgerTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$RelationStakeholderLedgerTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$RelationStakeholderLedgerTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> stakeholderId = const Value.absent(),
+                Value<int> ledgerId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RelationStakeholderLedgerCompanion(
+                stakeholderId: stakeholderId,
+                ledgerId: ledgerId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int stakeholderId,
+                required int ledgerId,
+                Value<int> rowid = const Value.absent(),
+              }) => RelationStakeholderLedgerCompanion.insert(
+                stakeholderId: stakeholderId,
+                ledgerId: ledgerId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RelationStakeholderLedgerTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({stakeholderId = false, ledgerId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (stakeholderId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.stakeholderId,
+                                referencedTable:
+                                    $$RelationStakeholderLedgerTableReferences
+                                        ._stakeholderIdTable(db),
+                                referencedColumn:
+                                    $$RelationStakeholderLedgerTableReferences
+                                        ._stakeholderIdTable(db)
+                                        .stakeholderId,
+                              )
+                              as T;
+                    }
+                    if (ledgerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.ledgerId,
+                                referencedTable:
+                                    $$RelationStakeholderLedgerTableReferences
+                                        ._ledgerIdTable(db),
+                                referencedColumn:
+                                    $$RelationStakeholderLedgerTableReferences
+                                        ._ledgerIdTable(db)
+                                        .ledgerId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$RelationStakeholderLedgerTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RelationStakeholderLedgerTable,
+      LedgerStakeholderRelationEntity,
+      $$RelationStakeholderLedgerTableFilterComposer,
+      $$RelationStakeholderLedgerTableOrderingComposer,
+      $$RelationStakeholderLedgerTableAnnotationComposer,
+      $$RelationStakeholderLedgerTableCreateCompanionBuilder,
+      $$RelationStakeholderLedgerTableUpdateCompanionBuilder,
+      (
+        LedgerStakeholderRelationEntity,
+        $$RelationStakeholderLedgerTableReferences,
+      ),
+      LedgerStakeholderRelationEntity,
+      PrefetchHooks Function({bool stakeholderId, bool ledgerId})
+    >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
       Value<int> transactionId,
@@ -20196,9 +22885,6 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<int?> stakeholderId,
       Value<bool> hidden,
       Value<bool> excluded,
-      Value<String?> locationName,
-      Value<double?> locationLat,
-      Value<double?> locationLng,
       Value<String> note,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
@@ -20212,9 +22898,6 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<int?> stakeholderId,
       Value<bool> hidden,
       Value<bool> excluded,
-      Value<String?> locationName,
-      Value<double?> locationLat,
-      Value<double?> locationLng,
       Value<String> note,
     });
 
@@ -20260,6 +22943,31 @@ final class $$TransactionsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$TransactionMetaTable, List<TransactionMetaEntity>>
+  _transactionMetaRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.transactionMeta,
+    aliasName: $_aliasNameGenerator(
+      db.transactions.transactionId,
+      db.transactionMeta.transactionId,
+    ),
+  );
+
+  $$TransactionMetaTableProcessedTableManager get transactionMetaRefs {
+    final manager =
+        $$TransactionMetaTableTableManager($_db, $_db.transactionMeta).filter(
+          (f) => f.transactionId.transactionId.sqlEquals(
+            $_itemColumn<int>('transaction_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _transactionMetaRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -20330,24 +23038,24 @@ final class $$TransactionsTableReferences
   }
 
   static MultiTypedResultKey<
-    $TransactionInstallmentDetailTable,
-    List<TransactionInstallmentDetailEntity>
+    $TransactionInstallmentPlanTable,
+    List<TransactionInstallmentPlanEntity>
   >
-  _transactionInstallmentDetailRefsTable(_$AppDatabase db) =>
+  _transactionInstallmentPlanRefsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
-        db.transactionInstallmentDetail,
+        db.transactionInstallmentPlan,
         aliasName: $_aliasNameGenerator(
           db.transactions.transactionId,
-          db.transactionInstallmentDetail.transactionId,
+          db.transactionInstallmentPlan.transactionId,
         ),
       );
 
-  $$TransactionInstallmentDetailTableProcessedTableManager
-  get transactionInstallmentDetailRefs {
+  $$TransactionInstallmentPlanTableProcessedTableManager
+  get transactionInstallmentPlanRefs {
     final manager =
-        $$TransactionInstallmentDetailTableTableManager(
+        $$TransactionInstallmentPlanTableTableManager(
           $_db,
-          $_db.transactionInstallmentDetail,
+          $_db.transactionInstallmentPlan,
         ).filter(
           (f) => f.transactionId.transactionId.sqlEquals(
             $_itemColumn<int>('transaction_id')!,
@@ -20355,7 +23063,7 @@ final class $$TransactionsTableReferences
         );
 
     final cache = $_typedResult.readTableOrNull(
-      _transactionInstallmentDetailRefsTable($_db),
+      _transactionInstallmentPlanRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -20528,21 +23236,6 @@ class $$TransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get locationName => $composableBuilder(
-    column: $table.locationName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get locationLat => $composableBuilder(
-    column: $table.locationLat,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get locationLng => $composableBuilder(
-    column: $table.locationLng,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnFilters(column),
@@ -20592,6 +23285,31 @@ class $$TransactionsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> transactionMetaRefs(
+    Expression<bool> Function($$TransactionMetaTableFilterComposer f) f,
+  ) {
+    final $$TransactionMetaTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactionMeta,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionMetaTableFilterComposer(
+            $db: $db,
+            $table: $db.transactionMeta,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> transactionAmountDetailRefs(
@@ -20647,26 +23365,24 @@ class $$TransactionsTableFilterComposer
     return f(composer);
   }
 
-  Expression<bool> transactionInstallmentDetailRefs(
-    Expression<bool> Function(
-      $$TransactionInstallmentDetailTableFilterComposer f,
-    )
+  Expression<bool> transactionInstallmentPlanRefs(
+    Expression<bool> Function($$TransactionInstallmentPlanTableFilterComposer f)
     f,
   ) {
-    final $$TransactionInstallmentDetailTableFilterComposer composer =
+    final $$TransactionInstallmentPlanTableFilterComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.transactionId,
-          referencedTable: $db.transactionInstallmentDetail,
+          referencedTable: $db.transactionInstallmentPlan,
           getReferencedColumn: (t) => t.transactionId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableFilterComposer(
+              }) => $$TransactionInstallmentPlanTableFilterComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -20823,21 +23539,6 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get locationName => $composableBuilder(
-    column: $table.locationName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get locationLat => $composableBuilder(
-    column: $table.locationLat,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get locationLng => $composableBuilder(
-    column: $table.locationLng,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
@@ -20922,21 +23623,6 @@ class $$TransactionsTableAnnotationComposer
   GeneratedColumn<bool> get excluded =>
       $composableBuilder(column: $table.excluded, builder: (column) => column);
 
-  GeneratedColumn<String> get locationName => $composableBuilder(
-    column: $table.locationName,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get locationLat => $composableBuilder(
-    column: $table.locationLat,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get locationLng => $composableBuilder(
-    column: $table.locationLng,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
 
@@ -20984,6 +23670,31 @@ class $$TransactionsTableAnnotationComposer
           ),
     );
     return composer;
+  }
+
+  Expression<T> transactionMetaRefs<T extends Object>(
+    Expression<T> Function($$TransactionMetaTableAnnotationComposer a) f,
+  ) {
+    final $$TransactionMetaTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactionMeta,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionMetaTableAnnotationComposer(
+            $db: $db,
+            $table: $db.transactionMeta,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<T> transactionAmountDetailRefs<T extends Object>(
@@ -21040,26 +23751,26 @@ class $$TransactionsTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> transactionInstallmentDetailRefs<T extends Object>(
+  Expression<T> transactionInstallmentPlanRefs<T extends Object>(
     Expression<T> Function(
-      $$TransactionInstallmentDetailTableAnnotationComposer a,
+      $$TransactionInstallmentPlanTableAnnotationComposer a,
     )
     f,
   ) {
-    final $$TransactionInstallmentDetailTableAnnotationComposer composer =
+    final $$TransactionInstallmentPlanTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.transactionId,
-          referencedTable: $db.transactionInstallmentDetail,
+          referencedTable: $db.transactionInstallmentPlan,
           getReferencedColumn: (t) => t.transactionId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableAnnotationComposer(
+              }) => $$TransactionInstallmentPlanTableAnnotationComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -21192,9 +23903,10 @@ class $$TransactionsTableTableManager
           PrefetchHooks Function({
             bool ledgerId,
             bool stakeholderId,
+            bool transactionMetaRefs,
             bool transactionAmountDetailRefs,
             bool transactionCategoryDetailRefs,
-            bool transactionInstallmentDetailRefs,
+            bool transactionInstallmentPlanRefs,
             bool transactionReduceRefs,
             bool transactionRefundRefs,
             bool relationProjectTransactionRefs,
@@ -21223,9 +23935,6 @@ class $$TransactionsTableTableManager
                 Value<int?> stakeholderId = const Value.absent(),
                 Value<bool> hidden = const Value.absent(),
                 Value<bool> excluded = const Value.absent(),
-                Value<String?> locationName = const Value.absent(),
-                Value<double?> locationLat = const Value.absent(),
-                Value<double?> locationLng = const Value.absent(),
                 Value<String> note = const Value.absent(),
               }) => TransactionsCompanion(
                 transactionId: transactionId,
@@ -21237,9 +23946,6 @@ class $$TransactionsTableTableManager
                 stakeholderId: stakeholderId,
                 hidden: hidden,
                 excluded: excluded,
-                locationName: locationName,
-                locationLat: locationLat,
-                locationLng: locationLng,
                 note: note,
               ),
           createCompanionCallback:
@@ -21253,9 +23959,6 @@ class $$TransactionsTableTableManager
                 Value<int?> stakeholderId = const Value.absent(),
                 Value<bool> hidden = const Value.absent(),
                 Value<bool> excluded = const Value.absent(),
-                Value<String?> locationName = const Value.absent(),
-                Value<double?> locationLat = const Value.absent(),
-                Value<double?> locationLng = const Value.absent(),
                 Value<String> note = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 transactionId: transactionId,
@@ -21267,9 +23970,6 @@ class $$TransactionsTableTableManager
                 stakeholderId: stakeholderId,
                 hidden: hidden,
                 excluded: excluded,
-                locationName: locationName,
-                locationLat: locationLat,
-                locationLng: locationLng,
                 note: note,
               ),
           withReferenceMapper: (p0) => p0
@@ -21284,9 +23984,10 @@ class $$TransactionsTableTableManager
               ({
                 ledgerId = false,
                 stakeholderId = false,
+                transactionMetaRefs = false,
                 transactionAmountDetailRefs = false,
                 transactionCategoryDetailRefs = false,
-                transactionInstallmentDetailRefs = false,
+                transactionInstallmentPlanRefs = false,
                 transactionReduceRefs = false,
                 transactionRefundRefs = false,
                 relationProjectTransactionRefs = false,
@@ -21295,11 +23996,12 @@ class $$TransactionsTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (transactionMetaRefs) db.transactionMeta,
                     if (transactionAmountDetailRefs) db.transactionAmountDetail,
                     if (transactionCategoryDetailRefs)
                       db.transactionCategoryDetail,
-                    if (transactionInstallmentDetailRefs)
-                      db.transactionInstallmentDetail,
+                    if (transactionInstallmentPlanRefs)
+                      db.transactionInstallmentPlan,
                     if (transactionReduceRefs) db.transactionReduce,
                     if (transactionRefundRefs) db.transactionRefund,
                     if (relationProjectTransactionRefs)
@@ -21357,6 +24059,27 @@ class $$TransactionsTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (transactionMetaRefs)
+                        await $_getPrefetchedData<
+                          TransactionEntity,
+                          $TransactionsTable,
+                          TransactionMetaEntity
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TransactionsTableReferences
+                              ._transactionMetaRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TransactionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).transactionMetaRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.transactionId == item.transactionId,
+                              ),
+                          typedResults: items,
+                        ),
                       if (transactionAmountDetailRefs)
                         await $_getPrefetchedData<
                           TransactionEntity,
@@ -21399,21 +24122,21 @@ class $$TransactionsTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (transactionInstallmentDetailRefs)
+                      if (transactionInstallmentPlanRefs)
                         await $_getPrefetchedData<
                           TransactionEntity,
                           $TransactionsTable,
-                          TransactionInstallmentDetailEntity
+                          TransactionInstallmentPlanEntity
                         >(
                           currentTable: table,
                           referencedTable: $$TransactionsTableReferences
-                              ._transactionInstallmentDetailRefsTable(db),
+                              ._transactionInstallmentPlanRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$TransactionsTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).transactionInstallmentDetailRefs,
+                              ).transactionInstallmentPlanRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.transactionId == item.transactionId,
@@ -21527,14 +24250,336 @@ typedef $$TransactionsTableProcessedTableManager =
       PrefetchHooks Function({
         bool ledgerId,
         bool stakeholderId,
+        bool transactionMetaRefs,
         bool transactionAmountDetailRefs,
         bool transactionCategoryDetailRefs,
-        bool transactionInstallmentDetailRefs,
+        bool transactionInstallmentPlanRefs,
         bool transactionReduceRefs,
         bool transactionRefundRefs,
         bool relationProjectTransactionRefs,
         bool reimbursementRefs,
       })
+    >;
+typedef $$TransactionMetaTableCreateCompanionBuilder =
+    TransactionMetaCompanion Function({
+      required int transactionId,
+      required TransactionMetaScope scope,
+      required String key,
+      required String value,
+      Value<int> rowid,
+    });
+typedef $$TransactionMetaTableUpdateCompanionBuilder =
+    TransactionMetaCompanion Function({
+      Value<int> transactionId,
+      Value<TransactionMetaScope> scope,
+      Value<String> key,
+      Value<String> value,
+      Value<int> rowid,
+    });
+
+final class $$TransactionMetaTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $TransactionMetaTable,
+          TransactionMetaEntity
+        > {
+  $$TransactionMetaTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
+      db.transactions.createAlias(
+        $_aliasNameGenerator(
+          db.transactionMeta.transactionId,
+          db.transactions.transactionId,
+        ),
+      );
+
+  $$TransactionsTableProcessedTableManager get transactionId {
+    final $_column = $_itemColumn<int>('transaction_id')!;
+
+    final manager = $$TransactionsTableTableManager(
+      $_db,
+      $_db.transactions,
+    ).filter((f) => f.transactionId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_transactionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$TransactionMetaTableFilterComposer
+    extends Composer<_$AppDatabase, $TransactionMetaTable> {
+  $$TransactionMetaTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<
+    TransactionMetaScope,
+    TransactionMetaScope,
+    String
+  >
+  get scope => $composableBuilder(
+    column: $table.scope,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$TransactionsTableFilterComposer get transactionId {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableFilterComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TransactionMetaTableOrderingComposer
+    extends Composer<_$AppDatabase, $TransactionMetaTable> {
+  $$TransactionMetaTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get scope => $composableBuilder(
+    column: $table.scope,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$TransactionsTableOrderingComposer get transactionId {
+    final $$TransactionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TransactionMetaTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TransactionMetaTable> {
+  $$TransactionMetaTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<TransactionMetaScope, String> get scope =>
+      $composableBuilder(column: $table.scope, builder: (column) => column);
+
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  $$TransactionsTableAnnotationComposer get transactionId {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.transactionId,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.transactionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TransactionMetaTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TransactionMetaTable,
+          TransactionMetaEntity,
+          $$TransactionMetaTableFilterComposer,
+          $$TransactionMetaTableOrderingComposer,
+          $$TransactionMetaTableAnnotationComposer,
+          $$TransactionMetaTableCreateCompanionBuilder,
+          $$TransactionMetaTableUpdateCompanionBuilder,
+          (TransactionMetaEntity, $$TransactionMetaTableReferences),
+          TransactionMetaEntity,
+          PrefetchHooks Function({bool transactionId})
+        > {
+  $$TransactionMetaTableTableManager(
+    _$AppDatabase db,
+    $TransactionMetaTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TransactionMetaTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TransactionMetaTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TransactionMetaTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> transactionId = const Value.absent(),
+                Value<TransactionMetaScope> scope = const Value.absent(),
+                Value<String> key = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TransactionMetaCompanion(
+                transactionId: transactionId,
+                scope: scope,
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int transactionId,
+                required TransactionMetaScope scope,
+                required String key,
+                required String value,
+                Value<int> rowid = const Value.absent(),
+              }) => TransactionMetaCompanion.insert(
+                transactionId: transactionId,
+                scope: scope,
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$TransactionMetaTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({transactionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (transactionId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.transactionId,
+                                referencedTable:
+                                    $$TransactionMetaTableReferences
+                                        ._transactionIdTable(db),
+                                referencedColumn:
+                                    $$TransactionMetaTableReferences
+                                        ._transactionIdTable(db)
+                                        .transactionId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$TransactionMetaTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TransactionMetaTable,
+      TransactionMetaEntity,
+      $$TransactionMetaTableFilterComposer,
+      $$TransactionMetaTableOrderingComposer,
+      $$TransactionMetaTableAnnotationComposer,
+      $$TransactionMetaTableCreateCompanionBuilder,
+      $$TransactionMetaTableUpdateCompanionBuilder,
+      (TransactionMetaEntity, $$TransactionMetaTableReferences),
+      TransactionMetaEntity,
+      PrefetchHooks Function({bool transactionId})
     >;
 typedef $$TransactionAmountDetailTableCreateCompanionBuilder =
     TransactionAmountDetailCompanion Function({
@@ -22665,29 +25710,29 @@ typedef $$TransactionCategoryDetailTableProcessedTableManager =
         bool currencyCode,
       })
     >;
-typedef $$TransactionInstallmentDetailTableCreateCompanionBuilder =
-    TransactionInstallmentDetailCompanion Function({
-      Value<int> installmentDetailId,
+typedef $$TransactionInstallmentPlanTableCreateCompanionBuilder =
+    TransactionInstallmentPlanCompanion Function({
+      Value<int> installmentPlanId,
       required int transactionId,
       required int accountId,
       required String currencyCode,
     });
-typedef $$TransactionInstallmentDetailTableUpdateCompanionBuilder =
-    TransactionInstallmentDetailCompanion Function({
-      Value<int> installmentDetailId,
+typedef $$TransactionInstallmentPlanTableUpdateCompanionBuilder =
+    TransactionInstallmentPlanCompanion Function({
+      Value<int> installmentPlanId,
       Value<int> transactionId,
       Value<int> accountId,
       Value<String> currencyCode,
     });
 
-final class $$TransactionInstallmentDetailTableReferences
+final class $$TransactionInstallmentPlanTableReferences
     extends
         BaseReferences<
           _$AppDatabase,
-          $TransactionInstallmentDetailTable,
-          TransactionInstallmentDetailEntity
+          $TransactionInstallmentPlanTable,
+          TransactionInstallmentPlanEntity
         > {
-  $$TransactionInstallmentDetailTableReferences(
+  $$TransactionInstallmentPlanTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
@@ -22696,7 +25741,7 @@ final class $$TransactionInstallmentDetailTableReferences
   static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
       db.transactions.createAlias(
         $_aliasNameGenerator(
-          db.transactionInstallmentDetail.transactionId,
+          db.transactionInstallmentPlan.transactionId,
           db.transactions.transactionId,
         ),
       );
@@ -22718,7 +25763,7 @@ final class $$TransactionInstallmentDetailTableReferences
   static $AccountTable _accountIdTable(_$AppDatabase db) =>
       db.account.createAlias(
         $_aliasNameGenerator(
-          db.transactionInstallmentDetail.accountId,
+          db.transactionInstallmentPlan.accountId,
           db.account.accountId,
         ),
       );
@@ -22740,7 +25785,7 @@ final class $$TransactionInstallmentDetailTableReferences
   static $CurrencyTable _currencyCodeTable(_$AppDatabase db) =>
       db.currency.createAlias(
         $_aliasNameGenerator(
-          db.transactionInstallmentDetail.currencyCode,
+          db.transactionInstallmentPlan.currencyCode,
           db.currency.currencyCode,
         ),
       );
@@ -22767,8 +25812,8 @@ final class $$TransactionInstallmentDetailTableReferences
       MultiTypedResultKey.fromTable(
         db.transactionInstallmentItem,
         aliasName: $_aliasNameGenerator(
-          db.transactionInstallmentDetail.installmentDetailId,
-          db.transactionInstallmentItem.installmentDetailId,
+          db.transactionInstallmentPlan.installmentPlanId,
+          db.transactionInstallmentItem.installmentPlanId,
         ),
       );
 
@@ -22779,8 +25824,8 @@ final class $$TransactionInstallmentDetailTableReferences
           $_db,
           $_db.transactionInstallmentItem,
         ).filter(
-          (f) => f.installmentDetailId.installmentDetailId.sqlEquals(
-            $_itemColumn<int>('installment_detail_id')!,
+          (f) => f.installmentPlanId.installmentPlanId.sqlEquals(
+            $_itemColumn<int>('installment_plan_id')!,
           ),
         );
 
@@ -22793,17 +25838,17 @@ final class $$TransactionInstallmentDetailTableReferences
   }
 }
 
-class $$TransactionInstallmentDetailTableFilterComposer
-    extends Composer<_$AppDatabase, $TransactionInstallmentDetailTable> {
-  $$TransactionInstallmentDetailTableFilterComposer({
+class $$TransactionInstallmentPlanTableFilterComposer
+    extends Composer<_$AppDatabase, $TransactionInstallmentPlanTable> {
+  $$TransactionInstallmentPlanTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get installmentDetailId => $composableBuilder(
-    column: $table.installmentDetailId,
+  ColumnFilters<int> get installmentPlanId => $composableBuilder(
+    column: $table.installmentPlanId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22883,9 +25928,9 @@ class $$TransactionInstallmentDetailTableFilterComposer
     final $$TransactionInstallmentItemTableFilterComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.installmentDetailId,
+          getCurrentColumn: (t) => t.installmentPlanId,
           referencedTable: $db.transactionInstallmentItem,
-          getReferencedColumn: (t) => t.installmentDetailId,
+          getReferencedColumn: (t) => t.installmentPlanId,
           builder:
               (
                 joinBuilder, {
@@ -22904,17 +25949,17 @@ class $$TransactionInstallmentDetailTableFilterComposer
   }
 }
 
-class $$TransactionInstallmentDetailTableOrderingComposer
-    extends Composer<_$AppDatabase, $TransactionInstallmentDetailTable> {
-  $$TransactionInstallmentDetailTableOrderingComposer({
+class $$TransactionInstallmentPlanTableOrderingComposer
+    extends Composer<_$AppDatabase, $TransactionInstallmentPlanTable> {
+  $$TransactionInstallmentPlanTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get installmentDetailId => $composableBuilder(
-    column: $table.installmentDetailId,
+  ColumnOrderings<int> get installmentPlanId => $composableBuilder(
+    column: $table.installmentPlanId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -22988,17 +26033,17 @@ class $$TransactionInstallmentDetailTableOrderingComposer
   }
 }
 
-class $$TransactionInstallmentDetailTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TransactionInstallmentDetailTable> {
-  $$TransactionInstallmentDetailTableAnnotationComposer({
+class $$TransactionInstallmentPlanTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TransactionInstallmentPlanTable> {
+  $$TransactionInstallmentPlanTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get installmentDetailId => $composableBuilder(
-    column: $table.installmentDetailId,
+  GeneratedColumn<int> get installmentPlanId => $composableBuilder(
+    column: $table.installmentPlanId,
     builder: (column) => column,
   );
 
@@ -23080,9 +26125,9 @@ class $$TransactionInstallmentDetailTableAnnotationComposer
     final $$TransactionInstallmentItemTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.installmentDetailId,
+          getCurrentColumn: (t) => t.installmentPlanId,
           referencedTable: $db.transactionInstallmentItem,
-          getReferencedColumn: (t) => t.installmentDetailId,
+          getReferencedColumn: (t) => t.installmentPlanId,
           builder:
               (
                 joinBuilder, {
@@ -23101,22 +26146,22 @@ class $$TransactionInstallmentDetailTableAnnotationComposer
   }
 }
 
-class $$TransactionInstallmentDetailTableTableManager
+class $$TransactionInstallmentPlanTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $TransactionInstallmentDetailTable,
-          TransactionInstallmentDetailEntity,
-          $$TransactionInstallmentDetailTableFilterComposer,
-          $$TransactionInstallmentDetailTableOrderingComposer,
-          $$TransactionInstallmentDetailTableAnnotationComposer,
-          $$TransactionInstallmentDetailTableCreateCompanionBuilder,
-          $$TransactionInstallmentDetailTableUpdateCompanionBuilder,
+          $TransactionInstallmentPlanTable,
+          TransactionInstallmentPlanEntity,
+          $$TransactionInstallmentPlanTableFilterComposer,
+          $$TransactionInstallmentPlanTableOrderingComposer,
+          $$TransactionInstallmentPlanTableAnnotationComposer,
+          $$TransactionInstallmentPlanTableCreateCompanionBuilder,
+          $$TransactionInstallmentPlanTableUpdateCompanionBuilder,
           (
-            TransactionInstallmentDetailEntity,
-            $$TransactionInstallmentDetailTableReferences,
+            TransactionInstallmentPlanEntity,
+            $$TransactionInstallmentPlanTableReferences,
           ),
-          TransactionInstallmentDetailEntity,
+          TransactionInstallmentPlanEntity,
           PrefetchHooks Function({
             bool transactionId,
             bool accountId,
@@ -23124,48 +26169,48 @@ class $$TransactionInstallmentDetailTableTableManager
             bool transactionInstallmentItemRefs,
           })
         > {
-  $$TransactionInstallmentDetailTableTableManager(
+  $$TransactionInstallmentPlanTableTableManager(
     _$AppDatabase db,
-    $TransactionInstallmentDetailTable table,
+    $TransactionInstallmentPlanTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$TransactionInstallmentDetailTableFilterComposer(
+              $$TransactionInstallmentPlanTableFilterComposer(
                 $db: db,
                 $table: table,
               ),
           createOrderingComposer: () =>
-              $$TransactionInstallmentDetailTableOrderingComposer(
+              $$TransactionInstallmentPlanTableOrderingComposer(
                 $db: db,
                 $table: table,
               ),
           createComputedFieldComposer: () =>
-              $$TransactionInstallmentDetailTableAnnotationComposer(
+              $$TransactionInstallmentPlanTableAnnotationComposer(
                 $db: db,
                 $table: table,
               ),
           updateCompanionCallback:
               ({
-                Value<int> installmentDetailId = const Value.absent(),
+                Value<int> installmentPlanId = const Value.absent(),
                 Value<int> transactionId = const Value.absent(),
                 Value<int> accountId = const Value.absent(),
                 Value<String> currencyCode = const Value.absent(),
-              }) => TransactionInstallmentDetailCompanion(
-                installmentDetailId: installmentDetailId,
+              }) => TransactionInstallmentPlanCompanion(
+                installmentPlanId: installmentPlanId,
                 transactionId: transactionId,
                 accountId: accountId,
                 currencyCode: currencyCode,
               ),
           createCompanionCallback:
               ({
-                Value<int> installmentDetailId = const Value.absent(),
+                Value<int> installmentPlanId = const Value.absent(),
                 required int transactionId,
                 required int accountId,
                 required String currencyCode,
-              }) => TransactionInstallmentDetailCompanion.insert(
-                installmentDetailId: installmentDetailId,
+              }) => TransactionInstallmentPlanCompanion.insert(
+                installmentPlanId: installmentPlanId,
                 transactionId: transactionId,
                 accountId: accountId,
                 currencyCode: currencyCode,
@@ -23174,7 +26219,7 @@ class $$TransactionInstallmentDetailTableTableManager
               .map(
                 (e) => (
                   e.readTable(table),
-                  $$TransactionInstallmentDetailTableReferences(db, table, e),
+                  $$TransactionInstallmentPlanTableReferences(db, table, e),
                 ),
               )
               .toList(),
@@ -23213,10 +26258,10 @@ class $$TransactionInstallmentDetailTableTableManager
                                     currentTable: table,
                                     currentColumn: table.transactionId,
                                     referencedTable:
-                                        $$TransactionInstallmentDetailTableReferences
+                                        $$TransactionInstallmentPlanTableReferences
                                             ._transactionIdTable(db),
                                     referencedColumn:
-                                        $$TransactionInstallmentDetailTableReferences
+                                        $$TransactionInstallmentPlanTableReferences
                                             ._transactionIdTable(db)
                                             .transactionId,
                                   )
@@ -23228,10 +26273,10 @@ class $$TransactionInstallmentDetailTableTableManager
                                     currentTable: table,
                                     currentColumn: table.accountId,
                                     referencedTable:
-                                        $$TransactionInstallmentDetailTableReferences
+                                        $$TransactionInstallmentPlanTableReferences
                                             ._accountIdTable(db),
                                     referencedColumn:
-                                        $$TransactionInstallmentDetailTableReferences
+                                        $$TransactionInstallmentPlanTableReferences
                                             ._accountIdTable(db)
                                             .accountId,
                                   )
@@ -23243,10 +26288,10 @@ class $$TransactionInstallmentDetailTableTableManager
                                     currentTable: table,
                                     currentColumn: table.currencyCode,
                                     referencedTable:
-                                        $$TransactionInstallmentDetailTableReferences
+                                        $$TransactionInstallmentPlanTableReferences
                                             ._currencyCodeTable(db),
                                     referencedColumn:
-                                        $$TransactionInstallmentDetailTableReferences
+                                        $$TransactionInstallmentPlanTableReferences
                                             ._currencyCodeTable(db)
                                             .currencyCode,
                                   )
@@ -23259,16 +26304,16 @@ class $$TransactionInstallmentDetailTableTableManager
                     return [
                       if (transactionInstallmentItemRefs)
                         await $_getPrefetchedData<
-                          TransactionInstallmentDetailEntity,
-                          $TransactionInstallmentDetailTable,
+                          TransactionInstallmentPlanEntity,
+                          $TransactionInstallmentPlanTable,
                           TransactionInstallmentItemEntity
                         >(
                           currentTable: table,
                           referencedTable:
-                              $$TransactionInstallmentDetailTableReferences
+                              $$TransactionInstallmentPlanTableReferences
                                   ._transactionInstallmentItemRefsTable(db),
                           managerFromTypedResult: (p0) =>
-                              $$TransactionInstallmentDetailTableReferences(
+                              $$TransactionInstallmentPlanTableReferences(
                                 db,
                                 table,
                                 p0,
@@ -23276,8 +26321,8 @@ class $$TransactionInstallmentDetailTableTableManager
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) =>
-                                    e.installmentDetailId ==
-                                    item.installmentDetailId,
+                                    e.installmentPlanId ==
+                                    item.installmentPlanId,
                               ),
                           typedResults: items,
                         ),
@@ -23289,21 +26334,21 @@ class $$TransactionInstallmentDetailTableTableManager
       );
 }
 
-typedef $$TransactionInstallmentDetailTableProcessedTableManager =
+typedef $$TransactionInstallmentPlanTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $TransactionInstallmentDetailTable,
-      TransactionInstallmentDetailEntity,
-      $$TransactionInstallmentDetailTableFilterComposer,
-      $$TransactionInstallmentDetailTableOrderingComposer,
-      $$TransactionInstallmentDetailTableAnnotationComposer,
-      $$TransactionInstallmentDetailTableCreateCompanionBuilder,
-      $$TransactionInstallmentDetailTableUpdateCompanionBuilder,
+      $TransactionInstallmentPlanTable,
+      TransactionInstallmentPlanEntity,
+      $$TransactionInstallmentPlanTableFilterComposer,
+      $$TransactionInstallmentPlanTableOrderingComposer,
+      $$TransactionInstallmentPlanTableAnnotationComposer,
+      $$TransactionInstallmentPlanTableCreateCompanionBuilder,
+      $$TransactionInstallmentPlanTableUpdateCompanionBuilder,
       (
-        TransactionInstallmentDetailEntity,
-        $$TransactionInstallmentDetailTableReferences,
+        TransactionInstallmentPlanEntity,
+        $$TransactionInstallmentPlanTableReferences,
       ),
-      TransactionInstallmentDetailEntity,
+      TransactionInstallmentPlanEntity,
       PrefetchHooks Function({
         bool transactionId,
         bool accountId,
@@ -23314,7 +26359,7 @@ typedef $$TransactionInstallmentDetailTableProcessedTableManager =
 typedef $$TransactionInstallmentItemTableCreateCompanionBuilder =
     TransactionInstallmentItemCompanion Function({
       Value<int> installmentItemId,
-      required int installmentDetailId,
+      required int installmentPlanId,
       required int installmentNumber,
       required int dueDate,
       required int capitalAmount,
@@ -23325,7 +26370,7 @@ typedef $$TransactionInstallmentItemTableCreateCompanionBuilder =
 typedef $$TransactionInstallmentItemTableUpdateCompanionBuilder =
     TransactionInstallmentItemCompanion Function({
       Value<int> installmentItemId,
-      Value<int> installmentDetailId,
+      Value<int> installmentPlanId,
       Value<int> installmentNumber,
       Value<int> dueDate,
       Value<int> capitalAmount,
@@ -23347,24 +26392,23 @@ final class $$TransactionInstallmentItemTableReferences
     super.$_typedResult,
   );
 
-  static $TransactionInstallmentDetailTable _installmentDetailIdTable(
+  static $TransactionInstallmentPlanTable _installmentPlanIdTable(
     _$AppDatabase db,
-  ) => db.transactionInstallmentDetail.createAlias(
+  ) => db.transactionInstallmentPlan.createAlias(
     $_aliasNameGenerator(
-      db.transactionInstallmentItem.installmentDetailId,
-      db.transactionInstallmentDetail.installmentDetailId,
+      db.transactionInstallmentItem.installmentPlanId,
+      db.transactionInstallmentPlan.installmentPlanId,
     ),
   );
 
-  $$TransactionInstallmentDetailTableProcessedTableManager
-  get installmentDetailId {
-    final $_column = $_itemColumn<int>('installment_detail_id')!;
+  $$TransactionInstallmentPlanTableProcessedTableManager get installmentPlanId {
+    final $_column = $_itemColumn<int>('installment_plan_id')!;
 
-    final manager = $$TransactionInstallmentDetailTableTableManager(
+    final manager = $$TransactionInstallmentPlanTableTableManager(
       $_db,
-      $_db.transactionInstallmentDetail,
-    ).filter((f) => f.installmentDetailId.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_installmentDetailIdTable($_db));
+      $_db.transactionInstallmentPlan,
+    ).filter((f) => f.installmentPlanId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_installmentPlanIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -23416,21 +26460,21 @@ class $$TransactionInstallmentItemTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  $$TransactionInstallmentDetailTableFilterComposer get installmentDetailId {
-    final $$TransactionInstallmentDetailTableFilterComposer composer =
+  $$TransactionInstallmentPlanTableFilterComposer get installmentPlanId {
+    final $$TransactionInstallmentPlanTableFilterComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.installmentDetailId,
-          referencedTable: $db.transactionInstallmentDetail,
-          getReferencedColumn: (t) => t.installmentDetailId,
+          getCurrentColumn: (t) => t.installmentPlanId,
+          referencedTable: $db.transactionInstallmentPlan,
+          getReferencedColumn: (t) => t.installmentPlanId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableFilterComposer(
+              }) => $$TransactionInstallmentPlanTableFilterComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -23485,21 +26529,21 @@ class $$TransactionInstallmentItemTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$TransactionInstallmentDetailTableOrderingComposer get installmentDetailId {
-    final $$TransactionInstallmentDetailTableOrderingComposer composer =
+  $$TransactionInstallmentPlanTableOrderingComposer get installmentPlanId {
+    final $$TransactionInstallmentPlanTableOrderingComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.installmentDetailId,
-          referencedTable: $db.transactionInstallmentDetail,
-          getReferencedColumn: (t) => t.installmentDetailId,
+          getCurrentColumn: (t) => t.installmentPlanId,
+          referencedTable: $db.transactionInstallmentPlan,
+          getReferencedColumn: (t) => t.installmentPlanId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableOrderingComposer(
+              }) => $$TransactionInstallmentPlanTableOrderingComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -23552,22 +26596,21 @@ class $$TransactionInstallmentItemTableAnnotationComposer
     builder: (column) => column,
   );
 
-  $$TransactionInstallmentDetailTableAnnotationComposer
-  get installmentDetailId {
-    final $$TransactionInstallmentDetailTableAnnotationComposer composer =
+  $$TransactionInstallmentPlanTableAnnotationComposer get installmentPlanId {
+    final $$TransactionInstallmentPlanTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.installmentDetailId,
-          referencedTable: $db.transactionInstallmentDetail,
-          getReferencedColumn: (t) => t.installmentDetailId,
+          getCurrentColumn: (t) => t.installmentPlanId,
+          referencedTable: $db.transactionInstallmentPlan,
+          getReferencedColumn: (t) => t.installmentPlanId,
           builder:
               (
                 joinBuilder, {
                 $addJoinBuilderToRootComposer,
                 $removeJoinBuilderFromRootComposer,
-              }) => $$TransactionInstallmentDetailTableAnnotationComposer(
+              }) => $$TransactionInstallmentPlanTableAnnotationComposer(
                 $db: $db,
-                $table: $db.transactionInstallmentDetail,
+                $table: $db.transactionInstallmentPlan,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -23594,7 +26637,7 @@ class $$TransactionInstallmentItemTableTableManager
             $$TransactionInstallmentItemTableReferences,
           ),
           TransactionInstallmentItemEntity,
-          PrefetchHooks Function({bool installmentDetailId})
+          PrefetchHooks Function({bool installmentPlanId})
         > {
   $$TransactionInstallmentItemTableTableManager(
     _$AppDatabase db,
@@ -23621,7 +26664,7 @@ class $$TransactionInstallmentItemTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> installmentItemId = const Value.absent(),
-                Value<int> installmentDetailId = const Value.absent(),
+                Value<int> installmentPlanId = const Value.absent(),
                 Value<int> installmentNumber = const Value.absent(),
                 Value<int> dueDate = const Value.absent(),
                 Value<int> capitalAmount = const Value.absent(),
@@ -23630,7 +26673,7 @@ class $$TransactionInstallmentItemTableTableManager
                 Value<int> realInterestAmount = const Value.absent(),
               }) => TransactionInstallmentItemCompanion(
                 installmentItemId: installmentItemId,
-                installmentDetailId: installmentDetailId,
+                installmentPlanId: installmentPlanId,
                 installmentNumber: installmentNumber,
                 dueDate: dueDate,
                 capitalAmount: capitalAmount,
@@ -23641,7 +26684,7 @@ class $$TransactionInstallmentItemTableTableManager
           createCompanionCallback:
               ({
                 Value<int> installmentItemId = const Value.absent(),
-                required int installmentDetailId,
+                required int installmentPlanId,
                 required int installmentNumber,
                 required int dueDate,
                 required int capitalAmount,
@@ -23650,7 +26693,7 @@ class $$TransactionInstallmentItemTableTableManager
                 required int realInterestAmount,
               }) => TransactionInstallmentItemCompanion.insert(
                 installmentItemId: installmentItemId,
-                installmentDetailId: installmentDetailId,
+                installmentPlanId: installmentPlanId,
                 installmentNumber: installmentNumber,
                 dueDate: dueDate,
                 capitalAmount: capitalAmount,
@@ -23666,7 +26709,7 @@ class $$TransactionInstallmentItemTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({installmentDetailId = false}) {
+          prefetchHooksCallback: ({installmentPlanId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -23686,18 +26729,18 @@ class $$TransactionInstallmentItemTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (installmentDetailId) {
+                    if (installmentPlanId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.installmentDetailId,
+                                currentColumn: table.installmentPlanId,
                                 referencedTable:
                                     $$TransactionInstallmentItemTableReferences
-                                        ._installmentDetailIdTable(db),
+                                        ._installmentPlanIdTable(db),
                                 referencedColumn:
                                     $$TransactionInstallmentItemTableReferences
-                                        ._installmentDetailIdTable(db)
-                                        .installmentDetailId,
+                                        ._installmentPlanIdTable(db)
+                                        .installmentPlanId,
                               )
                               as T;
                     }
@@ -23728,7 +26771,7 @@ typedef $$TransactionInstallmentItemTableProcessedTableManager =
         $$TransactionInstallmentItemTableReferences,
       ),
       TransactionInstallmentItemEntity,
-      PrefetchHooks Function({bool installmentDetailId})
+      PrefetchHooks Function({bool installmentPlanId})
     >;
 typedef $$TransactionReduceTableCreateCompanionBuilder =
     TransactionReduceCompanion Function({
@@ -27503,8 +30546,12 @@ class $AppDatabaseManager {
       $$AccountBonusTableTableManager(_db, _db.accountBonus);
   $$StakeholderTableTableManager get stakeholder =>
       $$StakeholderTableTableManager(_db, _db.stakeholder);
-  $$AccountLoanTableTableManager get accountLoan =>
-      $$AccountLoanTableTableManager(_db, _db.accountLoan);
+  $$AccountPlanLoanTableTableManager get accountPlanLoan =>
+      $$AccountPlanLoanTableTableManager(_db, _db.accountPlanLoan);
+  $$AccountFlexLoanTableTableManager get accountFlexLoan =>
+      $$AccountFlexLoanTableTableManager(_db, _db.accountFlexLoan);
+  $$AccountInvestTableTableManager get accountInvest =>
+      $$AccountInvestTableTableManager(_db, _db.accountInvest);
   $$LoanPlanTableTableManager get loanPlan =>
       $$LoanPlanTableTableManager(_db, _db.loanPlan);
   $$LoanRecordTableTableManager get loanRecord =>
@@ -27522,8 +30569,15 @@ class $AppDatabaseManager {
         _db,
         _db.relationCategoryLedger,
       );
+  $$RelationStakeholderLedgerTableTableManager get relationStakeholderLedger =>
+      $$RelationStakeholderLedgerTableTableManager(
+        _db,
+        _db.relationStakeholderLedger,
+      );
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
+  $$TransactionMetaTableTableManager get transactionMeta =>
+      $$TransactionMetaTableTableManager(_db, _db.transactionMeta);
   $$TransactionAmountDetailTableTableManager get transactionAmountDetail =>
       $$TransactionAmountDetailTableTableManager(
         _db,
@@ -27534,11 +30588,11 @@ class $AppDatabaseManager {
         _db,
         _db.transactionCategoryDetail,
       );
-  $$TransactionInstallmentDetailTableTableManager
-  get transactionInstallmentDetail =>
-      $$TransactionInstallmentDetailTableTableManager(
+  $$TransactionInstallmentPlanTableTableManager
+  get transactionInstallmentPlan =>
+      $$TransactionInstallmentPlanTableTableManager(
         _db,
-        _db.transactionInstallmentDetail,
+        _db.transactionInstallmentPlan,
       );
   $$TransactionInstallmentItemTableTableManager
   get transactionInstallmentItem =>

@@ -10,7 +10,9 @@ mixin _$AccountDaoMixin on DatabaseAccessor<AppDatabase> {
   $AccountCreditTable get accountCredit => attachedDatabase.accountCredit;
   $AccountBonusTable get accountBonus => attachedDatabase.accountBonus;
   $StakeholderTable get stakeholder => attachedDatabase.stakeholder;
-  $AccountLoanTable get accountLoan => attachedDatabase.accountLoan;
+  $AccountPlanLoanTable get accountPlanLoan => attachedDatabase.accountPlanLoan;
+  $AccountFlexLoanTable get accountFlexLoan => attachedDatabase.accountFlexLoan;
+  $AccountInvestTable get accountInvest => attachedDatabase.accountInvest;
   $LoanPlanTable get loanPlan => attachedDatabase.loanPlan;
   $LoanRecordTable get loanRecord => attachedDatabase.loanRecord;
   $LedgerTable get ledger => attachedDatabase.ledger;

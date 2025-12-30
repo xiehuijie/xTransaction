@@ -283,12 +283,11 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
             if (loanData == null) {
               throw Exception('借贷账户配置无效');
             }
-            await accountService.createLoanAccount(
+            await accountService.createFlexLoanAccount(
               name: name,
               currencyCode: _selectedCurrencyCode,
               stakeholderId: loanData.stakeholderId,
               loanType: loanData.loanType,
-              amount: loanData.amount,
               rate: loanData.rate,
               startDate: loanData.startDate,
               endDate: loanData.endDate,
@@ -296,7 +295,6 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
               icon: icon,
               note: note,
               loanNote: loanData.loanNote,
-              plans: loanData.plans,
               systemMeta: _systemMeta.isNotEmpty ? _systemMeta : null,
               customMeta: _customMeta.isNotEmpty ? _customMeta : null,
             );
@@ -407,20 +405,19 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
       case AccountType.loan:
         final loanData = _loanFormKey.currentState?.getFormData();
         if (loanData != null) {
-          final existingLoan = await ref.read(accountDaoProvider).getLoanAccount(
+          final existingFlexLoan = await ref.read(accountDaoProvider).getFlexLoanAccount(
                 widget.editAccount!.accountId,
               );
-          if (existingLoan != null) {
-            final updatedLoan = existingLoan.copyWith(
+          if (existingFlexLoan != null) {
+            final updatedFlexLoan = existingFlexLoan.copyWith(
               stakeholderId: loanData.stakeholderId,
               type: loanData.loanType,
-              amount: loanData.amount,
-              rate: loanData.rate,
+              rate: loanData.rate.toDouble(),
               startDate: loanData.startDate,
               endDate: loanData.endDate,
               note: loanData.loanNote,
             );
-            await accountService.updateLoanAccount(updatedLoan);
+            await accountService.updateFlexLoanAccount(updatedFlexLoan);
           }
         }
         break;

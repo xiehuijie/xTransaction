@@ -211,7 +211,7 @@
   "loadFailed": "Load Failed",
   "retry": "Retry",
   "noData": "No Data",
-  "new": "New",
+  "addNew": "New",
   "copied": "Copied",
   "copy": "Copy",
   "viewJson": "View JSON",

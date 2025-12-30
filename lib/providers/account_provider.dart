@@ -49,11 +49,18 @@ final creditAccountDetailProvider =
   return accountDao.getCreditAccount(accountId);
 });
 
-/// 借贷账户详情 Provider
-final loanAccountDetailProvider =
-    FutureProvider.family<LoanAccountEntity?, int>((ref, accountId) async {
+/// 灵活借贷账户详情 Provider
+final flexLoanAccountDetailProvider =
+    FutureProvider.family<FlexLoanAccountEntity?, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
-  return accountDao.getLoanAccount(accountId);
+  return accountDao.getFlexLoanAccount(accountId);
+});
+
+/// 计划借贷账户详情 Provider
+final planLoanAccountDetailProvider =
+    FutureProvider.family<PlanLoanAccountEntity?, int>((ref, accountId) async {
+  final accountDao = ref.watch(accountDaoProvider);
+  return accountDao.getPlanLoanAccount(accountId);
 });
 
 /// 借贷计划列表 Provider
@@ -396,16 +403,87 @@ class AccountService {
     return accountId;
   }
 
-  /// 创建借贷账户
-  Future<int> createLoanAccount({
+  /// 创建灵活借贷账户
+  Future<int> createFlexLoanAccount({
     required String name,
     required String currencyCode,
     required int stakeholderId,
     required AccountLoanType loanType,
-    required int amount,
-    required int rate,
+    required double rate,
     required int startDate,
     required int endDate,
+    String description = '',
+    String icon = '',
+    String note = '',
+    String loanNote = '',
+    Map<String, String>? systemMeta,
+    Map<String, String>? customMeta,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final accountId = await accountDao.insertAccount(
+      AccountCompanion.insert(
+        name: name,
+        description: Value(description),
+        icon: Value(icon),
+        type: AccountType.loan,
+        currencyCode: currencyCode,
+        createdAt: now,
+        updatedAt: now,
+        note: Value(note),
+      ),
+    );
+
+    // 保存灵活借贷账户详情
+    await accountDao.insertFlexLoanAccount(
+      AccountFlexLoanCompanion.insert(
+        accountId: Value(accountId),
+        stakeholderId: stakeholderId,
+        type: loanType,
+        rate: rate,
+        startDate: startDate,
+        endDate: endDate,
+        archived: const Value(false),
+        note: Value(loanNote),
+      ),
+    );
+
+    // 保存系统级元数据
+    if (systemMeta != null) {
+      for (final entry in systemMeta.entries) {
+        await accountDao.upsertAccountMeta(
+          AccountMetaCompanion.insert(
+            accountId: accountId,
+            scope: AccountMetaScope.system,
+            key: entry.key,
+            value: entry.value,
+          ),
+        );
+      }
+    }
+
+    // 保存用户自定义元数据
+    if (customMeta != null) {
+      for (final entry in customMeta.entries) {
+        await accountDao.upsertAccountMeta(
+          AccountMetaCompanion.insert(
+            accountId: accountId,
+            scope: AccountMetaScope.custom,
+            key: entry.key,
+            value: entry.value,
+          ),
+        );
+      }
+    }
+
+    return accountId;
+  }
+
+  /// 创建计划借贷账户
+  Future<int> createPlanLoanAccount({
+    required String name,
+    required String currencyCode,
+    required int stakeholderId,
+    required AccountLoanType loanType,
     String description = '',
     String icon = '',
     String note = '',
@@ -428,16 +506,12 @@ class AccountService {
       ),
     );
 
-    // 保存借贷账户详情
-    await accountDao.insertLoanAccount(
-      AccountLoanCompanion.insert(
+    // 保存计划借贷账户详情
+    await accountDao.insertPlanLoanAccount(
+      AccountPlanLoanCompanion.insert(
         accountId: Value(accountId),
         stakeholderId: stakeholderId,
         type: loanType,
-        amount: amount,
-        rate: rate,
-        startDate: startDate,
-        endDate: endDate,
         archived: const Value(false),
         note: Value(loanNote),
       ),
@@ -594,9 +668,14 @@ class AccountService {
     return accountDao.updateCreditAccount(creditAccount);
   }
 
-  /// 更新借贷账户详情
-  Future<bool> updateLoanAccount(LoanAccountEntity loanAccount) async {
-    return accountDao.updateLoanAccount(loanAccount);
+  /// 更新灵活借贷账户详情
+  Future<bool> updateFlexLoanAccount(FlexLoanAccountEntity flexLoanAccount) async {
+    return accountDao.updateFlexLoanAccount(flexLoanAccount);
+  }
+
+  /// 更新计划借贷账户详情
+  Future<bool> updatePlanLoanAccount(PlanLoanAccountEntity planLoanAccount) async {
+    return accountDao.updatePlanLoanAccount(planLoanAccount);
   }
 
   /// 删除账户

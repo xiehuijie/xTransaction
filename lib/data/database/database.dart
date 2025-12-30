@@ -23,7 +23,6 @@ part 'database.g.dart';
     AccountMeta,
     AccountCredit,
     AccountBonus,
-    AccountLoan,
     AccountPlanLoan,
     AccountFlexLoan,
     AccountInvest,
@@ -167,7 +166,6 @@ class AppDatabase extends _$AppDatabase {
       await delete(accountInvest).go();
       await delete(accountFlexLoan).go();
       await delete(accountPlanLoan).go();
-      await delete(accountLoan).go();
       await delete(accountBonus).go();
       await delete(accountCredit).go();
       await delete(accountMeta).go();
@@ -188,7 +186,6 @@ class AppDatabase extends _$AppDatabase {
     data['accountMeta'] = await select(accountMeta).get();
     data['accountCredit'] = await select(accountCredit).get();
     data['accountBonus'] = await select(accountBonus).get();
-    data['accountLoan'] = await select(accountLoan).get();
     data['accountPlanLoan'] = await select(accountPlanLoan).get();
     data['accountFlexLoan'] = await select(accountFlexLoan).get();
     data['accountInvest'] = await select(accountInvest).get();

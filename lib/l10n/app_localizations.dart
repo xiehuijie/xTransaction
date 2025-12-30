@@ -1101,6 +1101,1440 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable biometric unlock'**
   String get onboardingBiometricSubtitle;
+
+  /// No description provided for @week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get week;
+
+  /// No description provided for @month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get month;
+
+  /// No description provided for @year.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get year;
+
+  /// No description provided for @categoryManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Management'**
+  String get categoryManagement;
+
+  /// No description provided for @newCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New Category'**
+  String get newCategory;
+
+  /// No description provided for @confirmDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get confirmDeleteTitle;
+
+  /// No description provided for @confirmDeleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this category? This action cannot be undone.'**
+  String get confirmDeleteCategory;
+
+  /// No description provided for @selectIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Icon'**
+  String get selectIcon;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Licenses'**
+  String get licenses;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @record.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get record;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @currencyManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency Management'**
+  String get currencyManagement;
+
+  /// No description provided for @deleteCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Currency'**
+  String get deleteCurrency;
+
+  /// No description provided for @deleteCurrencyConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this currency?\n\nThis operation cannot be undone.'**
+  String get deleteCurrencyConfirm;
+
+  /// No description provided for @addCustomCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Custom Currency'**
+  String get addCustomCurrency;
+
+  /// No description provided for @symbolPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbol Position'**
+  String get symbolPosition;
+
+  /// No description provided for @prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefix'**
+  String get prefix;
+
+  /// No description provided for @suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'Suffix'**
+  String get suffix;
+
+  /// No description provided for @ledgerManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Management'**
+  String get ledgerManagement;
+
+  /// No description provided for @createLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Ledger'**
+  String get createLedger;
+
+  /// No description provided for @newLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'New Ledger'**
+  String get newLedger;
+
+  /// No description provided for @deleteLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Ledger'**
+  String get deleteLedger;
+
+  /// No description provided for @deleteLedgerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the ledger \"{name}\"?\n\nThis operation cannot be undone.'**
+  String deleteLedgerConfirm(Object name);
+
+  /// No description provided for @ledgerDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger deleted'**
+  String get ledgerDeleted;
+
+  /// No description provided for @baseCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Currency'**
+  String get baseCurrency;
+
+  /// No description provided for @autoInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Include'**
+  String get autoInclude;
+
+  /// No description provided for @autoIncludeNewAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Include New Accounts'**
+  String get autoIncludeNewAccounts;
+
+  /// No description provided for @autoIncludeNewAccountsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Newly created accounts will be automatically associated with this ledger'**
+  String get autoIncludeNewAccountsDesc;
+
+  /// No description provided for @autoIncludeNewCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Include New Categories'**
+  String get autoIncludeNewCategories;
+
+  /// No description provided for @autoIncludeNewCategoriesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Newly created categories will be automatically associated with this ledger'**
+  String get autoIncludeNewCategoriesDesc;
+
+  /// No description provided for @associatedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated Accounts'**
+  String get associatedAccounts;
+
+  /// No description provided for @associatedCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated Categories'**
+  String get associatedCategories;
+
+  /// No description provided for @databaseBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Database Browser'**
+  String get databaseBrowser;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Failed'**
+  String get loadFailed;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noData.
+  ///
+  /// In en, this message translates to:
+  /// **'No Data'**
+  String get noData;
+
+  /// No description provided for @addNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get addNew;
+
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @viewJson.
+  ///
+  /// In en, this message translates to:
+  /// **'View JSON'**
+  String get viewJson;
+
+  /// No description provided for @copyJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy JSON'**
+  String get copyJson;
+
+  /// No description provided for @json.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON'**
+  String get json;
+
+  /// No description provided for @jsonFormatError.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON format error: {error}'**
+  String jsonFormatError(Object error);
+
+  /// No description provided for @createSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Success'**
+  String get createSuccess;
+
+  /// No description provided for @createFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Failed: {error}'**
+  String createFailed(Object error);
+
+  /// No description provided for @updateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Success'**
+  String get updateSuccess;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Failed: {error}'**
+  String updateFailed(Object error);
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Success'**
+  String get deleteSuccess;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Failed: {error}'**
+  String deleteFailed(Object error);
+
+  /// No description provided for @confirmDeleteRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this record? This operation cannot be undone.'**
+  String get confirmDeleteRecord;
+
+  /// No description provided for @iconPickerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get iconPickerConfirm;
+
+  /// No description provided for @noRecentIcons.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent icons'**
+  String get noRecentIcons;
+
+  /// No description provided for @projectManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Management'**
+  String get projectManagement;
+
+  /// No description provided for @newProject.
+  ///
+  /// In en, this message translates to:
+  /// **'New Project'**
+  String get newProject;
+
+  /// No description provided for @createProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Project'**
+  String get createProject;
+
+  /// No description provided for @pleaseSelectLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a ledger'**
+  String get pleaseSelectLedger;
+
+  /// No description provided for @confirmDeleteProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this project? This action cannot be undone.'**
+  String get confirmDeleteProject;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Failed: {error}'**
+  String saveFailed(Object error);
+
+  /// No description provided for @editAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editAccount;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccount;
+
+  /// No description provided for @addAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get addAccount;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this account?'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @selectAccountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Account Type'**
+  String get selectAccountType;
+
+  /// No description provided for @saveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveButton;
+
+  /// No description provided for @enableGiftBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Gift Balance'**
+  String get enableGiftBalance;
+
+  /// No description provided for @enableGiftBalanceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Associate a gift balance account with this prepaid account'**
+  String get enableGiftBalanceDesc;
+
+  /// No description provided for @useGiftFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Gift First'**
+  String get useGiftFirst;
+
+  /// No description provided for @useGiftLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Gift Last'**
+  String get useGiftLast;
+
+  /// No description provided for @useGiftProportional.
+  ///
+  /// In en, this message translates to:
+  /// **'Proportional Deduction'**
+  String get useGiftProportional;
+
+  /// No description provided for @borrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Borrow'**
+  String get borrow;
+
+  /// No description provided for @lend.
+  ///
+  /// In en, this message translates to:
+  /// **'Lend'**
+  String get lend;
+
+  /// No description provided for @configureRepayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Repayment Plan'**
+  String get configureRepayment;
+
+  /// No description provided for @repaymentConfigInDev.
+  ///
+  /// In en, this message translates to:
+  /// **'Repayment plan configuration is in development...'**
+  String get repaymentConfigInDev;
+
+  /// No description provided for @developerTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Tools'**
+  String get developerTools;
+
+  /// No description provided for @allAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'All Accounts'**
+  String get allAccounts;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get accountDeleted;
+
+  /// No description provided for @deleteAccountWithTx.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the account \"{name}\"?\n\nThis operation cannot be undone. Related transactions will be kept but no longer associated with this account.'**
+  String deleteAccountWithTx(Object name);
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this category?'**
+  String get deleteCategoryConfirm;
+
+  /// No description provided for @stakeholderManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Stakeholder Management'**
+  String get stakeholderManagement;
+
+  /// No description provided for @newStakeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'New Stakeholder'**
+  String get newStakeholder;
+
+  /// No description provided for @addStakeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {type}'**
+  String addStakeholder(Object type);
+
+  /// No description provided for @selectAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Avatar'**
+  String get selectAvatar;
+
+  /// No description provided for @type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get type;
+
+  /// No description provided for @deleteStakeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Stakeholder'**
+  String get deleteStakeholder;
+
+  /// No description provided for @deleteStakeholderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?\n\nThis operation cannot be undone.'**
+  String deleteStakeholderConfirm(Object name);
+
+  /// No description provided for @stakeholderDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Stakeholder deleted'**
+  String get stakeholderDeleted;
+
+  /// No description provided for @accountManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Management'**
+  String get accountManagement;
+
+  /// No description provided for @newAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'New Account'**
+  String get newAccount;
+
+  /// No description provided for @addAccountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {type}'**
+  String addAccountType(Object type);
+
+  /// No description provided for @allSystemFieldsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'All system fields have been added'**
+  String get allSystemFieldsAdded;
+
+  /// No description provided for @extendedInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Extended Info'**
+  String get extendedInfo;
+
+  /// No description provided for @addSystemField.
+  ///
+  /// In en, this message translates to:
+  /// **'Add System Field'**
+  String get addSystemField;
+
+  /// No description provided for @addCustomField.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Custom Field'**
+  String get addCustomField;
+
+  /// No description provided for @fieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Field Name'**
+  String get fieldName;
+
+  /// No description provided for @fieldValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Field Value'**
+  String get fieldValue;
+
+  /// No description provided for @allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get allCategories;
+
+  /// No description provided for @multiCurrencyConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-Currency Configuration'**
+  String get multiCurrencyConfig;
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Backup'**
+  String get backupRestore;
+
+  /// No description provided for @backupRestoreInDev.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restore is in development'**
+  String get backupRestoreInDev;
+
+  /// No description provided for @selectBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Backup File'**
+  String get selectBackupFile;
+
+  /// No description provided for @cloudRestoreInDev.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup is in development'**
+  String get cloudRestoreInDev;
+
+  /// No description provided for @restoreFromCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud'**
+  String get restoreFromCloud;
+
+  /// No description provided for @bindSpecificAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind Specific Asset'**
+  String get bindSpecificAsset;
+
+  /// No description provided for @repaymentPlanConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Repayment Plan Configuration'**
+  String get repaymentPlanConfig;
+
+  /// No description provided for @autoGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Generate'**
+  String get autoGenerate;
+
+  /// No description provided for @addPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Period'**
+  String get addPeriod;
+
+  /// No description provided for @autoGenerateRepayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Generate Repayment Plan'**
+  String get autoGenerateRepayment;
+
+  /// No description provided for @period.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get period;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @interval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get interval;
+
+  /// No description provided for @everyMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Month'**
+  String get everyMonth;
+
+  /// No description provided for @everyTwoMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Two Months'**
+  String get everyTwoMonths;
+
+  /// No description provided for @everyQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Quarter'**
+  String get everyQuarter;
+
+  /// No description provided for @everySixMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Six Months'**
+  String get everySixMonths;
+
+  /// No description provided for @everyYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Year'**
+  String get everyYear;
+
+  /// No description provided for @generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get generate;
+
+  /// No description provided for @addLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ledger'**
+  String get addLedger;
+
+  /// No description provided for @setAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Default'**
+  String get setAsDefault;
+
+  /// No description provided for @ledgerBaseCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Base Currency'**
+  String get ledgerBaseCurrency;
+
+  /// No description provided for @autoIncludeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Include Settings'**
+  String get autoIncludeSettings;
+
+  /// No description provided for @autoIncludeNewAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Include New Accounts'**
+  String get autoIncludeNewAccount;
+
+  /// No description provided for @autoIncludeNewAccountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Newly created accounts will be automatically added to this ledger'**
+  String get autoIncludeNewAccountDesc;
+
+  /// No description provided for @autoIncludeNewCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Include New Categories'**
+  String get autoIncludeNewCategory;
+
+  /// No description provided for @autoIncludeNewCategoryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Newly created categories will be automatically added to this ledger'**
+  String get autoIncludeNewCategoryDesc;
+
+  /// No description provided for @giftDeductionMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Deduction Mode'**
+  String get giftDeductionMode;
+
+  /// No description provided for @giftAccountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Account Name'**
+  String get giftAccountName;
+
+  /// No description provided for @giftAccountNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank to auto-generate'**
+  String get giftAccountNameHint;
+
+  /// No description provided for @giftCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Currency'**
+  String get giftCurrency;
+
+  /// No description provided for @giftInitialBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Initial Balance'**
+  String get giftInitialBalance;
+
+  /// No description provided for @giftInitialBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift amount when created'**
+  String get giftInitialBalanceHint;
+
+  /// No description provided for @loanAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Amount'**
+  String get loanAmount;
+
+  /// No description provided for @loanAmountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Amount *'**
+  String get loanAmountRequired;
+
+  /// No description provided for @loanAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter loan amount'**
+  String get loanAmountHint;
+
+  /// No description provided for @annualRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Rate (%)'**
+  String get annualRate;
+
+  /// No description provided for @annualRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: 5.00'**
+  String get annualRateHint;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// No description provided for @startDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date *'**
+  String get startDateRequired;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// No description provided for @endDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date *'**
+  String get endDateRequired;
+
+  /// No description provided for @loanNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Note'**
+  String get loanNote;
+
+  /// No description provided for @loanNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: Purpose, repayment method, etc.'**
+  String get loanNoteHint;
+
+  /// No description provided for @dueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get dueDate;
+
+  /// No description provided for @note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get note;
+
+  /// No description provided for @periods.
+  ///
+  /// In en, this message translates to:
+  /// **'Periods'**
+  String get periods;
+
+  /// No description provided for @amountPerPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount Per Period'**
+  String get amountPerPeriod;
+
+  /// No description provided for @repaymentInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Repayment Interval'**
+  String get repaymentInterval;
+
+  /// No description provided for @creditLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Limit'**
+  String get creditLimit;
+
+  /// No description provided for @creditLimitRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Limit *'**
+  String get creditLimitRequired;
+
+  /// No description provided for @creditLimitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter credit limit'**
+  String get creditLimitHint;
+
+  /// No description provided for @billingDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing Day'**
+  String get billingDay;
+
+  /// No description provided for @paymentDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Day'**
+  String get paymentDay;
+
+  /// No description provided for @bankName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Name'**
+  String get bankName;
+
+  /// No description provided for @bankNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: China Merchants Bank'**
+  String get bankNameHint;
+
+  /// No description provided for @cardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Number'**
+  String get cardNumber;
+
+  /// No description provided for @cardNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter card number'**
+  String get cardNumberHint;
+
+  /// No description provided for @expiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get expiryDate;
+
+  /// No description provided for @expiryDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: 12/28'**
+  String get expiryDateHint;
+
+  /// No description provided for @dayRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} *'**
+  String dayRequired(Object label);
+
+  /// No description provided for @bankNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Name'**
+  String get bankNameLabel;
+
+  /// No description provided for @bankNameLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: ICBC'**
+  String get bankNameLabelHint;
+
+  /// No description provided for @bankCardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Card Number'**
+  String get bankCardNumber;
+
+  /// No description provided for @bankCardNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter bank card number'**
+  String get bankCardNumberHint;
+
+  /// No description provided for @bankBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Branch'**
+  String get bankBranch;
+
+  /// No description provided for @bankBranchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: XX Branch'**
+  String get bankBranchHint;
+
+  /// No description provided for @cardholderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardholder Name'**
+  String get cardholderName;
+
+  /// No description provided for @cardholderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter cardholder name'**
+  String get cardholderNameHint;
+
+  /// No description provided for @accountNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Name *'**
+  String get accountNameRequired;
+
+  /// No description provided for @accountNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter account name'**
+  String get accountNameHint;
+
+  /// No description provided for @accountCurrencyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Currency *'**
+  String get accountCurrencyRequired;
+
+  /// No description provided for @initialBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Balance'**
+  String get initialBalance;
+
+  /// No description provided for @initialBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial amount when created'**
+  String get initialBalanceHint;
+
+  /// No description provided for @accountDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Description'**
+  String get accountDescription;
+
+  /// No description provided for @accountDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, brief description of this account'**
+  String get accountDescriptionHint;
+
+  /// No description provided for @accountNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get accountNote;
+
+  /// No description provided for @accountNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional, add note information'**
+  String get accountNoteHint;
+
+  /// No description provided for @previewConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration Preview'**
+  String get previewConfig;
+
+  /// No description provided for @confirmAndStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and Start Using'**
+  String get confirmAndStart;
+
+  /// No description provided for @searchCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Search currency...'**
+  String get searchCurrency;
+
+  /// No description provided for @iconHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get iconHint;
+
+  /// No description provided for @currencyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency Code'**
+  String get currencyCode;
+
+  /// No description provided for @currencyCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: POINT, TOKEN'**
+  String get currencyCodeHint;
+
+  /// No description provided for @currencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency Name'**
+  String get currencyName;
+
+  /// No description provided for @currencyNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: Points, Tokens'**
+  String get currencyNameHint;
+
+  /// No description provided for @currencySymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency Symbol'**
+  String get currencySymbol;
+
+  /// No description provided for @currencySymbolHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: ¤, ₿'**
+  String get currencySymbolHint;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get categoryName;
+
+  /// No description provided for @categoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter category name'**
+  String get categoryNameHint;
+
+  /// No description provided for @categoryType.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Type'**
+  String get categoryType;
+
+  /// No description provided for @parentCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Category'**
+  String get parentCategory;
+
+  /// No description provided for @sortOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Order'**
+  String get sortOrder;
+
+  /// No description provided for @sortOrderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller values appear first'**
+  String get sortOrderHint;
+
+  /// No description provided for @ledgerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger Name'**
+  String get ledgerName;
+
+  /// No description provided for @ledgerNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter ledger name'**
+  String get ledgerNameHint;
+
+  /// No description provided for @ledgerNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: Daily Ledger, Family Ledger'**
+  String get ledgerNameExample;
+
+  /// No description provided for @descriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Optional)'**
+  String get descriptionOptional;
+
+  /// No description provided for @descriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter description'**
+  String get descriptionHint;
+
+  /// No description provided for @ledgerDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose of the ledger'**
+  String get ledgerDescriptionHint;
+
+  /// No description provided for @noteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (Optional)'**
+  String get noteOptional;
+
+  /// No description provided for @noteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter note information'**
+  String get noteHint;
+
+  /// No description provided for @accountNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Name'**
+  String get accountNameLabel;
+
+  /// No description provided for @accountNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: ICBC Savings Card'**
+  String get accountNameExample;
+
+  /// No description provided for @accountCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Currency'**
+  String get accountCurrency;
+
+  /// No description provided for @initialBalanceDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'0.00'**
+  String get initialBalanceDefault;
+
+  /// No description provided for @accountDescriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Description (Optional)'**
+  String get accountDescriptionOptional;
+
+  /// No description provided for @creditLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Limit'**
+  String get creditLimitLabel;
+
+  /// No description provided for @giftDeductionModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Deduction Mode'**
+  String get giftDeductionModeLabel;
+
+  /// No description provided for @giftInitialBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Initial Balance'**
+  String get giftInitialBalanceLabel;
+
+  /// No description provided for @investmentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Type'**
+  String get investmentType;
+
+  /// No description provided for @investmentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Code (Optional)'**
+  String get investmentCode;
+
+  /// No description provided for @loanAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Amount'**
+  String get loanAmountLabel;
+
+  /// No description provided for @annualRateBps.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Rate (bps)'**
+  String get annualRateBps;
+
+  /// No description provided for @annualRateBpsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: 500 = 5%'**
+  String get annualRateBpsHint;
+
+  /// No description provided for @jsonInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter JSON...'**
+  String get jsonInputHint;
+
+  /// No description provided for @searchEmoji.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Emoji...'**
+  String get searchEmoji;
+
+  /// No description provided for @searchCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Search country/region...'**
+  String get searchCountry;
+
+  /// No description provided for @fieldNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Field Name'**
+  String get fieldNameLabel;
+
+  /// No description provided for @fieldNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.: Note'**
+  String get fieldNameHint;
+
+  /// No description provided for @fieldValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Field Value'**
+  String get fieldValueLabel;
+
+  /// No description provided for @fieldValueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter value'**
+  String get fieldValueHint;
+
+  /// No description provided for @stakeholderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get stakeholderName;
+
+  /// No description provided for @stakeholderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter stakeholder name'**
+  String get stakeholderNameHint;
+
+  /// No description provided for @stakeholderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Optional)'**
+  String get stakeholderDescription;
+
+  /// No description provided for @stakeholderDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter description'**
+  String get stakeholderDescriptionHint;
+
+  /// No description provided for @stakeholderContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact (Optional)'**
+  String get stakeholderContact;
+
+  /// No description provided for @stakeholderContactHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter contact information'**
+  String get stakeholderContactHint;
+
+  /// No description provided for @stakeholderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (Optional)'**
+  String get stakeholderNote;
+
+  /// No description provided for @stakeholderNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter note information'**
+  String get stakeholderNoteHint;
+
+  /// No description provided for @projectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Name'**
+  String get projectName;
+
+  /// No description provided for @projectNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter project name'**
+  String get projectNameHint;
+
+  /// No description provided for @projectLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Ledger'**
+  String get projectLedger;
+
+  /// No description provided for @projectDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Description'**
+  String get projectDescription;
+
+  /// No description provided for @projectDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter project description (optional)'**
+  String get projectDescriptionHint;
+
+  /// No description provided for @projectBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Amount'**
+  String get projectBudget;
+
+  /// No description provided for @projectBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter budget amount (optional)'**
+  String get projectBudgetHint;
+
+  /// No description provided for @projectStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get projectStartDate;
+
+  /// No description provided for @projectEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get projectEndDate;
+
+  /// No description provided for @addCategoryType.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {type} Category'**
+  String addCategoryType(Object type);
 }
 
 class _AppLocalizationsDelegate

@@ -28,7 +28,6 @@ class DatabaseBrowserPage extends ConsumerWidget {
         _TableMeta('account_meta', '账户元数据', db.accountMeta),
         _TableMeta('account_credit', '信用账户', db.accountCredit),
         _TableMeta('account_bonus', '赠送金账户', db.accountBonus),
-        _TableMeta('account_loan', '借贷账户', db.accountLoan),
         _TableMeta('account_plan_loan', '计划借贷账户', db.accountPlanLoan),
         _TableMeta('account_flex_loan', '灵活借贷账户', db.accountFlexLoan),
         _TableMeta('account_invest', '投资账户', db.accountInvest),

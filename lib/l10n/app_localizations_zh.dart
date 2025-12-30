@@ -535,4 +535,745 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingBiometricSubtitle => '启用生物识别保护您的数据';
+
+  @override
+  String get week => '周';
+
+  @override
+  String get month => '月';
+
+  @override
+  String get year => '年';
+
+  @override
+  String get categoryManagement => '分类管理';
+
+  @override
+  String get newCategory => '新增分类';
+
+  @override
+  String get confirmDeleteTitle => '确认删除';
+
+  @override
+  String get confirmDeleteCategory => '确定要删除这个分类吗？此操作不可恢复。';
+
+  @override
+  String get selectIcon => '选择图标';
+
+  @override
+  String get about => '关于';
+
+  @override
+  String get licenses => '许可证';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get record => '记一笔';
+
+  @override
+  String get manage => '管理';
+
+  @override
+  String get currencyManagement => '货币管理';
+
+  @override
+  String get deleteCurrency => '删除货币';
+
+  @override
+  String get deleteCurrencyConfirm => '确定要删除这个货币吗？\n\n此操作不可撤销。';
+
+  @override
+  String get addCustomCurrency => '添加自定义货币';
+
+  @override
+  String get symbolPosition => '符号位置';
+
+  @override
+  String get prefix => '前缀';
+
+  @override
+  String get suffix => '后缀';
+
+  @override
+  String get ledgerManagement => '账本管理';
+
+  @override
+  String get createLedger => '创建账本';
+
+  @override
+  String get newLedger => '新建账本';
+
+  @override
+  String get deleteLedger => '删除账本';
+
+  @override
+  String deleteLedgerConfirm(Object name) {
+    return '确定要删除账本「$name」吗？此操作不可撤销。';
+  }
+
+  @override
+  String get ledgerDeleted => '账本已删除';
+
+  @override
+  String get baseCurrency => '本币';
+
+  @override
+  String get autoInclude => '自动设置';
+
+  @override
+  String get autoIncludeNewAccounts => '自动包含新账户';
+
+  @override
+  String get autoIncludeNewAccountsDesc => '新创建的账户将自动关联到此账本';
+
+  @override
+  String get autoIncludeNewCategories => '自动包含新分类';
+
+  @override
+  String get autoIncludeNewCategoriesDesc => '新创建的分类将自动关联到此账本';
+
+  @override
+  String get associatedAccounts => '关联账户';
+
+  @override
+  String get associatedCategories => '关联分类';
+
+  @override
+  String get databaseBrowser => '数据库浏览器';
+
+  @override
+  String get loadFailed => '加载失败';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get noData => '暂无数据';
+
+  @override
+  String get addNew => '新增';
+
+  @override
+  String get copied => '已复制';
+
+  @override
+  String get copy => '复制';
+
+  @override
+  String get viewJson => '查看JSON';
+
+  @override
+  String get copyJson => '复制JSON';
+
+  @override
+  String get json => 'JSON';
+
+  @override
+  String jsonFormatError(Object error) {
+    return 'JSON格式错误: $error';
+  }
+
+  @override
+  String get createSuccess => '新增成功';
+
+  @override
+  String createFailed(Object error) {
+    return '新增失败: $error';
+  }
+
+  @override
+  String get updateSuccess => '更新成功';
+
+  @override
+  String updateFailed(Object error) {
+    return '更新失败: $error';
+  }
+
+  @override
+  String get deleteSuccess => '删除成功';
+
+  @override
+  String deleteFailed(Object error) {
+    return '删除失败: $error';
+  }
+
+  @override
+  String get confirmDeleteRecord => '确定要删除这条记录吗？此操作不可撤销。';
+
+  @override
+  String get iconPickerConfirm => '确定';
+
+  @override
+  String get noRecentIcons => '暂无最近使用';
+
+  @override
+  String get projectManagement => '项目管理';
+
+  @override
+  String get newProject => '新建项目';
+
+  @override
+  String get createProject => '创建项目';
+
+  @override
+  String get pleaseSelectLedger => '请选择所属账本';
+
+  @override
+  String get confirmDeleteProject => '确定要删除这个项目吗？此操作不可恢复。';
+
+  @override
+  String saveFailed(Object error) {
+    return '保存失败: $error';
+  }
+
+  @override
+  String get editAccount => '编辑';
+
+  @override
+  String get deleteAccount => '删除';
+
+  @override
+  String get addAccount => '添加账户';
+
+  @override
+  String get deleteAccountConfirm => '确定要删除这个账户吗？';
+
+  @override
+  String get selectAccountType => '选择账户类型';
+
+  @override
+  String get saveButton => '保存';
+
+  @override
+  String get enableGiftBalance => '启用赠送金账户';
+
+  @override
+  String get enableGiftBalanceDesc => '为此预付账户关联一个赠送金账户';
+
+  @override
+  String get useGiftFirst => '优先使用赠送金';
+
+  @override
+  String get useGiftLast => '最后使用赠送金';
+
+  @override
+  String get useGiftProportional => '等比例扣减';
+
+  @override
+  String get borrow => '借入';
+
+  @override
+  String get lend => '借出';
+
+  @override
+  String get configureRepayment => '配置还款计划';
+
+  @override
+  String get repaymentConfigInDev => '借贷计划配置功能开发中...';
+
+  @override
+  String get developerTools => '开发者工具';
+
+  @override
+  String get allAccounts => '全部账户';
+
+  @override
+  String get accountDeleted => '账户已删除';
+
+  @override
+  String deleteAccountWithTx(Object name) {
+    return '确定要删除账户「$name」吗？此操作不可撤销，相关的交易记录将保留但不再关联此账户。';
+  }
+
+  @override
+  String get deleteCategoryConfirm => '确定要删除这个分类吗？';
+
+  @override
+  String get stakeholderManagement => '相关方管理';
+
+  @override
+  String get newStakeholder => '新增相关方';
+
+  @override
+  String addStakeholder(Object type) {
+    return '添加$type';
+  }
+
+  @override
+  String get selectAvatar => '选择头像';
+
+  @override
+  String get type => '类型';
+
+  @override
+  String get deleteStakeholder => '删除相关方';
+
+  @override
+  String deleteStakeholderConfirm(Object name) {
+    return '确定要删除「$name」吗？此操作不可撤销。';
+  }
+
+  @override
+  String get stakeholderDeleted => '相关方已删除';
+
+  @override
+  String get accountManagement => '账户管理';
+
+  @override
+  String get newAccount => '新增账户';
+
+  @override
+  String addAccountType(Object type) {
+    return '添加$type';
+  }
+
+  @override
+  String get allSystemFieldsAdded => '所有系统字段都已添加';
+
+  @override
+  String get extendedInfo => '扩展信息';
+
+  @override
+  String get addSystemField => '添加系统字段';
+
+  @override
+  String get addCustomField => '添加自定义字段';
+
+  @override
+  String get fieldName => '字段名';
+
+  @override
+  String get fieldValue => '字段值';
+
+  @override
+  String get allCategories => '全部分类';
+
+  @override
+  String get multiCurrencyConfig => '多货币配置';
+
+  @override
+  String get backupRestore => '从备份恢复';
+
+  @override
+  String get backupRestoreInDev => '备份恢复功能正在开发中';
+
+  @override
+  String get selectBackupFile => '选择备份文件';
+
+  @override
+  String get cloudRestoreInDev => '云端备份功能正在开发中';
+
+  @override
+  String get restoreFromCloud => '从云端恢复';
+
+  @override
+  String get bindSpecificAsset => '绑定特定资产';
+
+  @override
+  String get repaymentPlanConfig => '还款计划配置';
+
+  @override
+  String get autoGenerate => '自动生成';
+
+  @override
+  String get addPeriod => '添加一期';
+
+  @override
+  String get autoGenerateRepayment => '自动生成还款计划';
+
+  @override
+  String get period => '期数';
+
+  @override
+  String get amount => '金额';
+
+  @override
+  String get interval => '间隔';
+
+  @override
+  String get everyMonth => '每月';
+
+  @override
+  String get everyTwoMonths => '每两月';
+
+  @override
+  String get everyQuarter => '每季度';
+
+  @override
+  String get everySixMonths => '每半年';
+
+  @override
+  String get everyYear => '每年';
+
+  @override
+  String get generate => '生成';
+
+  @override
+  String get addLedger => '添加账本';
+
+  @override
+  String get setAsDefault => '设为默认';
+
+  @override
+  String get ledgerBaseCurrency => '账本本币';
+
+  @override
+  String get autoIncludeSettings => '自动包含设置';
+
+  @override
+  String get autoIncludeNewAccount => '自动包含新增账户';
+
+  @override
+  String get autoIncludeNewAccountDesc => '新增的账户将自动加入此账本';
+
+  @override
+  String get autoIncludeNewCategory => '自动包含新增分类';
+
+  @override
+  String get autoIncludeNewCategoryDesc => '新增的分类将自动加入此账本';
+
+  @override
+  String get giftDeductionMode => '扣减模式';
+
+  @override
+  String get giftAccountName => '赠送金账户名称';
+
+  @override
+  String get giftAccountNameHint => '留空则自动生成';
+
+  @override
+  String get giftCurrency => '赠送金货币';
+
+  @override
+  String get giftInitialBalance => '赠送金初始余额';
+
+  @override
+  String get giftInitialBalanceHint => '创建时的赠送金金额';
+
+  @override
+  String get loanAmount => '借贷金额';
+
+  @override
+  String get loanAmountRequired => '借贷金额 *';
+
+  @override
+  String get loanAmountHint => '请输入借贷金额';
+
+  @override
+  String get annualRate => '年化利率（%）';
+
+  @override
+  String get annualRateHint => '如：5.00';
+
+  @override
+  String get startDate => '开始日期';
+
+  @override
+  String get startDateRequired => '开始日期 *';
+
+  @override
+  String get endDate => '结束日期';
+
+  @override
+  String get endDateRequired => '结束日期 *';
+
+  @override
+  String get loanNote => '借贷备注';
+
+  @override
+  String get loanNoteHint => '如：借款用途、还款方式等';
+
+  @override
+  String get dueDate => '到期日';
+
+  @override
+  String get note => '备注';
+
+  @override
+  String get periods => '期数';
+
+  @override
+  String get amountPerPeriod => '每期金额';
+
+  @override
+  String get repaymentInterval => '还款间隔';
+
+  @override
+  String get creditLimit => '信用额度';
+
+  @override
+  String get creditLimitRequired => '信用额度 *';
+
+  @override
+  String get creditLimitHint => '请输入信用额度';
+
+  @override
+  String get billingDay => '账单日';
+
+  @override
+  String get paymentDay => '还款日';
+
+  @override
+  String get bankName => '发卡银行';
+
+  @override
+  String get bankNameHint => '如：招商银行';
+
+  @override
+  String get cardNumber => '卡号';
+
+  @override
+  String get cardNumberHint => '请输入信用卡号';
+
+  @override
+  String get expiryDate => '有效期';
+
+  @override
+  String get expiryDateHint => '如：12/28';
+
+  @override
+  String dayRequired(Object label) {
+    return '$label *';
+  }
+
+  @override
+  String get bankNameLabel => '银行名称';
+
+  @override
+  String get bankNameLabelHint => '如：中国工商银行';
+
+  @override
+  String get bankCardNumber => '银行卡号';
+
+  @override
+  String get bankCardNumberHint => '请输入银行卡号';
+
+  @override
+  String get bankBranch => '开户行';
+
+  @override
+  String get bankBranchHint => '如：某某支行';
+
+  @override
+  String get cardholderName => '持卡人姓名';
+
+  @override
+  String get cardholderNameHint => '请输入持卡人姓名';
+
+  @override
+  String get accountNameRequired => '账户名称 *';
+
+  @override
+  String get accountNameHint => '请输入账户名称';
+
+  @override
+  String get accountCurrencyRequired => '账户货币 *';
+
+  @override
+  String get initialBalance => '初始余额';
+
+  @override
+  String get initialBalanceHint => '创建时的初始金额';
+
+  @override
+  String get accountDescription => '账户描述';
+
+  @override
+  String get accountDescriptionHint => '可选，简短描述此账户';
+
+  @override
+  String get accountNote => '备注';
+
+  @override
+  String get accountNoteHint => '可选，添加备注信息';
+
+  @override
+  String get previewConfig => '配置预览';
+
+  @override
+  String get confirmAndStart => '确认并开始使用';
+
+  @override
+  String get searchCurrency => '搜索货币...';
+
+  @override
+  String get iconHint => '图标';
+
+  @override
+  String get currencyCode => '货币代码';
+
+  @override
+  String get currencyCodeHint => '如: POINT, TOKEN';
+
+  @override
+  String get currencyName => '货币名称';
+
+  @override
+  String get currencyNameHint => '如: 积分, 代币';
+
+  @override
+  String get currencySymbol => '货币符号';
+
+  @override
+  String get currencySymbolHint => '如: ¤, ₿';
+
+  @override
+  String get categoryName => '分类名称';
+
+  @override
+  String get categoryNameHint => '请输入分类名称';
+
+  @override
+  String get categoryType => '分类类型';
+
+  @override
+  String get parentCategory => '父级分类';
+
+  @override
+  String get sortOrder => '排序值';
+
+  @override
+  String get sortOrderHint => '数值越小越靠前';
+
+  @override
+  String get ledgerName => '账本名称';
+
+  @override
+  String get ledgerNameHint => '输入账本名称';
+
+  @override
+  String get ledgerNameExample => '如: 日常账本、家庭账本';
+
+  @override
+  String get descriptionOptional => '描述（可选）';
+
+  @override
+  String get descriptionHint => '输入描述信息';
+
+  @override
+  String get ledgerDescriptionHint => '账本的用途说明';
+
+  @override
+  String get noteOptional => '备注（可选）';
+
+  @override
+  String get noteHint => '输入备注信息';
+
+  @override
+  String get accountNameLabel => '账户名称';
+
+  @override
+  String get accountNameExample => '如: 工商银行储蓄卡';
+
+  @override
+  String get accountCurrency => '账户货币';
+
+  @override
+  String get initialBalanceDefault => '0.00';
+
+  @override
+  String get accountDescriptionOptional => '账户描述（可选）';
+
+  @override
+  String get creditLimitLabel => '信用额度';
+
+  @override
+  String get giftDeductionModeLabel => '赠送金扣减方式';
+
+  @override
+  String get giftInitialBalanceLabel => '赠送金初始余额';
+
+  @override
+  String get investmentType => '投资类型';
+
+  @override
+  String get investmentCode => '投资代码（可选）';
+
+  @override
+  String get loanAmountLabel => '借贷金额';
+
+  @override
+  String get annualRateBps => '年化利率（基点）';
+
+  @override
+  String get annualRateBpsHint => '如: 500 表示 5%';
+
+  @override
+  String get jsonInputHint => '输入JSON...';
+
+  @override
+  String get searchEmoji => '搜索 Emoji...';
+
+  @override
+  String get searchCountry => '搜索国家/地区...';
+
+  @override
+  String get fieldNameLabel => '字段名';
+
+  @override
+  String get fieldNameHint => '如：备注信息';
+
+  @override
+  String get fieldValueLabel => '字段值';
+
+  @override
+  String get fieldValueHint => '请输入值';
+
+  @override
+  String get stakeholderName => '名称';
+
+  @override
+  String get stakeholderNameHint => '输入相关方名称';
+
+  @override
+  String get stakeholderDescription => '描述（可选）';
+
+  @override
+  String get stakeholderDescriptionHint => '输入描述信息';
+
+  @override
+  String get stakeholderContact => '联系方式（可选）';
+
+  @override
+  String get stakeholderContactHint => '输入联系方式';
+
+  @override
+  String get stakeholderNote => '备注（可选）';
+
+  @override
+  String get stakeholderNoteHint => '输入备注信息';
+
+  @override
+  String get projectName => '项目名称';
+
+  @override
+  String get projectNameHint => '请输入项目名称';
+
+  @override
+  String get projectLedger => '所属账本';
+
+  @override
+  String get projectDescription => '项目描述';
+
+  @override
+  String get projectDescriptionHint => '请输入项目描述（可选）';
+
+  @override
+  String get projectBudget => '预算金额';
+
+  @override
+  String get projectBudgetHint => '请输入预算金额（可选）';
+
+  @override
+  String get projectStartDate => '开始日期';
+
+  @override
+  String get projectEndDate => '结束日期';
+
+  @override
+  String addCategoryType(Object type) {
+    return '添加$type分类';
+  }
 }

@@ -19,11 +19,8 @@ class LoanAccountFormData {
   /// 借贷类型
   final AccountLoanType loanType;
 
-  /// 借贷金额
-  final int amount;
-
-  /// 年化利率（基点）
-  final int rate;
+  /// 年化利率
+  final double rate;
 
   /// 开始日期
   final int startDate;
@@ -40,7 +37,6 @@ class LoanAccountFormData {
   const LoanAccountFormData({
     required this.stakeholderId,
     required this.loanType,
-    required this.amount,
     required this.rate,
     required this.startDate,
     required this.endDate,
@@ -67,9 +63,6 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
   /// 借贷类型
   AccountLoanType _loanType = AccountLoanType.borrow;
 
-  /// 借贷金额
-  late TextEditingController _amountController;
-
   /// 年化利率
   late TextEditingController _rateController;
 
@@ -93,7 +86,6 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController();
     _rateController = TextEditingController();
     _loanNoteController = TextEditingController();
 
@@ -109,20 +101,19 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
       final accountDao = ref.read(accountDaoProvider);
       final stakeholderDao = ref.read(stakeholderDaoProvider);
 
-      // 加载借贷账户详情
-      final loanAccount =
-          await accountDao.getLoanAccount(widget.editAccountId!);
-      if (loanAccount != null) {
-        _loanType = loanAccount.type;
-        _amountController.text = loanAccount.amount.toString();
-        _rateController.text = (loanAccount.rate / 100).toStringAsFixed(2);
-        _startDate = _dateFromDays(loanAccount.startDate);
-        _endDate = _dateFromDays(loanAccount.endDate);
-        _loanNoteController.text = loanAccount.note;
+      // 加载灵活借贷账户详情
+      final flexLoanAccount =
+          await accountDao.getFlexLoanAccount(widget.editAccountId!);
+      if (flexLoanAccount != null) {
+        _loanType = flexLoanAccount.type;
+        _rateController.text = flexLoanAccount.rate.toStringAsFixed(2);
+        _startDate = _dateFromDays(flexLoanAccount.startDate);
+        _endDate = _dateFromDays(flexLoanAccount.endDate);
+        _loanNoteController.text = flexLoanAccount.note;
 
         // 加载相关方
         _selectedStakeholder =
-            await stakeholderDao.getStakeholderById(loanAccount.stakeholderId);
+            await stakeholderDao.getStakeholderById(flexLoanAccount.stakeholderId);
       }
 
       // 加载还款计划
@@ -144,7 +135,6 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
 
   @override
   void dispose() {
-    _amountController.dispose();
     _rateController.dispose();
     _loanNoteController.dispose();
     super.dispose();
@@ -156,19 +146,12 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
       return null;
     }
 
-    final amount = int.tryParse(_amountController.text);
-    if (amount == null || amount <= 0) {
-      return null;
-    }
-
     final ratePercent = double.tryParse(_rateController.text) ?? 0;
-    final rate = (ratePercent * 100).round(); // 转换为基点
 
     return LoanAccountFormData(
       stakeholderId: _selectedStakeholder!.stakeholderId,
       loanType: _loanType,
-      amount: amount,
-      rate: rate,
+      rate: ratePercent,
       startDate: _dateToDays(_startDate),
       endDate: _dateToDays(_endDate),
       loanNote: _loanNoteController.text.trim(),
@@ -348,28 +331,6 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-
-        // 借贷金额
-        TextFormField(
-          controller: _amountController,
-          decoration: const InputDecoration(
-            labelText: '借贷金额 *',
-            hintText: '请输入借贷金额',
-            prefixIcon: Icon(Icons.monetization_on_outlined),
-          ),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return '请输入借贷金额';
-            }
-            final amount = int.tryParse(value);
-            if (amount == null || amount <= 0) {
-              return '请输入有效的金额';
-            }
-            return null;
-          },
         ),
         const SizedBox(height: 16),
 

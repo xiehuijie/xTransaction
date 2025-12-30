@@ -20,7 +20,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:country_flags/country_flags.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../../data/constants/icon_data.dart';
 import '../../utils/haptic_service.dart';

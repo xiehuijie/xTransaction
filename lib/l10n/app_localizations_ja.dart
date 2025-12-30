@@ -537,4 +537,745 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingBiometricSubtitle => '生体認証を有効にしてデータを保護します';
+
+  @override
+  String get week => '週';
+
+  @override
+  String get month => '月';
+
+  @override
+  String get year => '年';
+
+  @override
+  String get categoryManagement => 'カテゴリ管理';
+
+  @override
+  String get newCategory => '新規カテゴリ';
+
+  @override
+  String get confirmDeleteTitle => '削除確認';
+
+  @override
+  String get confirmDeleteCategory => 'このカテゴリを削除してもよろしいですか？この操作は元に戻せません。';
+
+  @override
+  String get selectIcon => 'アイコンを選択';
+
+  @override
+  String get about => 'について';
+
+  @override
+  String get licenses => 'ライセンス';
+
+  @override
+  String get close => '閉じる';
+
+  @override
+  String get record => '記録';
+
+  @override
+  String get manage => '管理';
+
+  @override
+  String get currencyManagement => '通貨管理';
+
+  @override
+  String get deleteCurrency => '通貨を削除';
+
+  @override
+  String get deleteCurrencyConfirm => 'この通貨を削除してもよろしいですか？\n\nこの操作は元に戻せません。';
+
+  @override
+  String get addCustomCurrency => 'カスタム通貨を追加';
+
+  @override
+  String get symbolPosition => '記号位置';
+
+  @override
+  String get prefix => 'プレフィックス';
+
+  @override
+  String get suffix => 'サフィックス';
+
+  @override
+  String get ledgerManagement => '台帳管理';
+
+  @override
+  String get createLedger => '台帳を作成';
+
+  @override
+  String get newLedger => '新規台帳';
+
+  @override
+  String get deleteLedger => '台帳を削除';
+
+  @override
+  String deleteLedgerConfirm(Object name) {
+    return '台帳「$name」を削除してもよろしいですか？\n\nこの操作は元に戻せません。';
+  }
+
+  @override
+  String get ledgerDeleted => '台帳が削除されました';
+
+  @override
+  String get baseCurrency => '基本通貨';
+
+  @override
+  String get autoInclude => '自動設定';
+
+  @override
+  String get autoIncludeNewAccounts => '新規アカウントを自動追加';
+
+  @override
+  String get autoIncludeNewAccountsDesc => '新規作成されたアカウントは自動的にこの台帳に関連付けられます';
+
+  @override
+  String get autoIncludeNewCategories => '新規カテゴリを自動追加';
+
+  @override
+  String get autoIncludeNewCategoriesDesc => '新規作成されたカテゴリは自動的にこの台帳に関連付けられます';
+
+  @override
+  String get associatedAccounts => '関連アカウント';
+
+  @override
+  String get associatedCategories => '関連カテゴリ';
+
+  @override
+  String get databaseBrowser => 'データベースブラウザ';
+
+  @override
+  String get loadFailed => '読み込み失敗';
+
+  @override
+  String get retry => '再試行';
+
+  @override
+  String get noData => 'データなし';
+
+  @override
+  String get addNew => '新規';
+
+  @override
+  String get copied => 'コピーしました';
+
+  @override
+  String get copy => 'コピー';
+
+  @override
+  String get viewJson => 'JSONを表示';
+
+  @override
+  String get copyJson => 'JSONをコピー';
+
+  @override
+  String get json => 'JSON';
+
+  @override
+  String jsonFormatError(Object error) {
+    return 'JSON形式エラー: $error';
+  }
+
+  @override
+  String get createSuccess => '作成成功';
+
+  @override
+  String createFailed(Object error) {
+    return '作成失敗: $error';
+  }
+
+  @override
+  String get updateSuccess => '更新成功';
+
+  @override
+  String updateFailed(Object error) {
+    return '更新失敗: $error';
+  }
+
+  @override
+  String get deleteSuccess => '削除成功';
+
+  @override
+  String deleteFailed(Object error) {
+    return '削除失敗: $error';
+  }
+
+  @override
+  String get confirmDeleteRecord => 'このレコードを削除してもよろしいですか？この操作は元に戻せません。';
+
+  @override
+  String get iconPickerConfirm => '確認';
+
+  @override
+  String get noRecentIcons => '最近使用したアイコンはありません';
+
+  @override
+  String get projectManagement => 'プロジェクト管理';
+
+  @override
+  String get newProject => '新規プロジェクト';
+
+  @override
+  String get createProject => 'プロジェクトを作成';
+
+  @override
+  String get pleaseSelectLedger => '台帳を選択してください';
+
+  @override
+  String get confirmDeleteProject => 'このプロジェクトを削除してもよろしいですか？この操作は元に戻せません。';
+
+  @override
+  String saveFailed(Object error) {
+    return '保存失敗: $error';
+  }
+
+  @override
+  String get editAccount => '編集';
+
+  @override
+  String get deleteAccount => '削除';
+
+  @override
+  String get addAccount => 'アカウントを追加';
+
+  @override
+  String get deleteAccountConfirm => 'このアカウントを削除してもよろしいですか？';
+
+  @override
+  String get selectAccountType => 'アカウントタイプを選択';
+
+  @override
+  String get saveButton => '保存';
+
+  @override
+  String get enableGiftBalance => 'ギフト残高を有効化';
+
+  @override
+  String get enableGiftBalanceDesc => 'このプリペイドアカウントにギフト残高アカウントを関連付けます';
+
+  @override
+  String get useGiftFirst => 'ギフトを優先使用';
+
+  @override
+  String get useGiftLast => 'ギフトを最後に使用';
+
+  @override
+  String get useGiftProportional => '比例控除';
+
+  @override
+  String get borrow => '借入';
+
+  @override
+  String get lend => '貸出';
+
+  @override
+  String get configureRepayment => '返済計画を設定';
+
+  @override
+  String get repaymentConfigInDev => '返済計画設定は開発中です...';
+
+  @override
+  String get developerTools => '開発者ツール';
+
+  @override
+  String get allAccounts => '全アカウント';
+
+  @override
+  String get accountDeleted => 'アカウントが削除されました';
+
+  @override
+  String deleteAccountWithTx(Object name) {
+    return 'アカウント「$name」を削除してもよろしいですか？\n\nこの操作は元に戻せません。関連する取引記録は保持されますが、このアカウントとの関連付けは解除されます。';
+  }
+
+  @override
+  String get deleteCategoryConfirm => 'このカテゴリを削除してもよろしいですか？';
+
+  @override
+  String get stakeholderManagement => '関係者管理';
+
+  @override
+  String get newStakeholder => '新規関係者';
+
+  @override
+  String addStakeholder(Object type) {
+    return '$typeを追加';
+  }
+
+  @override
+  String get selectAvatar => 'アバターを選択';
+
+  @override
+  String get type => 'タイプ';
+
+  @override
+  String get deleteStakeholder => '関係者を削除';
+
+  @override
+  String deleteStakeholderConfirm(Object name) {
+    return '「$name」を削除してもよろしいですか？\n\nこの操作は元に戻せません。';
+  }
+
+  @override
+  String get stakeholderDeleted => '関係者が削除されました';
+
+  @override
+  String get accountManagement => 'アカウント管理';
+
+  @override
+  String get newAccount => '新規アカウント';
+
+  @override
+  String addAccountType(Object type) {
+    return '$typeを追加';
+  }
+
+  @override
+  String get allSystemFieldsAdded => 'すべてのシステムフィールドが追加されました';
+
+  @override
+  String get extendedInfo => '拡張情報';
+
+  @override
+  String get addSystemField => 'システムフィールドを追加';
+
+  @override
+  String get addCustomField => 'カスタムフィールドを追加';
+
+  @override
+  String get fieldName => 'フィールド名';
+
+  @override
+  String get fieldValue => 'フィールド値';
+
+  @override
+  String get allCategories => '全カテゴリ';
+
+  @override
+  String get multiCurrencyConfig => 'マルチ通貨設定';
+
+  @override
+  String get backupRestore => 'バックアップから復元';
+
+  @override
+  String get backupRestoreInDev => 'バックアップ復元は開発中です';
+
+  @override
+  String get selectBackupFile => 'バックアップファイルを選択';
+
+  @override
+  String get cloudRestoreInDev => 'クラウドバックアップは開発中です';
+
+  @override
+  String get restoreFromCloud => 'クラウドから復元';
+
+  @override
+  String get bindSpecificAsset => '特定の資産をバインド';
+
+  @override
+  String get repaymentPlanConfig => '返済計画設定';
+
+  @override
+  String get autoGenerate => '自動生成';
+
+  @override
+  String get addPeriod => '期を追加';
+
+  @override
+  String get autoGenerateRepayment => '返済計画を自動生成';
+
+  @override
+  String get period => '期数';
+
+  @override
+  String get amount => '金額';
+
+  @override
+  String get interval => '間隔';
+
+  @override
+  String get everyMonth => '毎月';
+
+  @override
+  String get everyTwoMonths => '2ヶ月ごと';
+
+  @override
+  String get everyQuarter => '四半期ごと';
+
+  @override
+  String get everySixMonths => '半年ごと';
+
+  @override
+  String get everyYear => '毎年';
+
+  @override
+  String get generate => '生成';
+
+  @override
+  String get addLedger => '台帳を追加';
+
+  @override
+  String get setAsDefault => 'デフォルトに設定';
+
+  @override
+  String get ledgerBaseCurrency => '台帳の基本通貨';
+
+  @override
+  String get autoIncludeSettings => '自動追加設定';
+
+  @override
+  String get autoIncludeNewAccount => '新規アカウントを自動追加';
+
+  @override
+  String get autoIncludeNewAccountDesc => '新規作成されたアカウントは自動的にこの台帳に追加されます';
+
+  @override
+  String get autoIncludeNewCategory => '新規カテゴリを自動追加';
+
+  @override
+  String get autoIncludeNewCategoryDesc => '新規作成されたカテゴリは自動的にこの台帳に追加されます';
+
+  @override
+  String get giftDeductionMode => 'ギフト控除モード';
+
+  @override
+  String get giftAccountName => 'ギフトアカウント名';
+
+  @override
+  String get giftAccountNameHint => '空白の場合は自動生成されます';
+
+  @override
+  String get giftCurrency => 'ギフト通貨';
+
+  @override
+  String get giftInitialBalance => 'ギフト初期残高';
+
+  @override
+  String get giftInitialBalanceHint => '作成時のギフト金額';
+
+  @override
+  String get loanAmount => 'ローン金額';
+
+  @override
+  String get loanAmountRequired => 'ローン金額 *';
+
+  @override
+  String get loanAmountHint => 'ローン金額を入力してください';
+
+  @override
+  String get annualRate => '年利（%）';
+
+  @override
+  String get annualRateHint => '例：5.00';
+
+  @override
+  String get startDate => '開始日';
+
+  @override
+  String get startDateRequired => '開始日 *';
+
+  @override
+  String get endDate => '終了日';
+
+  @override
+  String get endDateRequired => '終了日 *';
+
+  @override
+  String get loanNote => 'ローンメモ';
+
+  @override
+  String get loanNoteHint => '例：目的、返済方法など';
+
+  @override
+  String get dueDate => '期日';
+
+  @override
+  String get note => 'メモ';
+
+  @override
+  String get periods => '期数';
+
+  @override
+  String get amountPerPeriod => '期当たり金額';
+
+  @override
+  String get repaymentInterval => '返済間隔';
+
+  @override
+  String get creditLimit => 'クレジット限度額';
+
+  @override
+  String get creditLimitRequired => 'クレジット限度額 *';
+
+  @override
+  String get creditLimitHint => 'クレジット限度額を入力してください';
+
+  @override
+  String get billingDay => '請求日';
+
+  @override
+  String get paymentDay => '支払日';
+
+  @override
+  String get bankName => '発行銀行';
+
+  @override
+  String get bankNameHint => '例：招商銀行';
+
+  @override
+  String get cardNumber => 'カード番号';
+
+  @override
+  String get cardNumberHint => 'カード番号を入力してください';
+
+  @override
+  String get expiryDate => '有効期限';
+
+  @override
+  String get expiryDateHint => '例：12/28';
+
+  @override
+  String dayRequired(Object label) {
+    return '$label *';
+  }
+
+  @override
+  String get bankNameLabel => '銀行名';
+
+  @override
+  String get bankNameLabelHint => '例：ICBC';
+
+  @override
+  String get bankCardNumber => '銀行カード番号';
+
+  @override
+  String get bankCardNumberHint => '銀行カード番号を入力してください';
+
+  @override
+  String get bankBranch => '支店';
+
+  @override
+  String get bankBranchHint => '例：XX支店';
+
+  @override
+  String get cardholderName => 'カード所持者名';
+
+  @override
+  String get cardholderNameHint => 'カード所持者名を入力してください';
+
+  @override
+  String get accountNameRequired => 'アカウント名 *';
+
+  @override
+  String get accountNameHint => 'アカウント名を入力してください';
+
+  @override
+  String get accountCurrencyRequired => 'アカウント通貨 *';
+
+  @override
+  String get initialBalance => '初期残高';
+
+  @override
+  String get initialBalanceHint => '作成時の初期金額';
+
+  @override
+  String get accountDescription => 'アカウント説明';
+
+  @override
+  String get accountDescriptionHint => 'オプション、このアカウントの簡単な説明';
+
+  @override
+  String get accountNote => 'メモ';
+
+  @override
+  String get accountNoteHint => 'オプション、メモ情報を追加';
+
+  @override
+  String get previewConfig => '設定プレビュー';
+
+  @override
+  String get confirmAndStart => '確認して使用開始';
+
+  @override
+  String get searchCurrency => '通貨を検索...';
+
+  @override
+  String get iconHint => 'アイコン';
+
+  @override
+  String get currencyCode => '通貨コード';
+
+  @override
+  String get currencyCodeHint => '例: POINT, TOKEN';
+
+  @override
+  String get currencyName => '通貨名';
+
+  @override
+  String get currencyNameHint => '例: ポイント、トークン';
+
+  @override
+  String get currencySymbol => '通貨記号';
+
+  @override
+  String get currencySymbolHint => '例: ¤, ₿';
+
+  @override
+  String get categoryName => 'カテゴリ名';
+
+  @override
+  String get categoryNameHint => 'カテゴリ名を入力してください';
+
+  @override
+  String get categoryType => 'カテゴリタイプ';
+
+  @override
+  String get parentCategory => '親カテゴリ';
+
+  @override
+  String get sortOrder => 'ソート順';
+
+  @override
+  String get sortOrderHint => '小さい値が最初に表示されます';
+
+  @override
+  String get ledgerName => '台帳名';
+
+  @override
+  String get ledgerNameHint => '台帳名を入力';
+
+  @override
+  String get ledgerNameExample => '例：日常台帳、家族台帳';
+
+  @override
+  String get descriptionOptional => '説明（オプション）';
+
+  @override
+  String get descriptionHint => '説明を入力';
+
+  @override
+  String get ledgerDescriptionHint => '台帳の目的説明';
+
+  @override
+  String get noteOptional => 'メモ（オプション）';
+
+  @override
+  String get noteHint => 'メモ情報を入力';
+
+  @override
+  String get accountNameLabel => 'アカウント名';
+
+  @override
+  String get accountNameExample => '例：ICBC普通預金カード';
+
+  @override
+  String get accountCurrency => 'アカウント通貨';
+
+  @override
+  String get initialBalanceDefault => '0.00';
+
+  @override
+  String get accountDescriptionOptional => 'アカウント説明（オプション）';
+
+  @override
+  String get creditLimitLabel => 'クレジット限度額';
+
+  @override
+  String get giftDeductionModeLabel => 'ギフト控除方法';
+
+  @override
+  String get giftInitialBalanceLabel => 'ギフト初期残高';
+
+  @override
+  String get investmentType => '投資タイプ';
+
+  @override
+  String get investmentCode => '投資コード（オプション）';
+
+  @override
+  String get loanAmountLabel => 'ローン金額';
+
+  @override
+  String get annualRateBps => '年利（基準点）';
+
+  @override
+  String get annualRateBpsHint => '例：500 = 5%';
+
+  @override
+  String get jsonInputHint => 'JSONを入力...';
+
+  @override
+  String get searchEmoji => '絵文字を検索...';
+
+  @override
+  String get searchCountry => '国/地域を検索...';
+
+  @override
+  String get fieldNameLabel => 'フィールド名';
+
+  @override
+  String get fieldNameHint => '例：メモ';
+
+  @override
+  String get fieldValueLabel => 'フィールド値';
+
+  @override
+  String get fieldValueHint => '値を入力してください';
+
+  @override
+  String get stakeholderName => '名前';
+
+  @override
+  String get stakeholderNameHint => '関係者名を入力';
+
+  @override
+  String get stakeholderDescription => '説明（オプション）';
+
+  @override
+  String get stakeholderDescriptionHint => '説明を入力';
+
+  @override
+  String get stakeholderContact => '連絡先（オプション）';
+
+  @override
+  String get stakeholderContactHint => '連絡先情報を入力';
+
+  @override
+  String get stakeholderNote => 'メモ（オプション）';
+
+  @override
+  String get stakeholderNoteHint => 'メモ情報を入力';
+
+  @override
+  String get projectName => 'プロジェクト名';
+
+  @override
+  String get projectNameHint => 'プロジェクト名を入力してください';
+
+  @override
+  String get projectLedger => 'プロジェクト台帳';
+
+  @override
+  String get projectDescription => 'プロジェクト説明';
+
+  @override
+  String get projectDescriptionHint => 'プロジェクト説明を入力してください（オプション）';
+
+  @override
+  String get projectBudget => '予算金額';
+
+  @override
+  String get projectBudgetHint => '予算金額を入力してください（オプション）';
+
+  @override
+  String get projectStartDate => '開始日';
+
+  @override
+  String get projectEndDate => '終了日';
+
+  @override
+  String addCategoryType(Object type) {
+    return '$typeカテゴリを追加';
+  }
 }

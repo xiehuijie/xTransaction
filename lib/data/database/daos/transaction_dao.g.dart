@@ -8,14 +8,15 @@ mixin _$TransactionDaoMixin on DatabaseAccessor<AppDatabase> {
   $LedgerTable get ledger => attachedDatabase.ledger;
   $StakeholderTable get stakeholder => attachedDatabase.stakeholder;
   $TransactionsTable get transactions => attachedDatabase.transactions;
+  $TransactionMetaTable get transactionMeta => attachedDatabase.transactionMeta;
   $AccountTable get account => attachedDatabase.account;
   $TransactionAmountDetailTable get transactionAmountDetail =>
       attachedDatabase.transactionAmountDetail;
   $CategoryTable get category => attachedDatabase.category;
   $TransactionCategoryDetailTable get transactionCategoryDetail =>
       attachedDatabase.transactionCategoryDetail;
-  $TransactionInstallmentDetailTable get transactionInstallmentDetail =>
-      attachedDatabase.transactionInstallmentDetail;
+  $TransactionInstallmentPlanTable get transactionInstallmentPlan =>
+      attachedDatabase.transactionInstallmentPlan;
   $TransactionInstallmentItemTable get transactionInstallmentItem =>
       attachedDatabase.transactionInstallmentItem;
   $TransactionReduceTable get transactionReduce =>

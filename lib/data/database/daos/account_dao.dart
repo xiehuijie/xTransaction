@@ -10,7 +10,6 @@ part 'account_dao.g.dart';
     AccountMeta,
     AccountCredit,
     AccountBonus,
-    AccountLoan,
     AccountPlanLoan,
     AccountFlexLoan,
     AccountInvest,
@@ -124,25 +123,6 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
                 t.prepaidAccountId.equals(prepaidAccountId),
           ))
           .go();
-
-  // ==================== LoanAccount CRUD ====================
-
-  /// 获取借贷账户详情
-  Future<LoanAccountEntity?> getLoanAccount(int accountId) => (select(
-    accountLoan,
-  )..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
-
-  /// 添加借贷账户详情
-  Future<void> insertLoanAccount(AccountLoanCompanion entry) =>
-      into(accountLoan).insert(entry);
-
-  /// 更新借贷账户详情
-  Future<bool> updateLoanAccount(LoanAccountEntity entry) =>
-      update(accountLoan).replace(entry);
-
-  /// 获取未归档的借贷账户
-  Future<List<LoanAccountEntity>> getActiveLoanAccounts() =>
-      (select(accountLoan)..where((t) => t.archived.equals(false))).get();
 
   // ==================== PlanLoanAccount CRUD ====================
 
