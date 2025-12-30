@@ -20,6 +20,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:country_flags/country_flags.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../data/constants/icon_data.dart';
 import '../../utils/haptic_service.dart';
@@ -116,7 +117,7 @@ class _IconPickerPageState extends State<IconPickerPage>
         ),
         actions: [
           if (_selectedIcon != null)
-            TextButton(onPressed: _confirmSelection, child: const Text('确定')),
+            TextButton(onPressed: _confirmSelection, child: Text(AppLocalizations.of(context)!.iconPickerConfirm)),
         ],
       ),
       body: Column(
@@ -272,7 +273,7 @@ class _EmojiPickerTab extends StatelessWidget {
           horizontalSpacing: 0,
           gridPadding: const EdgeInsets.all(8),
           backgroundColor: theme.scaffoldBackgroundColor,
-          noRecents: const Text('暂无最近使用', style: TextStyle(fontSize: 14)),
+          noRecents: Text(AppLocalizations.of(context)!.noRecentIcons, style: const TextStyle(fontSize: 14)),
         ),
         categoryViewConfig: CategoryViewConfig(
           initCategory: Category.SMILEYS,
@@ -286,7 +287,7 @@ class _EmojiPickerTab extends StatelessWidget {
         searchViewConfig: SearchViewConfig(
           backgroundColor: theme.scaffoldBackgroundColor,
           buttonIconColor: theme.colorScheme.primary,
-          hintText: '搜索 Emoji...',
+          hintText: AppLocalizations.of(context)!.searchEmoji,
         ),
         skinToneConfig: SkinToneConfig(
           dialogBackgroundColor: isDark ? Colors.grey[800]! : Colors.white,
@@ -491,7 +492,7 @@ class _FlagsTabState extends State<_FlagsTab> {
           padding: const EdgeInsets.all(16),
           child: TextField(
             decoration: InputDecoration(
-              hintText: '搜索国家/地区...',
+              hintText: AppLocalizations.of(context)!.searchCountry,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

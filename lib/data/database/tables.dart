@@ -29,6 +29,12 @@ enum TransactionType { expense, income, transfer }
 /// 交易关联类型
 enum TransactionRelationType { afterwards, forwards, children, parent, related }
 
+/// 交易元数据作用域
+enum TransactionMetaScope { system, custom }
+
+/// 投资类型
+enum AccountInvestType { stock, fund, bond, crypto, other }
+
 // ==================== 表定义 ====================
 
 /// 货币表
@@ -126,6 +132,53 @@ class AccountLoan extends Table {
   Set<Column> get primaryKey => {accountId};
 }
 
+/// 计划借贷账户表
+@DataClassName('PlanLoanAccountEntity')
+class AccountPlanLoan extends Table {
+  IntColumn get accountId =>
+      integer().named('account_id').references(Account, #accountId)();
+  IntColumn get stakeholderId => integer()
+      .named('stakeholder_id')
+      .references(Stakeholder, #stakeholderId)();
+  TextColumn get type => textEnum<AccountLoanType>()();
+  BoolColumn get archived => boolean().withDefault(const Constant(false))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {accountId};
+}
+
+/// 灵活借贷账户表
+@DataClassName('FlexLoanAccountEntity')
+class AccountFlexLoan extends Table {
+  IntColumn get accountId =>
+      integer().named('account_id').references(Account, #accountId)();
+  IntColumn get stakeholderId => integer()
+      .named('stakeholder_id')
+      .references(Stakeholder, #stakeholderId)();
+  TextColumn get type => textEnum<AccountLoanType>()();
+  RealColumn get rate => real()();
+  IntColumn get startDate => integer().named('start_date')();
+  IntColumn get endDate => integer().named('end_date')();
+  BoolColumn get archived => boolean().withDefault(const Constant(false))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {accountId};
+}
+
+/// 投资账户表
+@DataClassName('InvestAccountEntity')
+class AccountInvest extends Table {
+  IntColumn get accountId =>
+      integer().named('account_id').references(Account, #accountId)();
+  TextColumn get type => textEnum<AccountInvestType>()();
+  TextColumn get code => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {accountId};
+}
+
 /// 借贷计划表
 @DataClassName('LoanPlanEntity')
 class LoanPlan extends Table {
@@ -166,6 +219,8 @@ class Ledger extends Table {
       boolean().named('auto_account').withDefault(const Constant(true))();
   BoolColumn get autoCategory =>
       boolean().named('auto_category').withDefault(const Constant(true))();
+  BoolColumn get autoStakeholder =>
+      boolean().named('auto_stakeholder').withDefault(const Constant(true))();
   IntColumn get createdAt => integer().named('created_at')();
   IntColumn get updatedAt => integer().named('updated_at')();
   TextColumn get note => text().withDefault(const Constant(''))();
@@ -256,6 +311,19 @@ class Stakeholder extends Table {
   TextColumn get note => text().withDefault(const Constant(''))();
 }
 
+/// 相关方账本关联表
+@DataClassName('LedgerStakeholderRelationEntity')
+class RelationStakeholderLedger extends Table {
+  IntColumn get stakeholderId => integer()
+      .named('stakeholder_id')
+      .references(Stakeholder, #stakeholderId)();
+  IntColumn get ledgerId =>
+      integer().named('ledger_id').references(Ledger, #ledgerId)();
+
+  @override
+  Set<Column> get primaryKey => {stakeholderId, ledgerId};
+}
+
 /// 交易表
 @DataClassName('TransactionEntity')
 class Transactions extends Table {
@@ -273,10 +341,21 @@ class Transactions extends Table {
       .references(Stakeholder, #stakeholderId)();
   BoolColumn get hidden => boolean().withDefault(const Constant(false))();
   BoolColumn get excluded => boolean().withDefault(const Constant(false))();
-  TextColumn get locationName => text().nullable().named('location_name')();
-  RealColumn get locationLat => real().nullable().named('location_lat')();
-  RealColumn get locationLng => real().nullable().named('location_lng')();
   TextColumn get note => text().withDefault(const Constant(''))();
+}
+
+/// 交易元数据表
+@DataClassName('TransactionMetaEntity')
+class TransactionMeta extends Table {
+  IntColumn get transactionId => integer()
+      .named('transaction_id')
+      .references(Transactions, #transactionId)();
+  TextColumn get scope => textEnum<TransactionMetaScope>()();
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {transactionId, scope, key};
 }
 
 /// 交易金额明细表
@@ -312,10 +391,10 @@ class TransactionCategoryDetail extends Table {
 }
 
 /// 交易分期计划表
-@DataClassName('TransactionInstallmentDetailEntity')
-class TransactionInstallmentDetail extends Table {
-  IntColumn get installmentDetailId =>
-      integer().autoIncrement().named('installment_detail_id')();
+@DataClassName('TransactionInstallmentPlanEntity')
+class TransactionInstallmentPlan extends Table {
+  IntColumn get installmentPlanId =>
+      integer().autoIncrement().named('installment_plan_id')();
   IntColumn get transactionId => integer()
       .named('transaction_id')
       .references(Transactions, #transactionId)();
@@ -330,9 +409,9 @@ class TransactionInstallmentDetail extends Table {
 class TransactionInstallmentItem extends Table {
   IntColumn get installmentItemId =>
       integer().autoIncrement().named('installment_item_id')();
-  IntColumn get installmentDetailId => integer()
-      .named('installment_detail_id')
-      .references(TransactionInstallmentDetail, #installmentDetailId)();
+  IntColumn get installmentPlanId => integer()
+      .named('installment_plan_id')
+      .references(TransactionInstallmentPlan, #installmentPlanId)();
   IntColumn get installmentNumber => integer().named('installment_number')();
   IntColumn get dueDate => integer().named('due_date')();
   IntColumn get capitalAmount => integer().named('capital_amount')();

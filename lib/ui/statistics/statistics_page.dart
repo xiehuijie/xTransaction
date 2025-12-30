@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// 统计页面
 class StatisticsPage extends ConsumerWidget {
@@ -8,10 +9,11 @@ class StatisticsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('统计'),
+        title: Text(l10n.statistics),
         centerTitle: true,
         actions: [
           IconButton(
@@ -33,10 +35,10 @@ class StatisticsPage extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: SegmentedButton<int>(
-                      segments: const [
-                        ButtonSegment(value: 0, label: Text('周')),
-                        ButtonSegment(value: 1, label: Text('月')),
-                        ButtonSegment(value: 2, label: Text('年')),
+                      segments: [
+                        ButtonSegment(value: 0, label: Text(l10n.week)),
+                        ButtonSegment(value: 1, label: Text(l10n.month)),
+                        ButtonSegment(value: 2, label: Text(l10n.year)),
                       ],
                       selected: const {1},
                       onSelectionChanged: (selected) {

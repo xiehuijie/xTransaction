@@ -11,6 +11,9 @@ part 'account_dao.g.dart';
     AccountCredit,
     AccountBonus,
     AccountLoan,
+    AccountPlanLoan,
+    AccountFlexLoan,
+    AccountInvest,
     LoanPlan,
     LoanRecord,
     RelationAccountLedger,
@@ -140,6 +143,64 @@ class AccountDao extends DatabaseAccessor<AppDatabase> with _$AccountDaoMixin {
   /// 获取未归档的借贷账户
   Future<List<LoanAccountEntity>> getActiveLoanAccounts() =>
       (select(accountLoan)..where((t) => t.archived.equals(false))).get();
+
+  // ==================== PlanLoanAccount CRUD ====================
+
+  /// 获取计划借贷账户详情
+  Future<PlanLoanAccountEntity?> getPlanLoanAccount(int accountId) => (select(
+    accountPlanLoan,
+  )..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
+
+  /// 添加计划借贷账户详情
+  Future<void> insertPlanLoanAccount(AccountPlanLoanCompanion entry) =>
+      into(accountPlanLoan).insert(entry);
+
+  /// 更新计划借贷账户详情
+  Future<bool> updatePlanLoanAccount(PlanLoanAccountEntity entry) =>
+      update(accountPlanLoan).replace(entry);
+
+  /// 获取未归档的计划借贷账户
+  Future<List<PlanLoanAccountEntity>> getActivePlanLoanAccounts() =>
+      (select(accountPlanLoan)..where((t) => t.archived.equals(false))).get();
+
+  // ==================== FlexLoanAccount CRUD ====================
+
+  /// 获取灵活借贷账户详情
+  Future<FlexLoanAccountEntity?> getFlexLoanAccount(int accountId) => (select(
+    accountFlexLoan,
+  )..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
+
+  /// 添加灵活借贷账户详情
+  Future<void> insertFlexLoanAccount(AccountFlexLoanCompanion entry) =>
+      into(accountFlexLoan).insert(entry);
+
+  /// 更新灵活借贷账户详情
+  Future<bool> updateFlexLoanAccount(FlexLoanAccountEntity entry) =>
+      update(accountFlexLoan).replace(entry);
+
+  /// 获取未归档的灵活借贷账户
+  Future<List<FlexLoanAccountEntity>> getActiveFlexLoanAccounts() =>
+      (select(accountFlexLoan)..where((t) => t.archived.equals(false))).get();
+
+  // ==================== InvestAccount CRUD ====================
+
+  /// 获取投资账户详情
+  Future<InvestAccountEntity?> getInvestAccount(int accountId) => (select(
+    accountInvest,
+  )..where((t) => t.accountId.equals(accountId))).getSingleOrNull();
+
+  /// 添加投资账户详情
+  Future<void> insertInvestAccount(AccountInvestCompanion entry) =>
+      into(accountInvest).insert(entry);
+
+  /// 更新投资账户详情
+  Future<bool> updateInvestAccount(InvestAccountEntity entry) =>
+      update(accountInvest).replace(entry);
+
+  /// 根据投资类型获取投资账户
+  Future<List<InvestAccountEntity>> getInvestAccountsByType(
+    AccountInvestType type,
+  ) => (select(accountInvest)..where((t) => t.type.equalsValue(type))).get();
 
   // ==================== LoanPlan CRUD ====================
 

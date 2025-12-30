@@ -24,6 +24,9 @@ part 'database.g.dart';
     AccountCredit,
     AccountBonus,
     AccountLoan,
+    AccountPlanLoan,
+    AccountFlexLoan,
+    AccountInvest,
     LoanPlan,
     LoanRecord,
     Ledger,
@@ -32,10 +35,12 @@ part 'database.g.dart';
     Category,
     RelationCategoryLedger,
     Stakeholder,
+    RelationStakeholderLedger,
     Transactions,
+    TransactionMeta,
     TransactionAmountDetail,
     TransactionCategoryDetail,
-    TransactionInstallmentDetail,
+    TransactionInstallmentPlan,
     TransactionInstallmentItem,
     TransactionReduce,
     TransactionRefund,
@@ -145,10 +150,12 @@ class AppDatabase extends _$AppDatabase {
       await delete(transactionRefund).go();
       await delete(transactionReduce).go();
       await delete(transactionInstallmentItem).go();
-      await delete(transactionInstallmentDetail).go();
+      await delete(transactionInstallmentPlan).go();
       await delete(transactionCategoryDetail).go();
       await delete(transactionAmountDetail).go();
       await delete(transactions).go();
+      await delete(transactionMeta).go();
+      await delete(relationStakeholderLedger).go();
       await delete(stakeholder).go();
       await delete(relationCategoryLedger).go();
       await delete(category).go();
@@ -157,6 +164,9 @@ class AppDatabase extends _$AppDatabase {
       await delete(ledger).go();
       await delete(loanRecord).go();
       await delete(loanPlan).go();
+      await delete(accountInvest).go();
+      await delete(accountFlexLoan).go();
+      await delete(accountPlanLoan).go();
       await delete(accountLoan).go();
       await delete(accountBonus).go();
       await delete(accountCredit).go();
@@ -179,6 +189,9 @@ class AppDatabase extends _$AppDatabase {
     data['accountCredit'] = await select(accountCredit).get();
     data['accountBonus'] = await select(accountBonus).get();
     data['accountLoan'] = await select(accountLoan).get();
+    data['accountPlanLoan'] = await select(accountPlanLoan).get();
+    data['accountFlexLoan'] = await select(accountFlexLoan).get();
+    data['accountInvest'] = await select(accountInvest).get();
     data['loanPlan'] = await select(loanPlan).get();
     data['loanRecord'] = await select(loanRecord).get();
     data['ledger'] = await select(ledger).get();
@@ -187,15 +200,18 @@ class AppDatabase extends _$AppDatabase {
     data['category'] = await select(category).get();
     data['relationCategoryLedger'] = await select(relationCategoryLedger).get();
     data['stakeholder'] = await select(stakeholder).get();
+    data['relationStakeholderLedger'] =
+        await select(relationStakeholderLedger).get();
     data['transactions'] = await select(transactions).get();
+    data['transactionMeta'] = await select(transactionMeta).get();
     data['transactionAmountDetail'] = await select(
       transactionAmountDetail,
     ).get();
     data['transactionCategoryDetail'] = await select(
       transactionCategoryDetail,
     ).get();
-    data['transactionInstallmentDetail'] = await select(
-      transactionInstallmentDetail,
+    data['transactionInstallmentPlan'] = await select(
+      transactionInstallmentPlan,
     ).get();
     data['transactionInstallmentItem'] = await select(
       transactionInstallmentItem,
