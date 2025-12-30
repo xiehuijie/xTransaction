@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../data/data.dart';
 import '../../data/constants/icon_data.dart';
@@ -101,10 +102,11 @@ class _CategoryManagePageState extends ConsumerState<CategoryManagePage>
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(allCategoriesProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('分类管理'),
+        title: Text(l10n.categoryManagement),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
@@ -170,7 +172,7 @@ class _CategoryManagePageState extends ConsumerState<CategoryManagePage>
           _navigateToForm(context, type: currentType);
         },
         icon: const Icon(Icons.add),
-        label: const Text('新增分类'),
+        label: Text(l10n.newCategory),
       ),
     );
   }
@@ -547,22 +549,23 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
   }
 
   Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除这个分类吗？此操作不可恢复。'),
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteCategory),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('删除'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -643,7 +646,7 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
             Center(
               child: TextButton(
                 onPressed: _selectIcon,
-                child: const Text('选择图标'),
+                child: Text(AppLocalizations.of(context)!.selectIcon),
               ),
             ),
             const SizedBox(height: 24),
@@ -651,14 +654,14 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
             // 分类名称
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: '分类名称',
-                hintText: '请输入分类名称',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.categoryName,
+                hintText: AppLocalizations.of(context)!.categoryNameHint,
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return '请输入分类名称';
+                  return AppLocalizations.of(context)!.categoryNameHint;
                 }
                 return null;
               },

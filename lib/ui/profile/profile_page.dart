@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../utils/haptic_service.dart';
 import '../settings/settings_page.dart';
@@ -18,10 +19,11 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('我的'),
+        title: Text(l10n.profile),
         centerTitle: true,
         actions: [
           // 使用自定义滑入动画打开设置页
@@ -244,9 +246,10 @@ class _AboutDialogState extends State<_AboutDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      title: const Text('关于'),
+      title: Text(l10n.about),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -296,11 +299,11 @@ class _AboutDialogState extends State<_AboutDialog> {
               applicationVersion: '0.1.0',
             );
           },
-          child: const Text('许可证'),
+          child: Text(l10n.licenses),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('关闭'),
+          child: Text(l10n.close),
         ),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../data/data.dart';
 import '../../providers/providers.dart';
@@ -127,7 +128,7 @@ class OverviewPage extends ConsumerWidget {
           // TODO: 添加新交易
         },
         icon: const Icon(Icons.add),
-        label: const Text('记一笔'),
+        label: Text(AppLocalizations.of(context)!.record),
       ),
     );
   }
@@ -265,7 +266,7 @@ class _LedgerPickerSheet extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onManageLedgers,
                   icon: const Icon(Icons.settings, size: 18),
-                  label: const Text('管理'),
+                  label: Text(AppLocalizations.of(context)!.manage),
                 ),
               ],
             ),

@@ -7,9 +7,10 @@ part 'transaction_dao.g.dart';
 @DriftAccessor(
   tables: [
     Transactions,
+    TransactionMeta,
     TransactionAmountDetail,
     TransactionCategoryDetail,
-    TransactionInstallmentDetail,
+    TransactionInstallmentPlan,
     TransactionInstallmentItem,
     TransactionReduce,
     TransactionRefund,
@@ -86,6 +87,46 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
             ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
           .watch();
 
+  // ==================== TransactionMeta CRUD ====================
+
+  /// 获取交易的元数据
+  Future<List<TransactionMetaEntity>> getTransactionMetas(
+    int transactionId,
+  ) => (select(
+    transactionMeta,
+  )..where((t) => t.transactionId.equals(transactionId))).get();
+
+  /// 根据作用域获取交易元数据
+  Future<List<TransactionMetaEntity>> getTransactionMetasByScope(
+    int transactionId,
+    TransactionMetaScope scope,
+  ) => (select(transactionMeta)..where(
+        (t) =>
+            t.transactionId.equals(transactionId) & t.scope.equalsValue(scope),
+      )).get();
+
+  /// 添加交易元数据
+  Future<void> insertTransactionMeta(TransactionMetaCompanion entry) =>
+      into(transactionMeta).insert(entry, mode: InsertMode.insertOrReplace);
+
+  /// 删除交易的所有元数据
+  Future<int> deleteTransactionMetasByTransactionId(int transactionId) =>
+      (delete(transactionMeta)
+            ..where((t) => t.transactionId.equals(transactionId)))
+          .go();
+
+  /// 删除特定交易元数据
+  Future<int> deleteTransactionMeta(
+    int transactionId,
+    TransactionMetaScope scope,
+    String key,
+  ) => (delete(transactionMeta)..where(
+        (t) =>
+            t.transactionId.equals(transactionId) &
+            t.scope.equalsValue(scope) &
+            t.key.equals(key),
+      )).go();
+
   // ==================== TransactionAmountDetail CRUD ====================
 
   /// 获取交易的金额明细
@@ -140,23 +181,23 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   // ==================== TransactionInstallment CRUD ====================
 
   /// 获取交易的分期计划
-  Future<TransactionInstallmentDetailEntity?> getInstallmentDetail(
+  Future<TransactionInstallmentPlanEntity?> getInstallmentPlan(
     int transactionId,
   ) => (select(
-    transactionInstallmentDetail,
+    transactionInstallmentPlan,
   )..where((t) => t.transactionId.equals(transactionId))).getSingleOrNull();
 
   /// 添加分期计划
-  Future<int> insertInstallmentDetail(
-    TransactionInstallmentDetailCompanion entry,
-  ) => into(transactionInstallmentDetail).insert(entry);
+  Future<int> insertInstallmentPlan(
+    TransactionInstallmentPlanCompanion entry,
+  ) => into(transactionInstallmentPlan).insert(entry);
 
   /// 获取分期明细
   Future<List<TransactionInstallmentItemEntity>> getInstallmentItems(
-    int installmentDetailId,
+    int installmentPlanId,
   ) =>
       (select(transactionInstallmentItem)
-            ..where((t) => t.installmentDetailId.equals(installmentDetailId))
+            ..where((t) => t.installmentPlanId.equals(installmentPlanId))
             ..orderBy([(t) => OrderingTerm.asc(t.installmentNumber)]))
           .get();
 
