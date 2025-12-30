@@ -678,7 +678,7 @@ class _ProjectFormPageState extends ConsumerState<ProjectFormPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('确认$action'),
-        content: Text('确定要${action}这个项目吗？'),
+        content: Text('确定要$action这个项目吗？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -797,7 +797,7 @@ class _ProjectFormPageState extends ConsumerState<ProjectFormPage> {
                 }
 
                 return DropdownButtonFormField<int>(
-                  value: _ledgerId,
+                  initialValue: _ledgerId,
                   decoration: const InputDecoration(
                     labelText: '所属账本',
                     border: OutlineInputBorder(),

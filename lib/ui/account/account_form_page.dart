@@ -7,10 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/data.dart';
-import '../../data/constants/account_types.dart';
 import '../../data/constants/icon_data.dart';
 import '../../providers/providers.dart';
-import '../../providers/account_provider.dart';
 import '../../utils/haptic_service.dart';
 import '../common/app_icon_widget.dart';
 import '../common/icon_picker_page.dart';

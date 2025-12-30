@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/data.dart';
-import '../../../data/constants/account_types.dart';
 import '../../../providers/providers.dart';
-import '../../../providers/account_provider.dart';
 import '../../../utils/haptic_service.dart';
 
 /// 赠送金扣减模式
@@ -268,7 +266,7 @@ class PrepaidAccountFormState extends ConsumerState<PrepaidAccountForm> {
 
           // 赠送金扣减模式
           DropdownButtonFormField<BonusDeductMode>(
-            value: _bonusDeductMode,
+            initialValue: _bonusDeductMode,
             decoration: const InputDecoration(
               labelText: '扣减模式',
               prefixIcon: Icon(Icons.swap_vert),

@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 
 import '../../../data/data.dart';
 import '../../../providers/providers.dart';
-import '../../../providers/account_provider.dart';
 import '../../../utils/haptic_service.dart';
 
 /// 借贷账户表单数据
@@ -990,7 +989,7 @@ class _GeneratePlansDialogState extends State<_GeneratePlansDialog> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<int>(
-            value: _interval,
+            initialValue: _interval,
             decoration: const InputDecoration(
               labelText: '还款间隔',
             ),

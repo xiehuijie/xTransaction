@@ -668,7 +668,7 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
             // 分类类型（新建时可选，编辑时只读）
             if (!isEditing && _parentId == null) ...[
               DropdownButtonFormField<CategoryType>(
-                value: _type,
+                initialValue: _type,
                 decoration: const InputDecoration(
                   labelText: '分类类型',
                   border: OutlineInputBorder(),
