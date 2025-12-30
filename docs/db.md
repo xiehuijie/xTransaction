@@ -66,21 +66,32 @@
   | bonus_account_id 🔑🔗   | INTEGER  | 对应的赠送金账户唯一标识 |
   | prepaid_account_id 🔑🔗 | INTEGER  | 对应的预付款账户唯一标识 |
 
-- #### 借贷账户表 (LoanAccount) [account_loan]
+- #### 计划借贷账户表 (PlanLoanAccount) [account_plan_loan]
 
-  在基础账户表的基础上，扩展借贷账户特有的信息。
+  在基础账户表的基础上，扩展计划借贷账户特有的信息。
 
-  | 字段名                      | 字段类型 | 描述                     |
-  | --------------------------- | -------- | ------------------------ |
-  | account_id 🔑🔗             | INTEGER  | 关联的账户唯一标识       |
-  | stakeholder_id 🔗🔍[0]      | INTEGER  | 关联的相关方唯一标识     |
-  | [type ℹ️](#accountloantype) | TEXT     | 借贷类型                 |
-  | amount 💰                   | INTEGER  | 借贷金额                 |
-  | rate                        | INTEGER  | 年化利率（基点，5%=500） |
-  | start_date 📅               | INTEGER  | 借贷开始日期             |
-  | end_date 📅🔍[1]            | INTEGER  | 借贷结束日期             |
-  | archived 🚩🔍[2]            | INTEGER  | 是否归档                 |
-  | note                        | TEXT     | 备注                     |
+  | 字段名                      | 字段类型 | 描述                 |
+  | --------------------------- | -------- | -------------------- |
+  | account_id 🔑🔗             | INTEGER  | 关联的账户唯一标识   |
+  | stakeholder_id 🔗🔍[0]      | INTEGER  | 关联的相关方唯一标识 |
+  | [type ℹ️](#accountloantype) | TEXT     | 借贷类型             |
+  | archived 🚩🔍[2]            | INTEGER  | 是否归档             |
+  | note                        | TEXT     | 备注                 |
+
+- #### 灵活借贷账户表 (FlexLoanAccount) [account_flex_loan]
+
+  在基础账户表的基础上，扩展灵活借贷账户特有的信息。灵活借贷账户多用于描述那些没有固定还款计划的借贷账户。
+
+  | 字段名                      | 字段类型 | 描述                 |
+  | --------------------------- | -------- | -------------------- |
+  | account_id 🔑🔗             | INTEGER  | 关联的账户唯一标识   |
+  | stakeholder_id 🔗🔍[0]      | INTEGER  | 关联的相关方唯一标识 |
+  | [type ℹ️](#accountloantype) | TEXT     | 借贷类型             |
+  | rate                        | REAL     | 年化利率             |
+  | start_date 📅               | INTEGER  | 借贷开始日期         |
+  | end_date 📅🔍[1]            | INTEGER  | 借贷结束日期         |
+  | archived 🚩🔍[2]            | INTEGER  | 是否归档             |
+  | note                        | TEXT     | 备注                 |
 
 - #### 借贷计划表 (LoanPlan) [loan_plan]
 
@@ -114,26 +125,29 @@
 
   在基础账户表的基础上，扩展投资账户特有的信息。
 
-  | 字段名          | 字段类型 | 描述               |
-  | --------------- | -------- | ------------------ |
-  | account_id 🔑🔗 | INTEGER  | 关联的账户唯一标识 |
+  | 字段名                        | 字段类型 | 描述               |
+  | ----------------------------- | -------- | ------------------ |
+  | account_id 🔑🔗               | INTEGER  | 关联的账户唯一标识 |
+  | [type ℹ️](#accountinvesttype) | TEXT     | 投资类型           |
+  | code                          | TEXT     | 对应资产代码       |
 
 - #### 账本表 (Ledger) [ledger]
 
   用于描述账本信息，不同账本下的分类、账户、相关方将被认为是不同的实体，一切的记账活动均基于某个账本进行，例如账户余额统计、消费统计汇总等。
 
-  | 字段名           | 字段类型 | 描述                 |
-  | ---------------- | -------- | -------------------- |
-  | ledger_id 🔄🔑   | INTEGER  | 账本唯一标识         |
-  | name ❄️[0]       | TEXT     | 账本名称             |
-  | currency_code 🔗 | TEXT     | 账本货币本币代码     |
-  | description      | TEXT     | 账本描述             |
-  | photo            | TEXT     | 账本封面             |
-  | auto_account 🚩  | INTEGER  | 是否自动包含新增账户 |
-  | auto_category 🚩 | INTEGER  | 是否自动包含新增分类 |
-  | created_at 🕗    | INTEGER  | 创建时间戳           |
-  | updated_at 🕗    | INTEGER  | 更新时间戳           |
-  | note             | TEXT     | 备注                 |
+  | 字段名              | 字段类型 | 描述                   |
+  | ------------------- | -------- | ---------------------- |
+  | ledger_id 🔄🔑      | INTEGER  | 账本唯一标识           |
+  | name ❄️[0]          | TEXT     | 账本名称               |
+  | currency_code 🔗    | TEXT     | 账本货币本币代码       |
+  | description         | TEXT     | 账本描述               |
+  | photo               | TEXT     | 账本封面               |
+  | auto_account 🚩     | INTEGER  | 是否自动包含新增账户   |
+  | auto_category 🚩    | INTEGER  | 是否自动包含新增分类   |
+  | auto_stakeholder 🚩 | INTEGER  | 是否自动包含新增相关方 |
+  | created_at 🕗       | INTEGER  | 创建时间戳             |
+  | updated_at 🕗       | INTEGER  | 更新时间戳             |
+  | note                | TEXT     | 备注                   |
 
 - #### 账户账本关联表 (LedgerAccountRelation) [relation_account_ledger]
 
@@ -164,7 +178,7 @@
 
 - #### 货币表 (Currency) [currency]
 
-  记录系统支持的货币信息，除了系统内置货币外，用户还可以自定义货币，但主要用于储值型账户。
+  记录已启用的货币信息，除了系统内置货币外，用户还可以自定义货币，但主要用于储值型账户。
 
   | 字段名                           | 字段类型 | 描述               |
   | -------------------------------- | -------- | ------------------ |
@@ -214,6 +228,15 @@
   | updated_at 🕗                    | INTEGER  | 更新时间戳     |
   | note                             | TEXT     | 备注           |
 
+- #### 相关方账本关联表 (LedgerStakeholderRelation) [relation_stakeholder_ledger]
+
+  定义相关方与账本的关联关系。当账本的`auto_stakeholder`字段为真时，新增相关方会自动添加到此账本中。
+
+  | 字段名              | 字段类型 | 描述                 |
+  | ------------------- | -------- | -------------------- |
+  | stakeholder_id 🔑🔗 | INTEGER  | 关联的相关方唯一标识 |
+  | ledger_id 🔑🔗      | INTEGER  | 关联的账本唯一标识   |
+
 - #### 交易表 (Transaction) [transaction]
 
   用于记录每一笔交易（支出、收入）的信息。
@@ -227,12 +250,20 @@
   | created_at 🕗                    | INTEGER  | 创建时间戳                 |
   | updated_at 🕗                    | INTEGER  | 更新时间戳                 |
   | stakeholder_id 🔗 ❇️🔍[3]        | INTEGER  | 关联的相关方唯一标识       |
-  | hidden 🚩🔍[4]                   | INTEGER  | 交易是否可见               |
-  | excluded 🚩🔍[5]                 | INTEGER  | 是否不计入收支             |
-  | location_name ❇️                 | TEXT     | 交易地点名称               |
-  | location_lat ❇️                  | REAL     | 交易地点纬度               |
-  | location_lng ❇️                  | REAL     | 交易地点经度               |
+  | hidden 🚩🔍[4]                   | INTEGER  | 交易是否在记录中可见       |
+  | excluded 🚩🔍[5]                 | INTEGER  | 是否从收支统计中排除       |
   | note                             | TEXT     | 交易备注                   |
+
+- #### 交易元数据表 (TransactionMeta) [transaction_meta]
+
+  存储交易的扩展元数据信息，采用键值对形式。
+
+  | 字段名                              | 字段类型 | 描述               |
+  | ----------------------------------- | -------- | ------------------ |
+  | transaction_id 🔑                   | INTEGER  | 关联的交易唯一标识 |
+  | [scope ℹ️](#transactionmetascope)🔑 | TEXT     | 元数据作用域       |
+  | key 🔑🔍                            | TEXT     | 元数据键           |
+  | value 🔍                            | TEXT     | 元数据值           |
 
 - #### 交易金额明细表 (TransactionAmountDetail) [transaction_amount_detail]
 
@@ -260,31 +291,31 @@
   | amount 💰               | INTEGER  | 交易时金额（交易币） |
   | real_amount 💰          | INTEGER  | 实际交易金额（本币） |
 
-- #### 交易分期计划表 (TransactionInstallmentDetail) [transaction_installment_detail]
+- #### 交易分期计划表 (TransactionInstallmentPlan) [transaction_installment_plan]
 
-  记录交易分期的计划元数据信息。
+  记录交易分期的计划元数据信息。分期交易金额等于所有明细本金之和。分期交易仅适用于支出，金额始终为正数。
 
-  | 字段名                     | 字段类型 | 描述               |
-  | -------------------------- | -------- | ------------------ |
-  | installment_detail_id 🔄🔑 | INTEGER  | 分期计划唯一标识   |
-  | transaction_id 🔗🔍[0]     | INTEGER  | 所属交易的唯一标识 |
-  | account_id 🔗🔍[1]         | INTEGER  | 关联的账户唯一标识 |
-  | currency_code 🔗           | TEXT     | 分期时货币代码     |
+  | 字段名                   | 字段类型 | 描述               |
+  | ------------------------ | -------- | ------------------ |
+  | installment_plan_id 🔄🔑 | INTEGER  | 分期计划唯一标识   |
+  | transaction_id 🔗🔍[0]   | INTEGER  | 所属交易的唯一标识 |
+  | account_id 🔗🔍[1]       | INTEGER  | 关联的账户唯一标识 |
+  | currency_code 🔗         | TEXT     | 分期时货币代码     |
 
 - #### 交易分期明细表 (TransactionInstallmentItem) [transaction_installment_item]
 
-  记录分期计划中各分期的具体明细，仅包含期次相关信息。
+  记录分期计划中各分期的具体明细，仅包含期次内相关信息。
 
-  | 字段名                        | 字段类型 | 描述                   |
-  | ----------------------------- | -------- | ---------------------- |
-  | installment_item_id 🔄🔑      | INTEGER  | 分期明细唯一标识       |
-  | installment_detail_id 🔗🔍[0] | INTEGER  | 分期计划唯一标识       |
-  | installment_number 🔍[1]      | INTEGER  | 分期编号（从 1 开始）  |
-  | due_date 📅🔍[2]              | INTEGER  | 分期到期日期           |
-  | capital_amount 💰             | INTEGER  | 本期本金金额（交易币） |
-  | real_capital_amount 💰        | INTEGER  | 本期本金金额（本币）   |
-  | interest_amount 💰            | INTEGER  | 本期利息金额（交易币） |
-  | real_interest_amount 💰       | INTEGER  | 本期利息金额（本币）   |
+  | 字段名                      | 字段类型 | 描述                   |
+  | --------------------------- | -------- | ---------------------- |
+  | installment_item_id 🔄🔑    | INTEGER  | 分期明细唯一标识       |
+  | installment_plan_id 🔗🔍[0] | INTEGER  | 分期计划唯一标识       |
+  | installment_number 🔍[1]    | INTEGER  | 分期编号（从 1 开始）  |
+  | due_date 📅🔍[2]            | INTEGER  | 分期到期日期           |
+  | capital_amount 💰           | INTEGER  | 本期本金金额（交易币） |
+  | real_capital_amount 💰      | INTEGER  | 本期本金金额（本币）   |
+  | interest_amount 💰          | INTEGER  | 本期利息金额（交易币） |
+  | real_interest_amount 💰     | INTEGER  | 本期利息金额（本币）   |
 
 - #### 交易减免表 (TransactionReduce) [transaction_deduce]
 
@@ -411,6 +442,14 @@
   - `lend` 借出
   - `borrow` 借入
 
+- #### AccountInvestType
+
+  - `stock` 股票
+  - `fund` 基金
+  - `bond` 债券
+  - `crypto` 加密货币
+  - `other` 其他投资类型
+
 - #### CurrencySource
 
   - `system` 系统内置货币
@@ -446,6 +485,11 @@
   - `expense` 支出
   - `income` 收入
   - `transfer` 转账
+
+- #### TransactionMetaScope
+
+  - `system` 系统级元数据
+  - `custom` 用户自定义元数据
 
 - #### TransactionRelationType
 
