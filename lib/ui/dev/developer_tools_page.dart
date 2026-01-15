@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/database.dart';
 import '../../utils/haptic_service.dart';
+import '../../utils/format_utils.dart';
 import 'database_browser_page.dart';
 
 /// 开发者工具页面
@@ -152,7 +153,7 @@ class DeveloperToolsPage extends ConsumerWidget {
                     itemCount: files.length,
                     itemBuilder: (context, index) {
                       final file = files[index];
-                      final size = _formatFileSize(file['size'] as int);
+                      final size = formatFileSize(file['size'] as int);
                       final modified = file['modified'] as DateTime;
                       
                       return Card(
@@ -168,7 +169,7 @@ class DeveloperToolsPage extends ConsumerWidget {
                             children: [
                               Text('大小: $size'),
                               Text(
-                                '修改: ${_formatDateTime(modified)}',
+                                '修改: ${formatDateTime(modified)}',
                                 style: const TextStyle(fontSize: 11),
                               ),
                             ],
@@ -206,20 +207,6 @@ class DeveloperToolsPage extends ConsumerWidget {
         );
       }
     }
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-  }
-
-  String _formatDateTime(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildSection(

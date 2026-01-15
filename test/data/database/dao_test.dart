@@ -9,6 +9,13 @@ LedgerDatabase createTestDatabase() {
   return LedgerDatabase.forTesting(NativeDatabase.memory());
 }
 
+/// Timestamp unit conventions:
+/// - Account.createdAt, Account.updatedAt: Unix timestamp in seconds
+/// - Transaction.timestamp, Transaction.createdAt, Transaction.updatedAt: Unix timestamp in milliseconds
+/// - Project.createdAt, Project.updatedAt: Unix timestamp in seconds
+/// - Stakeholder.createdAt, Stakeholder.updatedAt: Unix timestamp in seconds
+/// - Reimbursement.createdAt, Reimbursement.updatedAt: Unix timestamp in milliseconds
+
 void main() {
   group('CurrencyDao Tests', () {
     late LedgerDatabase db;
@@ -316,7 +323,9 @@ void main() {
     });
 
     test('should add amount details to transaction', () async {
+      // Transaction timestamps use milliseconds since epoch
       final now = DateTime.now().millisecondsSinceEpoch;
+      // Account timestamps use seconds since epoch
       final nowSec = now ~/ 1000;
       
       final accountId = await accountDao.insertAccount(
@@ -324,17 +333,17 @@ void main() {
           name: 'Test',
           type: AccountType.balance,
           currencyCode: 'CNY',
-          createdAt: nowSec,
-          updatedAt: nowSec,
+          createdAt: nowSec, // seconds
+          updatedAt: nowSec, // seconds
         ),
       );
 
       final txId = await transactionDao.insertTransaction(
         TransactionsCompanion.insert(
           type: TransactionType.expense,
-          timestamp: now,
-          createdAt: now,
-          updatedAt: now,
+          timestamp: now, // milliseconds
+          createdAt: now, // milliseconds
+          updatedAt: now, // milliseconds
         ),
       );
 
@@ -344,9 +353,9 @@ void main() {
           accountId: accountId,
           type: AmountChangeType.basic,
           currencyCode: 'CNY',
-          occurAmount: -10000, // 支出用负数
+          occurAmount: -10000, // Use negative for expenses
           localAmount: -10000,
-          timestamp: now,
+          timestamp: now, // milliseconds
         ),
       );
 
@@ -471,7 +480,7 @@ void main() {
       final reimb = await reimbursementDao.getReimbursementById(reimbId);
       expect(reimb, isNotNull);
       expect(reimb!.summary, equals('Business Trip'));
-      expect(reimb.status, isFalse); // 默认未完成
+      expect(reimb.status, isFalse); // default is not completed
     });
 
     test('should complete reimbursement', () async {
@@ -485,7 +494,7 @@ void main() {
         ),
       );
 
-      // 标记完成
+      // Mark as completed
       await reimbursementDao.completeReimbursement(reimbId);
 
       final reimb = await reimbursementDao.getReimbursementById(reimbId);
@@ -685,8 +694,8 @@ void main() {
       final loanPlanId = await accountDao.insertLoanPlan(
         LoanPlanCompanion.insert(
           accountId: accountId,
-          startDate: 45000, // 日期天数
-          rate: const Value(0.05), // 5% 年利率
+          startDate: 45000, // days since 1900 date system
+          rate: const Value(0.05), // 5% annual rate
         ),
       );
 
@@ -716,13 +725,13 @@ void main() {
         ),
       );
 
-      // 添加借贷记录
+      // Add loan records
       await accountDao.insertLoanRecord(
         LoanRecordCompanion.insert(
           loanPlanId: loanPlanId,
           period: 1,
-          amount: 100000, // 1000.00 本金
-          interest: 5000, // 50.00 利息
+          amount: 100000, // 1000.00 principal
+          interest: 5000, // 50.00 interest
           date: 45030,
         ),
       );

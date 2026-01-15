@@ -12,6 +12,7 @@ import '../../data/database/database.dart';
 import '../../data/services/ledger_service.dart';
 import '../../providers/providers.dart';
 import '../../utils/haptic_service.dart';
+import '../../utils/format_utils.dart';
 
 /// 表信息
 class _TableMeta {
@@ -349,26 +350,42 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
           return;
         }
 
+        // 验证是否为有效的 SQLite 数据库文件
+        if (!await DatabaseManager.isValidSqliteFile(sourcePath)) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('不是有效的 SQLite 数据库文件')),
+            );
+          }
+          return;
+        }
+
         // 关闭当前数据库连接
         final manager = ref.read(databaseManagerProvider);
         await manager.closeDatabase(db.ledgerId);
 
-        // 执行导入
-        final success = await DatabaseManager.importDatabase(
+        // 执行导入（带备份）
+        final importResult = await DatabaseManager.importDatabaseWithValidation(
           db.ledgerId,
           sourcePath,
+          createBackupFirst: true,
         );
 
         if (mounted) {
-          if (success) {
+          if (importResult['success'] == true) {
+            final backupPath = importResult['backupPath'] as String?;
+            final message = backupPath != null
+                ? '数据库导入成功（备份已创建）'
+                : '数据库导入成功';
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('数据库导入成功')),
+              SnackBar(content: Text(message)),
             );
             // 刷新页面
             setState(() {});
           } else {
+            final error = importResult['error'] ?? '未知错误';
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('导入失败')),
+              SnackBar(content: Text('导入失败: $error')),
             );
           }
         }
@@ -401,7 +418,7 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
                     itemCount: files.length,
                     itemBuilder: (context, index) {
                       final file = files[index];
-                      final size = _formatFileSize(file['size'] as int);
+                      final size = formatFileSize(file['size'] as int);
                       final modified = file['modified'] as DateTime;
                       
                       return ListTile(
@@ -412,7 +429,7 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
                           children: [
                             Text('大小: $size'),
                             Text(
-                              '修改时间: ${_formatDateTime(modified)}',
+                              '修改时间: ${formatDateTime(modified)}',
                               style: const TextStyle(fontSize: 11),
                             ),
                           ],
@@ -448,11 +465,6 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
         );
       }
     }
-  }
-
-  String _formatDateTime(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   Future<void> _exportDatabase(LedgerDatabase db) async {
@@ -582,7 +594,7 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
     final file = File(dbPath);
     final exists = await file.exists();
     final size = exists ? await file.length() : 0;
-    final sizeStr = _formatFileSize(size);
+    final sizeStr = formatFileSize(size);
 
     if (!mounted) return;
 
@@ -617,15 +629,6 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
         ],
       ),
     );
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 }
 
