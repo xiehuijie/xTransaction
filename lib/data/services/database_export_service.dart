@@ -8,7 +8,7 @@ import '../database/database.dart';
 
 /// 数据库导入导出服务
 class DatabaseExportService {
-  final AppDatabase _db;
+  final LedgerDatabase _db;
 
   DatabaseExportService(this._db);
 
@@ -99,7 +99,7 @@ class DatabaseExportService {
 
   /// 获取数据库文件大小
   Future<int> getDatabaseFileSize() async {
-    final dbPath = await AppDatabase.getDatabasePath();
+    final dbPath = await _db.getDatabasePath();
     final file = File(dbPath);
     if (await file.exists()) {
       return await file.length();

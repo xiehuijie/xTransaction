@@ -112,7 +112,7 @@ class _SystemCurrenciesTabState extends ConsumerState<_SystemCurrenciesTab> {
       data: (enabledCurrencies) {
         final enabledCodes = enabledCurrencies
             .where((c) => c.source == CurrencySource.system)
-            .map((c) => c.currencyCode)
+            .map((c) => c.code)
             .toSet();
 
         return Column(
@@ -217,11 +217,12 @@ class _SystemCurrenciesTabState extends ConsumerState<_SystemCurrenciesTab> {
                             onChanged: (value) async {
                               HapticService.selectionClick();
                               final currencyDao = ref.read(currencyDaoProvider);
+                              if (currencyDao == null) return;
                               if (value) {
                                 // 添加货币
                                 await currencyDao.insertCurrency(
                                   CurrencyCompanion.insert(
-                                    currencyCode: currency.code,
+                                    code: currency.code,
                                     name: currency.nameCN,
                                     symbol: currency.symbol,
                                     position: Value(CurrencyPosition.prefix),
@@ -240,13 +241,14 @@ class _SystemCurrenciesTabState extends ConsumerState<_SystemCurrenciesTab> {
                           onTap: () async {
                             HapticService.selectionClick();
                             final currencyDao = ref.read(currencyDaoProvider);
+                            if (currencyDao == null) return;
                             if (isEnabled) {
                               await currencyDao
                                   .deleteCurrencyByCode(currency.code);
                             } else {
                               await currencyDao.insertCurrency(
                                 CurrencyCompanion.insert(
-                                  currencyCode: currency.code,
+                                  code: currency.code,
                                   name: currency.nameCN,
                                   symbol: currency.symbol,
                                   position: Value(CurrencyPosition.prefix),
@@ -393,7 +395,7 @@ class _CustomCurrenciesTab extends ConsumerWidget {
                                   ),
                                 ),
                           title: Text(
-                            '${currency.currencyCode} - ${currency.name}',
+                            '${currency.code} - ${currency.name}',
                           ),
                           subtitle: Text(
                             '${currency.symbol} · ${currency.decimal}位小数',
@@ -431,8 +433,9 @@ class _CustomCurrenciesTab extends ConsumerWidget {
                                 if (confirmed == true) {
                                   final currencyDao =
                                       ref.read(currencyDaoProvider);
+                                  if (currencyDao == null) return;
                                   await currencyDao.deleteCurrencyByCode(
-                                      currency.currencyCode);
+                                      currency.code);
                                   ref.invalidate(allCurrenciesProvider);
                                 }
                               }
@@ -488,6 +491,7 @@ class _CustomCurrenciesTab extends ConsumerWidget {
         builder: (_) => _CustomCurrencyEditorPage(
           onSave: (currency) async {
             final currencyDao = ref.read(currencyDaoProvider);
+            if (currencyDao == null) return;
             await currencyDao.insertCurrency(currency);
             ref.invalidate(allCurrenciesProvider);
           },
@@ -507,7 +511,10 @@ class _CustomCurrenciesTab extends ConsumerWidget {
           currency: currency,
           onSave: (updated) async {
             final currencyDao = ref.read(currencyDaoProvider);
-            await currencyDao.updateCurrency(updated);
+            if (currencyDao == null) return;
+            // 编辑时先删除再插入（因为货币code是主键）
+            await currencyDao.deleteCurrencyByCode(currency.code);
+            await currencyDao.insertCurrency(updated);
             ref.invalidate(allCurrenciesProvider);
           },
         ),
@@ -543,7 +550,7 @@ class _CustomCurrencyEditorPageState extends State<_CustomCurrencyEditorPage> {
   void initState() {
     super.initState();
     _codeController = TextEditingController(
-      text: widget.currency?.currencyCode,
+      text: widget.currency?.code,
     );
     _nameController = TextEditingController(text: widget.currency?.name);
     _symbolController = TextEditingController(text: widget.currency?.symbol);
@@ -572,11 +579,11 @@ class _CustomCurrencyEditorPageState extends State<_CustomCurrencyEditorPage> {
 
     try {
       final currency = CurrencyCompanion.insert(
-        currencyCode: _codeController.text.toUpperCase(),
+        code: _codeController.text.toUpperCase(),
         name: _nameController.text,
         symbol: _symbolController.text,
         decimal: Value(_decimal),
-        icon: Value(_icon),
+        icon: Value(_icon ?? ''),
         position: Value(_position),
         source: Value(CurrencySource.custom),
       );

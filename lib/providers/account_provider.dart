@@ -6,9 +6,10 @@ import 'providers.dart';
 
 export '../data/constants/account_types.dart';
 
-/// 所有账户列表 Provider
+/// 所有账户列表 Provider（当前账本）
 final allAccountsProvider = StreamProvider<List<AccountEntity>>((ref) {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return const Stream.empty();
   return accountDao.watchAllAccounts();
 });
 
@@ -16,6 +17,8 @@ final allAccountsProvider = StreamProvider<List<AccountEntity>>((ref) {
 final groupedAccountsProvider =
     FutureProvider<Map<AccountType, List<AccountEntity>>>((ref) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return {};
+  
   final accounts = await accountDao.getAllAccounts();
 
   final Map<AccountType, List<AccountEntity>> grouped = {};
@@ -32,6 +35,7 @@ final groupedAccountsProvider =
 final accountsByTypeProvider =
     FutureProvider.family<List<AccountEntity>, AccountType>((ref, type) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return [];
   return accountDao.getAccountsByType(type);
 });
 
@@ -39,6 +43,7 @@ final accountsByTypeProvider =
 final accountDetailProvider =
     FutureProvider.family<AccountEntity?, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return null;
   return accountDao.getAccountById(accountId);
 });
 
@@ -46,6 +51,7 @@ final accountDetailProvider =
 final creditAccountDetailProvider =
     FutureProvider.family<CreditAccountEntity?, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return null;
   return accountDao.getCreditAccount(accountId);
 });
 
@@ -53,6 +59,7 @@ final creditAccountDetailProvider =
 final flexLoanAccountDetailProvider =
     FutureProvider.family<FlexLoanAccountEntity?, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return null;
   return accountDao.getFlexLoanAccount(accountId);
 });
 
@@ -60,13 +67,31 @@ final flexLoanAccountDetailProvider =
 final planLoanAccountDetailProvider =
     FutureProvider.family<PlanLoanAccountEntity?, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return null;
   return accountDao.getPlanLoanAccount(accountId);
+});
+
+/// 预付账户详情 Provider
+final prepaidAccountDetailProvider =
+    FutureProvider.family<PrepaidAccountEntity?, int>((ref, accountId) async {
+  final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return null;
+  return accountDao.getPrepaidAccount(accountId);
+});
+
+/// 投资账户详情 Provider
+final investAccountDetailProvider =
+    FutureProvider.family<InvestAccountEntity?, int>((ref, accountId) async {
+  final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return null;
+  return accountDao.getInvestAccount(accountId);
 });
 
 /// 借贷计划列表 Provider
 final loanPlansProvider =
     FutureProvider.family<List<LoanPlanEntity>, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return [];
   return accountDao.getLoanPlansByAccountId(accountId);
 });
 
@@ -74,6 +99,7 @@ final loanPlansProvider =
 final loanRecordsProvider =
     FutureProvider.family<List<LoanRecordEntity>, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return [];
   return accountDao.getLoanRecordsByAccountId(accountId);
 });
 
@@ -81,12 +107,14 @@ final loanRecordsProvider =
 final accountMetaProvider =
     FutureProvider.family<List<AccountMetaEntity>, int>((ref, accountId) async {
   final accountDao = ref.watch(accountDaoProvider);
+  if (accountDao == null) return [];
   return accountDao.getAccountMeta(accountId);
 });
 
 /// 所有货币列表 Provider
 final allCurrenciesProvider = StreamProvider<List<CurrencyEntity>>((ref) {
   final currencyDao = ref.watch(currencyDaoProvider);
+  if (currencyDao == null) return const Stream.empty();
   return currencyDao.watchAllCurrencies();
 });
 
@@ -94,6 +122,7 @@ final allCurrenciesProvider = StreamProvider<List<CurrencyEntity>>((ref) {
 final systemCurrenciesProvider =
     FutureProvider<List<CurrencyEntity>>((ref) async {
   final currencyDao = ref.watch(currencyDaoProvider);
+  if (currencyDao == null) return [];
   return currencyDao.getSystemCurrencies();
 });
 
@@ -101,21 +130,15 @@ final systemCurrenciesProvider =
 final customCurrenciesProvider =
     FutureProvider<List<CurrencyEntity>>((ref) async {
   final currencyDao = ref.watch(currencyDaoProvider);
+  if (currencyDao == null) return [];
   return currencyDao.getCustomCurrencies();
 });
 
 /// 所有相关方列表 Provider
 final allStakeholdersProvider = StreamProvider<List<StakeholderEntity>>((ref) {
   final stakeholderDao = ref.watch(stakeholderDaoProvider);
+  if (stakeholderDao == null) return const Stream.empty();
   return stakeholderDao.watchAllStakeholders();
-});
-
-/// 预付款账户关联的赠送金账户 Provider
-final bonusAccountsByPrepaidProvider =
-    FutureProvider.family<List<BonusAccountEntity>, int>(
-        (ref, prepaidAccountId) async {
-  final accountDao = ref.watch(accountDaoProvider);
-  return accountDao.getBonusAccountsByPrepaidId(prepaidAccountId);
 });
 
 /// 账户管理服务
@@ -316,29 +339,10 @@ class AccountService {
       );
     }
 
-    // 保存赠送金启用状态
-    await accountDao.upsertAccountMeta(
-      AccountMetaCompanion.insert(
-        accountId: accountId,
-        scope: AccountMetaScope.system,
-        key: AccountMetaKeys.enableBonus,
-        value: enableBonus.toString(),
-      ),
-    );
-
-    // 保存赠送金扣减模式
-    await accountDao.upsertAccountMeta(
-      AccountMetaCompanion.insert(
-        accountId: accountId,
-        scope: AccountMetaScope.system,
-        key: AccountMetaKeys.bonusDeductMode,
-        value: bonusDeductMode,
-      ),
-    );
-
-    // 如果启用了赠送金，创建关联的赠送金账户
+    // 创建赠送金账户（如果启用）
+    int? bonusAccountId;
     if (enableBonus) {
-      final bonusAccountId = await accountDao.insertAccount(
+      bonusAccountId = await accountDao.insertAccount(
         AccountCompanion.insert(
           name: bonusName ?? '$name-赠送金',
           description: Value('$name 的赠送金账户'),
@@ -348,14 +352,6 @@ class AccountService {
           createdAt: now,
           updatedAt: now,
           note: Value(''),
-        ),
-      );
-
-      // 建立赠送金账户关联
-      await accountDao.insertBonusAccount(
-        AccountBonusCompanion.insert(
-          bonusAccountId: bonusAccountId,
-          prepaidAccountId: accountId,
         ),
       );
 
@@ -371,6 +367,26 @@ class AccountService {
         );
       }
     }
+
+    // 保存预付账户详情（包含赠送金关联）
+    // 注意：如果没有赠送金账户，使用主账户ID作为占位
+    await accountDao.insertPrepaidAccount(
+      AccountPrepaidCompanion.insert(
+        prepaidAccountId: Value(accountId),
+        bonusAccountId: bonusAccountId ?? accountId,
+        bonusMode: bonusDeductMode == 'first' ? AccountBonusMode.first : AccountBonusMode.same,
+      ),
+    );
+
+    // 保存赠送金启用状态
+    await accountDao.upsertAccountMeta(
+      AccountMetaCompanion.insert(
+        accountId: accountId,
+        scope: AccountMetaScope.system,
+        key: AccountMetaKeys.enableBonus,
+        value: enableBonus.toString(),
+      ),
+    );
 
     // 保存系统级元数据
     if (systemMeta != null) {
@@ -410,12 +426,12 @@ class AccountService {
     required int stakeholderId,
     required AccountLoanType loanType,
     required double rate,
+    required LoanInterestCycle cycle,
     required int startDate,
     required int endDate,
     String description = '',
     String icon = '',
     String note = '',
-    String loanNote = '',
     Map<String, String>? systemMeta,
     Map<String, String>? customMeta,
   }) async {
@@ -440,10 +456,10 @@ class AccountService {
         stakeholderId: stakeholderId,
         type: loanType,
         rate: rate,
+        cycle: cycle,
         startDate: startDate,
         endDate: endDate,
         archived: const Value(false),
-        note: Value(loanNote),
       ),
     );
 
@@ -487,7 +503,6 @@ class AccountService {
     String description = '',
     String icon = '',
     String note = '',
-    String loanNote = '',
     List<LoanPlanData>? plans,
     Map<String, String>? systemMeta,
     Map<String, String>? customMeta,
@@ -513,7 +528,6 @@ class AccountService {
         stakeholderId: stakeholderId,
         type: loanType,
         archived: const Value(false),
-        note: Value(loanNote),
       ),
     );
 
@@ -523,10 +537,9 @@ class AccountService {
         await accountDao.insertLoanPlan(
           LoanPlanCompanion.insert(
             accountId: accountId,
-            amount: plan.amount,
-            dueDate: plan.dueDate,
-            createdAt: now,
-            updatedAt: now,
+            rate: Value(plan.rate),
+            startDate: plan.startDate,
+            endDate: Value(plan.endDate),
             note: Value(plan.note),
           ),
         );
@@ -568,7 +581,7 @@ class AccountService {
   Future<int> createInvestAccount({
     required String name,
     required String currencyCode,
-    required InvestType investType,
+    required AccountInvestType investType,
     String? investCode,
     String description = '',
     String icon = '',
@@ -591,27 +604,14 @@ class AccountService {
       ),
     );
 
-    // 保存投资类型
-    await accountDao.upsertAccountMeta(
-      AccountMetaCompanion.insert(
-        accountId: accountId,
-        scope: AccountMetaScope.system,
-        key: AccountMetaKeys.investType,
-        value: investType.name,
+    // 保存投资账户详情
+    await accountDao.insertInvestAccount(
+      AccountInvestCompanion.insert(
+        accountId: Value(accountId),
+        type: investType,
+        code: Value(investCode),
       ),
     );
-
-    // 保存投资代码（股票/基金/虚拟货币代号）
-    if (investCode != null && investCode.isNotEmpty) {
-      await accountDao.upsertAccountMeta(
-        AccountMetaCompanion.insert(
-          accountId: accountId,
-          scope: AccountMetaScope.system,
-          key: AccountMetaKeys.investCode,
-          value: investCode,
-        ),
-      );
-    }
 
     // 保存初始余额元数据
     if (initialBalance != null) {
@@ -678,73 +678,78 @@ class AccountService {
     return accountDao.updatePlanLoanAccount(planLoanAccount);
   }
 
+  /// 更新预付账户详情
+  Future<bool> updatePrepaidAccount(PrepaidAccountEntity prepaidAccount) async {
+    return accountDao.updatePrepaidAccount(prepaidAccount);
+  }
+
+  /// 更新投资账户详情
+  Future<bool> updateInvestAccount(InvestAccountEntity investAccount) async {
+    return accountDao.updateInvestAccount(investAccount);
+  }
+
   /// 删除账户
   Future<int> deleteAccount(int accountId) async {
     return accountDao.deleteAccount(accountId);
   }
 
-  /// 将账户关联到账本
-  /// 
-  /// 如果提供了 initialBalance，会创建一笔隐藏的初始余额交易
-  Future<void> linkAccountToLedger({
-    required int accountId,
-    required int ledgerId,
-    int initialBalance = 0,
-  }) async {
-    // 先建立关联
-    await accountDao.linkAccountToLedger(accountId, ledgerId);
+  // ==================== 获取方法 ====================
 
-    // 如果有初始余额，创建隐藏的平账交易
-    // TODO: 在交易服务完善后实现初始余额交易的创建
-    // 当前先存储在元数据中作为临时方案
-    if (initialBalance != 0) {
-      await accountDao.upsertAccountMeta(
-        AccountMetaCompanion.insert(
-          accountId: accountId,
-          scope: AccountMetaScope.system,
-          key: 'ledger_${ledgerId}_initial_balance',
-          value: initialBalance.toString(),
-        ),
-      );
-    }
+  /// 获取账户详情
+  Future<AccountEntity?> getAccountById(int accountId) {
+    return accountDao.getAccountById(accountId);
   }
 
-  /// 解除账户与账本的关联
-  /// 
-  /// 如果 deleteRelatedTransactions 为 true，会同时删除相关交易
-  Future<int> unlinkAccountFromLedger({
-    required int accountId,
-    required int ledgerId,
-    bool deleteRelatedTransactions = false,
-  }) async {
-    // TODO: 如果需要删除相关交易，在交易服务完善后实现
-    // 当前先直接解除关联
+  /// 获取信用账户详情
+  Future<CreditAccountEntity?> getCreditAccount(int accountId) {
+    return accountDao.getCreditAccount(accountId);
+  }
 
-    // 删除初始余额元数据
-    await accountDao.deleteAccountMeta(
-      accountId,
-      AccountMetaScope.system,
-      'ledger_${ledgerId}_initial_balance',
-    );
+  /// 获取账户元数据
+  Future<List<AccountMetaEntity>> getAccountMeta(int accountId) {
+    return accountDao.getAccountMeta(accountId);
+  }
 
-    return accountDao.unlinkAccountFromLedger(accountId, ledgerId);
+  /// 获取灵活借贷账户详情
+  Future<FlexLoanAccountEntity?> getFlexLoanAccount(int accountId) {
+    return accountDao.getFlexLoanAccount(accountId);
+  }
+
+  /// 根据ID获取相关方
+  Future<StakeholderEntity?> getStakeholderById(int stakeholderId) async {
+    // TODO: 需要通过 StakeholderDao 获取
+    return null;
+  }
+
+  /// 获取账户的借贷计划
+  Future<List<LoanPlanEntity>> getLoanPlansByAccountId(int accountId) {
+    return accountDao.getLoanPlansByAccountId(accountId);
+  }
+
+  /// 获取预付账户的赠送金账户
+  Future<List<PrepaidAccountEntity>> getBonusAccountsByPrepaidId(int prepaidAccountId) async {
+    // 通过 PrepaidAccount 表查询
+    final prepaidAccount = await accountDao.getPrepaidAccount(prepaidAccountId);
+    if (prepaidAccount != null && prepaidAccount.bonusAccountId != null) {
+      return [prepaidAccount];
+    }
+    return [];
   }
 
   /// 添加借贷计划
   Future<int> addLoanPlan({
     required int accountId,
-    required int amount,
-    required int dueDate,
+    required int startDate,
+    double rate = 0.0,
+    int? endDate,
     String note = '',
   }) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
     return accountDao.insertLoanPlan(
       LoanPlanCompanion.insert(
         accountId: accountId,
-        amount: amount,
-        dueDate: dueDate,
-        createdAt: now,
-        updatedAt: now,
+        rate: Value(rate),
+        startDate: startDate,
+        endDate: Value(endDate),
         note: Value(note),
       ),
     );
@@ -784,20 +789,23 @@ class AccountService {
 
 /// 借贷计划数据
 class LoanPlanData {
-  final int amount;
-  final int dueDate;
+  final double rate;
+  final int startDate;
+  final int? endDate;
   final String note;
 
   const LoanPlanData({
-    required this.amount,
-    required this.dueDate,
+    this.rate = 0.0,
+    required this.startDate,
+    this.endDate,
     this.note = '',
   });
 }
 
 /// 账户服务 Provider
-final accountServiceProvider = Provider<AccountService>((ref) {
+final accountServiceProvider = Provider<AccountService?>((ref) {
   final accountDao = ref.watch(accountDaoProvider);
   final currencyDao = ref.watch(currencyDaoProvider);
+  if (accountDao == null || currencyDao == null) return null;
   return AccountService(accountDao: accountDao, currencyDao: currencyDao);
 });

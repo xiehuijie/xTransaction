@@ -131,24 +131,6 @@
   | [type ℹ️](#accountinvesttype) | TEXT     | 投资类型           |
   | code                          | TEXT     | 对应资产代码       |
 
-- #### 账本表 (Ledger) [ledger]
-
-  用于描述账本信息，不同账本下的分类、账户、相关方将被认为是不同的实体，一切的记账活动均基于某个账本进行，例如账户余额统计、消费统计汇总等。
-
-  | 字段名              | 字段类型 | 描述                   |
-  | ------------------- | -------- | ---------------------- |
-  | ledger_id 🔄🔑      | INTEGER  | 账本唯一标识           |
-  | name ❄️[0]          | TEXT     | 账本名称               |
-  | currency_code 🔗    | TEXT     | 账本货币本币代码       |
-  | description         | TEXT     | 账本描述               |
-  | photo               | TEXT     | 账本封面               |
-  | auto_account 🚩     | INTEGER  | 是否自动包含新增账户   |
-  | auto_category 🚩    | INTEGER  | 是否自动包含新增分类   |
-  | auto_stakeholder 🚩 | INTEGER  | 是否自动包含新增相关方 |
-  | created_at 🕗       | INTEGER  | 创建时间戳             |
-  | updated_at 🕗       | INTEGER  | 更新时间戳             |
-  | note                | TEXT     | 备注                   |
-
 - #### 账户账本关联表 (LedgerAccountRelation) [relation_account_ledger]
 
   定义账户与账本的关联关系。存在此表即表示某账户属于某账本。当账本的`auto_account`字段为真时，新增账户会自动添加到此账本中。
@@ -165,7 +147,6 @@
   | 字段名                 | 字段类型 | 描述               |
   | ---------------------- | -------- | ------------------ |
   | project_id 🔄🔑        | INTEGER  | 项目唯一标识       |
-  | ledger_id 🔗❄️[0]🔍[0] | INTEGER  | 关联的账本唯一标识 |
   | name ❄️[0]             | TEXT     | 项目名称           |
   | description            | TEXT     | 项目描述           |
   | budget 💰              | INTEGER  | 项目预算           |
@@ -203,15 +184,6 @@
   | icon                               | TEXT     | 分类图标         |
   | order                              | INTEGER  | 分类排序值       |
 
-- #### 分类账本关联表 (LedgerCategoryRelation) [relation_category_ledger]
-
-  定义分类与账本的关联关系。当账本的`auto_category`字段为真时，新增分类会自动添加到此账本中。
-
-  | 字段名           | 字段类型 | 描述               |
-  | ---------------- | -------- | ------------------ |
-  | category_id 🔑🔗 | INTEGER  | 关联的分类唯一标识 |
-  | ledger_id 🔑🔗   | INTEGER  | 关联的账本唯一标识 |
-
 - #### 相关方表 (Stakeholder) [stakeholder]
 
   用于描述参与交易相关的人员、商户、企业、实体等对象。
@@ -244,7 +216,6 @@
   | 字段名                           | 字段类型 | 描述                       |
   | -------------------------------- | -------- | -------------------------- |
   | transaction_id 🔄🔑              | INTEGER  | 交易唯一标识               |
-  | ledger_id 🔗🔍[0]                | INTEGER  | 关联的账本唯一标识         |
   | [type ℹ️](#transactiontype)🔍[1] | TEXT     | 交易类型（支出/收入/转账） |
   | timestamp 🕗🔍[2]                | INTEGER  | 交易时间戳                 |
   | created_at 🕗                    | INTEGER  | 创建时间戳                 |

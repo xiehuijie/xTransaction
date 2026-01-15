@@ -1,0 +1,829 @@
+datasource db {
+    provider = "sqlite"
+}
+
+/**
+ * 图例：
+ * 🔑 主键
+ * #️⃣ 自增字段，数据库自动分配唯一的递增值
+ * 🔍[x] 索引，x 表示索引组号
+ * ❄️[x] 唯一，x 表示唯一约束组号
+ * 🔗 外键，所有外键均遵循严格删除禁止的约定
+ * ℹ️ 枚举类型字段
+ * 💰 金额型字段，以整数形式存储，按货币精度的最小单位存储（如人民币 2 位小数，97.63 存储为 9763）
+ * 🕗 时间戳字段，以整数形式存储毫秒级别的 UNIX 时间戳
+ * 📅 日期型字段，以整数形式存储 1900 日期系统天数
+ */
+
+/// 账户类型
+enum AccountType {
+    /// 余额账户
+    balance
+    /// 信用账户
+    credit
+    /// 借贷账户
+    loan
+    /// 投资账户
+    invest
+    /// 预付账户
+    prepaid
+    /// 赠送金账户
+    bonus
+}
+
+/// 账户元数据作用域
+enum AccountMetaScope {
+    /// 系统级元数据
+    system
+    /// 用户自定义元数据
+    custom
+}
+
+/// 赠送金账户扣减方式
+enum AccountBonusMode {
+    /// 优先使用
+    first
+    /// 最后使用
+    last
+    /// 等比例扣减
+    same
+}
+
+/// 账户借贷类型
+enum AccountLoanType {
+    /// 借出
+    lend
+    /// 借入
+    borrow
+}
+
+/// 投资账户类型
+enum AccountInvestType {
+    /// 股票
+    stock
+    /// 基金
+    fund
+    /// 债券
+    bond
+    /// 加密货币
+    crypto
+    /// 其他投资类型
+    other
+}
+
+/// 货币来源
+enum CurrencySource {
+    /// 系统内置货币
+    system
+    /// 用户自定义货币
+    custom
+}
+
+/// 货币符号位置
+enum CurrencyPosition {
+    /// 货币符号在金额前
+    prefix
+    /// 货币符号在金额后
+    suffix
+}
+
+/// 分类类型
+enum CategoryType {
+    /// 普通支出
+    expense
+    /// 普通收入
+    income
+    /// 折扣/优惠，适用于支出型交易 Reduce 部分
+    discount
+    /// 税收/手续费，适用于收入型交易 Reduce 部分
+    cost
+    /// 收益，适用于转账型交易中金额增长部分
+    gain
+    /// 损失，适用于转账型交易中金额减少部分
+    loss
+}
+
+/// 相关方类型
+enum StakeholderType {
+    /// 个人
+    person
+    /// 商户
+    merchant
+    /// 公司/企业
+    company
+    /// 其他实体
+    other
+}
+
+/// 交易类型
+enum TransactionType {
+    /// 支出
+    expense
+    /// 收入
+    income
+    /// 转账
+    transfer
+}
+
+/// 交易元数据作用域
+enum TransactionMetaScope {
+    /// 系统级元数据
+    system
+    /// 用户自定义元数据
+    custom
+}
+
+/// 金额变动类型
+enum AmountChangeType {
+    /// 余额调整
+    adjust
+    /// 基于交易
+    basic
+    /// 退款
+    refund
+    /// 报销
+    reimbursement
+    /// 借款
+    loan
+    /// 还款
+    repayment
+}
+
+/// 交易关联关系类型
+enum TransactionRelationType {
+    /// 后续交易
+    afterwards
+    /// 前置交易
+    forwards
+    /// 子交易
+    children
+    /// 父交易
+    parent
+    /// 存在某种关联，但不属于上述之一
+    related
+}
+
+/// 灵活借贷计息周期
+enum LoanInterestCycle {
+    /// 按分钟计息
+    minutely
+    /// 按小时计息
+    hourly
+    /// 按日计息
+    daily
+    /// 按周计息
+    weekly
+    /// 按月计息
+    monthly
+    /// 按季度计息
+    quarterly
+    /// 按年计息
+    yearly
+}
+
+// ------------------------------ 模型定义 ------------------------------
+
+/// ### 货币
+/// ##### 记录当前账本已启用的货币信息
+model Currency {
+    /// 货币代码 🔑
+    code                     String                    @id
+    /// 货币名称
+    name                     String
+    /// 货币符号
+    symbol                   String
+    /// 是否为本币
+    main                     Boolean                   @default(false)
+    /// 货币符号位置 ℹ️
+    position                 CurrencyPosition
+    /// 小数位数
+    decimal                  Int
+    /// 货币图标
+    icon                     String
+    /// 货币来源 ℹ️
+    source                   CurrencySource
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 使用该货币的账户列表
+    accounts                 Account[]
+    /// `关联关系` 使用该货币的交易金额明细列表
+    transactionAmountDetails TransactionAmountDetail[]
+    /// `关联关系` 使用该货币的交易分期计划列表
+    transactionReduces       TransactionReduce[]
+}
+
+/// ### 账户
+/// ##### 用于描述基础的账户信息
+model Account {
+    /// 账户唯一标识 🔑#️⃣
+    id                             Int                       @id @default(autoincrement())
+    /// 账户名称 ❄️
+    name                           String                    @unique
+    /// 账户描述
+    description                    String
+    /// 账户图标
+    icon                           String
+    /// 账户类型 ℹ️
+    type                           AccountType
+    /// 账户货币代码 🔗
+    currencyCode                   String                    @map("currency_code")
+    /// 创建时间 🕗
+    createdAt                      Int                       @map("created_at")
+    /// 更新时间 🕗
+    updatedAt                      Int                       @map("updated_at")
+    /// 备注
+    note                           String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 账户对应的货币信息
+    currency                       Currency                  @relation(fields: [currencyCode], references: [code], onDelete: Restrict)
+    /// `关联关系` 账户元数据
+    accountMeta                    AccountMeta[]
+    /// `关联关系` 信用账户扩展信息
+    creditAccount                  CreditAccount?
+    /// `关联关系` 预付款账户扩展信息
+    prepaidAccount                 PrepaidAccount?
+    /// `关联关系` 计划借贷账户扩展信息
+    planLoanAccount                PlanLoanAccount?
+    /// `关联关系` 灵活借贷账户扩展信息
+    flexLoanAccount                FlexLoanAccount?
+    /// `关联关系` 投资账户扩展信息
+    investAccount                  InvestAccount?
+    /// `关联关系` 使用该账户的借贷计划列表
+    loanPlans                      LoanPlan[]
+    /// `关联关系` 使用该账户的交易金额明细列表
+    transactionAmountDetails       TransactionAmountDetail[]
+    /// `关联关系` 使用该账户的报销实际列表
+    reimbursementActuals           ReimbursementActual[]
+    prepaidAccountPrepaidAccountId Int?
+
+    @@index([type])
+    @@map("account")
+}
+
+/// ### 账户元数据表
+/// ##### 存储账户的扩展元数据信息
+/// ---
+/// - 键值对形式
+/// - 同一账户及作用域下键必须唯一
+/// - 可使用系统级元数据实现特定功能，如：银行卡信息等、电子账户信息等
+model AccountMeta {
+    /// 关联的账户唯一标识 🔑🔗
+    accountId Int              @map("account_id")
+    /// 元数据作用域 🔑ℹ️
+    scope     AccountMetaScope
+    /// 元数据键 🔑
+    key       String
+    /// 元数据值
+    value     String
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属账户
+    account   Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+    @@id([accountId, scope, key])
+    @@map("account_meta")
+}
+
+/// ### 信用账户
+/// ##### 在基础账户表基础上扩展信用账户特有的信息
+model CreditAccount {
+    /// 关联的账户唯一标识 🔑🔗
+    accountId       Int     @id @map("account_id")
+    /// 信用额度 💰
+    creditLimit     Int     @map("credit_limit")
+    /// 账单日 📅
+    billingCycleDay Int     @map("billing_cycle_day")
+    /// 还款日 📅
+    paymentDueDay   Int     @map("payment_due_day")
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属账户
+    account         Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+    @@map("account_credit")
+}
+
+/// ### 预付款账户
+/// ##### 在基础账户表基础上扩展预付款账户特有的信息
+/// ---
+/// - 赠送金账户与预付款账户一一对应
+/// - 赠送金账户在应用内不可见，在选择预付款账户支付时会自动扣减赠送金部分
+model PrepaidAccount {
+    /// 对应的预付款账户唯一标识 🔑🔗
+    prepaidAccountId Int              @id @map("prepaid_account_id")
+    /// 对应的赠送金账户唯一标识 ❄️🔗 
+    bonusAccountId   Int              @unique @map("bonus_account_id")
+    /// 赠送金扣减方式 ℹ️
+    bonusMode        AccountBonusMode @map("bonus_mode")
+    // ------------------------------ 关联关系 ------------------------------
+    bonusAccount     Account          @relation(fields: [bonusAccountId], references: [id], onDelete: Restrict)
+
+    @@map("account_prepaid")
+}
+
+/// ### 计划借贷账户
+/// ##### 扩展计划借贷账户特有的信息
+/// ---
+/// - 计划借贷账户在应用内以借据的形式展现
+model PlanLoanAccount {
+    /// 关联的账户唯一标识 🔑🔗
+    accountId     Int             @id @map("account_id")
+    /// 关联的相关方唯一标识 🔗🔍
+    stakeholderId Int             @map("stakeholder_id")
+    /// 借贷类型 ℹ️
+    type          AccountLoanType
+    /// 是否归档 🔍
+    archived      Boolean         @default(false)
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 账户基础信息
+    account       Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    /// `关联关系` 对应相关方
+    stakeholder   Stakeholder     @relation(fields: [stakeholderId], references: [id])
+
+    @@index([stakeholderId])
+    @@index([archived])
+    @@map("account_plan_loan")
+}
+
+/// ### 灵活借贷账户
+/// ##### 扩展灵活借贷账户特有的信息
+/// ---
+/// - 灵活借贷账户多用于描述那些没有固定还款计划的借贷账户
+model FlexLoanAccount {
+    /// 关联的账户唯一标识 🔑🔗
+    accountId     Int               @id @map("account_id")
+    /// 关联的相关方唯一标识 🔗🔍
+    stakeholderId Int               @map("stakeholder_id")
+    /// 借贷类型 ℹ️
+    type          AccountLoanType
+    /// 年化利率
+    rate          Float
+    /// 计息周期
+    cycle         LoanInterestCycle
+    /// 借贷开始日期 📅
+    startDate     Int               @map("start_date")
+    /// 借贷结束日期 📅🔍
+    endDate       Int               @map("end_date")
+    /// 是否归档 🔍
+    archived      Boolean           @default(false)
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 账户基础信息
+    account       Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    /// `关联关系` 对应相关方
+    stakeholder   Stakeholder       @relation(fields: [stakeholderId], references: [id])
+
+    @@index([stakeholderId])
+    @@index([endDate])
+    @@index([archived])
+    @@map("account_flex_loan")
+}
+
+/// ### 投资账户
+/// ##### 扩展投资账户特有的信息
+model InvestAccount {
+    /// 关联的账户唯一标识 🔑 🔗
+    accountId Int               @id @map("account_id")
+    /// 投资类型 ℹ️
+    type      AccountInvestType
+    /// 对应资产代码
+    code      String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 账户基础信息
+    account   Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+    @@map("account_invest")
+}
+
+/// ### 项目
+/// ##### 记录项目相关的信息
+/// ---
+/// 用于对交易进行归类和预算管理
+model Project {
+    /// 项目唯一标识 🔑#️⃣
+    id                 Int                      @id @default(autoincrement())
+    /// 项目名称 ❄️
+    name               String                   @unique
+    /// 项目描述
+    description        String?
+    /// 项目预算 💰
+    budget             Int
+    /// 项目图标
+    icon               String?
+    /// 是否归档 🔍
+    archived           Boolean                  @default(false)
+    /// 创建时间 🕗
+    createdAt          Int                      @map("created_at")
+    /// 更新时间 🕗
+    updatedAt          Int                      @map("updated_at")
+    /// 项目开始日期 📅🔍
+    startDate          Int?                     @map("start_date")
+    /// 项目结束日期 📅🔍
+    endDate            Int?                     @map("end_date")
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 交易明细列表
+    transactionDetails TransactionCountDetail[]
+
+    @@index([archived])
+    @@index([startDate])
+    @@index([endDate])
+    @@map("project")
+}
+
+/// ### 分类
+/// ##### 用于对交易进行分类和管理
+model Category {
+    /// 分类唯一标识 🔑#️⃣
+    id                         Int                      @id @default(autoincrement())
+    /// 分类名称 ❄️
+    name                       String                   @unique
+    /// 分类类型 ℹ️🔍
+    type                       CategoryType
+    /// 分类图标
+    icon                       String?
+    /// 禁止删除标记
+    undeletable                Boolean                  @default(false)
+    /// 父级分类唯一标识 🔗🔍
+    parentId                   Int?                     @map("parent_id")
+    /// 排序权重 🔍
+    weight                     Int                      @default(0)
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 交易明细列表
+    transactionCategoryDetails TransactionCountDetail[]
+    /// `关联关系` 父级分类
+    parentCategory             Category?                @relation("MultiLevel", fields: [parentId], references: [id])
+    /// `关联关系` 子级分类列表
+    categories                 Category[]               @relation("MultiLevel")
+
+    @@index([type])
+    @@index([weight])
+    @@map("category")
+}
+
+/// ### 相关方
+/// ##### 记录交易中涉及的个人、商户、公司等相关方信息
+model Stakeholder {
+    /// 相关方唯一标识 🔑#️⃣
+    id                 Int                      @id @default(autoincrement())
+    /// 相关方名称 ❄️
+    name               String                   @unique
+    /// 相关方类型 ℹ️🔍
+    type               StakeholderType
+    /// 相关方描述
+    description        String?
+    /// 相关方图标
+    icon               String?
+    /// 是否归档 🔍
+    archived           Boolean                  @default(false)
+    /// 创建时间 🕗
+    createdAt          Int                      @map("created_at")
+    /// 更新时间 🕗
+    updatedAt          Int                      @map("updated_at")
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 计划借贷账户列表
+    planLoanAccounts   PlanLoanAccount[]
+    /// `关联关系` 灵活借贷账户列表
+    flexLoanAccounts   FlexLoanAccount[]
+    /// `关联关系` 交易明细列表
+    transactionDetails TransactionCountDetail[]
+
+    @@index([type])
+    @@index([archived])
+    @@map("stakeholder")
+}
+
+/// ### 借贷计划
+/// ##### 记录借贷的计划还款/借款详情
+model LoanPlan {
+    /// 借贷计划唯一标识 🔑#️⃣
+    id          Int          @id @default(autoincrement())
+    /// 关联的账户唯一标识 🔗🔍
+    accountId   Int          @map("account_id")
+    /// 年化利率
+    rate        Float        @default(0)
+    /// 计划开始日期 📅🔍
+    startDate   Int          @map("start_date")
+    /// 计划结束日期 📅🔍
+    endDate     Int?         @map("end_date")
+    /// 备注
+    note        String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 关联的账户
+    account     Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+    /// `关联关系` 借贷记录列表
+    loanRecords LoanRecord[]
+
+    @@index([accountId])
+    @@index([endDate])
+    @@map("loan_plan")
+}
+
+/// ### 借贷记录
+/// ##### 记录借贷的实际发生记录
+/// ---
+/// - 通过复合主键 (`loanPlanId`, `period`) 保证同一借贷计划下的期数唯一
+model LoanRecord {
+    /// 关联的借贷计划唯一标识 🔑🔗🔍
+    loanPlanId Int      @map("loan_plan_id")
+    /// 借贷期数 🔑
+    period     Int
+    /// 本金 💰
+    amount     Int
+    /// 利息 💰
+    interest   Int
+    /// 实际发生日期 📅🔍
+    date       Int
+    /// 状态 🔍
+    status     Boolean  @default(false)
+    /// 备注
+    note       String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 关联的借贷计划
+    loanPlan   LoanPlan @relation(fields: [loanPlanId], references: [id], onDelete: Cascade)
+
+    @@id([loanPlanId, period])
+    @@index([loanPlanId])
+    @@index([date])
+    @@map("loan_record")
+}
+
+/// ### 交易
+/// ##### 记录交易的基本信息
+/// ---
+/// - 每笔交易可以包含多个金额变动明细、收支统计明细
+/// - 每个收支型交易中的子项的货币应当统一，即同一笔交易中的所有金额变动应当只使用一种货币
+/// - 转账型交易中，源交易和目标交易的货币可以不同
+/// - 所有金额变动在基于本币求和后，应当与对所有收支统计金额求和后相等
+model Transaction {
+    /// 交易唯一标识 🔑#️⃣
+    id               Int                       @id @default(autoincrement())
+    /// 交易类型 ℹ️🔍
+    type             TransactionType
+    /// 交易是否可见
+    visible          Boolean                   @default(true)
+    /// 交易备注
+    note             String?
+    /// 交易发生时间戳 🕗🔍
+    timestamp        Int
+    /// 创建时间 🕗
+    createdAt        Int                       @map("created_at")
+    /// 更新时间 🕗
+    updatedAt        Int                       @map("updated_at")
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 交易元数据
+    meta             TransactionMeta[]
+    /// `关联关系` 交易金额明细
+    amountDetails    TransactionAmountDetail[]
+    /// `关联关系` 交易分类明细
+    countDetails     TransactionCountDetail[]
+    /// `关联关系` 交易减项
+    reduces          TransactionReduce[]
+    /// `关联关系` 交易退款
+    refunds          TransactionRefund[]
+    /// `关联关系` 此交易作为源交易的关联关系
+    relationAsSource TransactionRelation[]     @relation("source")
+    /// `关联关系` 此交易作为目标交易的关联关系
+    relationAsTarget TransactionRelation[]     @relation("target")
+
+    @@index([type])
+    @@index([timestamp])
+    @@map("transaction")
+}
+
+/// ### 交易元数据
+/// ##### 存储交易的扩展数据
+/// ---
+/// - 记录可以帮助描述交易的键值对信息
+/// - 同一交易及作用域下键必须唯一
+/// - 可使用系统级元数据实现特定功能，如：地理位置记录等
+model TransactionMeta {
+    /// 关联的交易唯一标识 🔑🔗
+    transactionId Int                  @map("transaction_id")
+    /// 元数据作用域 🔑ℹ️
+    scope         TransactionMetaScope
+    /// 元数据键 🔑
+    key           String
+    /// 元数据值
+    value         String
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属交易
+    transaction   Transaction          @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+    @@id([transactionId, scope, key])
+    @@map("transaction_meta")
+}
+
+/// ### 交易金额变动明细
+/// ##### 记录交易涉及的各个账户的金额变动
+/// ---
+/// - 每笔交易可以涉及多个账户的金额变动
+/// - 当交易的币种与账本本币不同时，需要记录经汇兑后的本币金额，以便进行统计，同时也能用于汇率分析
+/// - 交易变动的时间不可小于交易的发生时间，同时该时间将用于信用账户的账期计算，以及描述账户资产随时间的变化情况
+model TransactionAmountDetail {
+    /// 交易金额明细唯一标识 🔑#️⃣
+    id            Int              @id @default(autoincrement())
+    /// 关联的交易唯一标识 🔗🔍
+    transactionId Int              @map("transaction_id")
+    /// 关联的账户唯一标识 🔗🔍
+    accountId     Int              @map("account_id")
+    /// 金额变动类型 ℹ️
+    type          AmountChangeType
+    /// 交易时货币代码 🔗
+    currencyCode  String           @map("currency_code")
+    /// 交易币种金额 💰
+    occurAmount   Int              @map("occur_amount")
+    /// 账本本币金额 💰
+    localAmount   Int              @map("local_amount")
+    /// 金额变动发生时间戳 🕗🔍
+    timestamp     Int
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属交易
+    transaction   Transaction      @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+    /// `关联关系` 涉及的账户
+    account       Account          @relation(fields: [accountId], references: [id], onDelete: Restrict)
+    /// `关联关系` 涉及的货币
+    currency      Currency         @relation(fields: [currencyCode], references: [code], onDelete: Restrict)
+
+    @@index([transactionId])
+    @@index([accountId])
+    @@map("transaction_amount_detail")
+}
+
+/// ### 交易收支统计明细
+/// ##### 用于收支统计
+/// ---
+/// - 每个收支明细需要对应一个分类，可选对应项目、相关方
+/// - 与时间无关，仅用于统计和报表
+/// - 货币取决于账本本币
+model TransactionCountDetail {
+    /// 交易明细唯一标识 🔑#️⃣
+    id                        Int                        @id @default(autoincrement())
+    /// 关联的交易唯一标识 🔗🔍
+    transactionId             Int                        @map("transaction_id")
+    /// 关联的分类唯一标识 🔗🔍
+    categoryId                Int                        @map("category_id")
+    /// 相关方唯一标识 🔗🔍
+    stakeholderId             Int?                       @map("stakeholder_id")
+    /// 项目唯一标识 🔗🔍
+    projectId                 Int?                       @map("project_id")
+    /// 记账金额 💰
+    amount                    Int
+    /// `关联关系` 所属交易
+    transaction               Transaction                @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+    /// `关联关系` 对应分类
+    category                  Category                   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+    /// `关联关系` 对应相关方
+    stakeholder               Stakeholder?               @relation(fields: [stakeholderId], references: [id], onDelete: Restrict)
+    /// `关联关系` 对应项目
+    project                   Project?                   @relation(fields: [projectId], references: [id], onDelete: Restrict)
+    reimbursementExpectations ReimbursementExpectation[]
+
+    // ------------------------------ 关联关系 ------------------------------
+    @@index([transactionId])
+    @@index([categoryId])
+    @@index([stakeholderId])
+    @@index([projectId])
+    @@map("transaction_count_detail")
+}
+
+/// ### 交易减项
+/// ##### 记录支出交易折扣或收入交易税费
+/// ---
+/// - 记录支出型交易中的折扣/优惠，收入交易中的税收/手续费等减项
+/// - 不会影响收支，仅作为交易的附加信息进行记录，但可以参与统计
+model TransactionReduce {
+    /// 减项唯一标识 🔑#️⃣
+    id            Int          @id @default(autoincrement())
+    /// 关联的交易唯一标识 🔗🔍
+    transactionId Int          @map("transaction_id")
+    /// 货币代码 🔗
+    currencyCode  String       @map("currency_code")
+    /// 减项类型 ℹ️
+    type          CategoryType
+    /// 减项金额 💰
+    amount        Int
+    /// 减项说明
+    description   String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属交易
+    transaction   Transaction  @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+    /// `关联关系` 涉及的货币
+    currency      Currency     @relation(fields: [currencyCode], references: [code], onDelete: Restrict)
+
+    @@index([transactionId])
+    @@map("transaction_reduce")
+}
+
+/// ### 交易退款
+/// ##### 记录交易的退款信息
+model TransactionRefund {
+    /// 退款唯一标识 🔑 #️⃣
+    id            Int         @id @default(autoincrement())
+    /// 原始交易唯一标识 🔗🔍
+    transactionId Int         @map("transaction_id")
+    /// 退款金额 💰
+    amount        Int
+    /// 退款时间戳 🕗🔍
+    timestamp     Int
+    /// 退款说明
+    description   String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 原始交易
+    transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+
+    @@index([timestamp])
+    @@map("transaction_refund")
+}
+
+/// ### 交易关联
+/// ##### 定义交易之间的关联关系
+model TransactionRelation {
+    /// 源交易唯一标识 🔑🔗🔍
+    sourceTransactionId Int                     @map("source_transaction_id")
+    /// 目标交易唯一标识 🔑🔗🔍
+    targetTransactionId Int                     @map("target_transaction_id")
+    /// 关联关系类型 ℹ️
+    type                TransactionRelationType
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 源交易
+    sourceTransaction   Transaction             @relation("source", fields: [sourceTransactionId], references: [id], onDelete: Cascade)
+    /// `关联关系` 目标交易
+    targetTransaction   Transaction             @relation("target", fields: [targetTransactionId], references: [id], onDelete: Cascade)
+
+    @@id([sourceTransactionId, targetTransactionId])
+    @@index([sourceTransactionId])
+    @@index([targetTransactionId])
+    @@map("transaction_relation")
+}
+
+/// ### 报销
+/// ##### 记录报销的基本信息
+/// ---
+/// - 当交易中的金额被标记为可报销时，将不再计入收支统计
+model Reimbursement {
+    /// 报销唯一标识 🔑#️⃣
+    id           Int                        @id @default(autoincrement())
+    /// 报销摘要
+    summary      String
+    /// 报销状态 🔍
+    status       Boolean                    @default(false)
+    /// 创建时间 🕗
+    createdAt    Int                        @map("created_at")
+    /// 更新时间 🕗
+    updatedAt    Int                        @map("updated_at")
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 报销期望明细
+    expectations ReimbursementExpectation[]
+    /// `关联关系` 报销实际明细
+    actuals      ReimbursementActual[]
+
+    @@map("reimbursement")
+}
+
+/// ### 报销期望明细
+/// ##### 记录报销期望的费用明细
+/// ---
+/// - 用于描述报销申请时的期望费用明细
+/// - 期望报销金额应当小于等于对应交易收支统计明细的金额
+model ReimbursementExpectation {
+    /// 报销期望明细唯一标识 🔑
+    id                       Int                    @id @default(autoincrement())
+    /// 关联的报销唯一标识 🔗🔍
+    reimbursementId          Int                    @map("reimbursement_id")
+    /// 关联的交易收支明细唯一标识 🔗🔍
+    transactionCountDetailId Int                    @map("transaction_count_detail_id")
+    /// 期望金额 💰
+    amount                   Int
+    /// 期望说明
+    description              String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属报销
+    reimbursement            Reimbursement          @relation(fields: [reimbursementId], references: [id], onDelete: Cascade)
+    /// `关联关系` 关联的交易收支明细
+    transactionCountDetail   TransactionCountDetail @relation(fields: [transactionCountDetailId], references: [id], onDelete: Restrict)
+
+    @@index([reimbursementId])
+}
+
+/// ### 报销实际明细
+/// ##### 记录报销实际的费用明细
+model ReimbursementActual {
+    /// 报销实际明细唯一标识 🔑#️⃣
+    id              Int           @id @default(autoincrement())
+    /// 关联的报销唯一标识 🔗🔍
+    reimbursementId Int           @map("reimbursement_id")
+    /// 关联的账户唯一标识 🔗🔍
+    accountId       Int           @map("account_id")
+    /// 实际金额 💰
+    amount          Int
+    /// 报销时间 🕗🔍
+    timestamp       Int
+    /// 备注
+    note            String?
+    // ------------------------------ 关联关系 ------------------------------
+    /// `关联关系` 所属报销
+    reimbursement   Reimbursement @relation(fields: [reimbursementId], references: [id], onDelete: Cascade)
+    /// `关联关系` 涉及的账户
+    account         Account       @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+    @@index([reimbursementId])
+    @@index([accountId])
+    @@index([timestamp])
+    @@map("reimbursement_actual")
+}

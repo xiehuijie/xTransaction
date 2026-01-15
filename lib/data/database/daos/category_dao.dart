@@ -4,8 +4,9 @@ import '../tables.dart';
 
 part 'category_dao.g.dart';
 
-@DriftAccessor(tables: [Category, RelationCategoryLedger])
-class CategoryDao extends DatabaseAccessor<AppDatabase>
+/// 分类 DAO
+@DriftAccessor(tables: [Category])
+class CategoryDao extends DatabaseAccessor<LedgerDatabase>
     with _$CategoryDaoMixin {
   CategoryDao(super.db);
 
@@ -17,39 +18,50 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   /// 根据ID获取分类
   Future<CategoryEntity?> getCategoryById(int id) => (select(
     category,
-  )..where((t) => t.categoryId.equals(id))).getSingleOrNull();
+  )..where((t) => t.id.equals(id))).getSingleOrNull();
 
   /// 根据ID列表获取分类
   Future<List<CategoryEntity>> getCategoriesByIds(List<int> ids) =>
-      (select(category)..where((t) => t.categoryId.isIn(ids))).get();
+      (select(category)..where((t) => t.id.isIn(ids))).get();
 
   /// 根据类型获取分类
   Future<List<CategoryEntity>> getCategoriesByType(CategoryType type) =>
       (select(category)
             ..where((t) => t.type.equalsValue(type))
-            ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
           .get();
 
   /// 获取顶级分类（无父级）
   Future<List<CategoryEntity>> getRootCategories() =>
       (select(category)
             ..where((t) => t.parentId.isNull())
-            ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
           .get();
 
   /// 获取顶级分类（按类型）
   Future<List<CategoryEntity>> getRootCategoriesByType(CategoryType type) =>
       (select(category)
             ..where((t) => t.parentId.isNull() & t.type.equalsValue(type))
-            ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
           .get();
 
   /// 获取子分类
   Future<List<CategoryEntity>> getChildCategories(int parentId) =>
       (select(category)
             ..where((t) => t.parentId.equals(parentId))
-            ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
           .get();
+
+  /// 获取所有子孙分类（递归）
+  Future<List<CategoryEntity>> getAllDescendants(int parentId) async {
+    final children = await getChildCategories(parentId);
+    final descendants = <CategoryEntity>[];
+    for (final child in children) {
+      descendants.add(child);
+      descendants.addAll(await getAllDescendants(child.id));
+    }
+    return descendants;
+  }
 
   /// 添加分类
   Future<int> insertCategory(CategoryCompanion entry) =>
@@ -61,13 +73,26 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
 
   /// 删除分类
   Future<int> deleteCategory(int id) =>
-      (delete(category)..where((t) => t.categoryId.equals(id))).go();
+      (delete(category)..where((t) => t.id.equals(id))).go();
 
   /// 更新分类排序
-  Future<void> updateCategoryOrder(int id, int newOrder) =>
-      (update(category)..where((t) => t.categoryId.equals(id))).write(
-        CategoryCompanion(order: Value(newOrder)),
+  Future<void> updateCategoryWeight(int id, int newWeight) =>
+      (update(category)..where((t) => t.id.equals(id))).write(
+        CategoryCompanion(weight: Value(newWeight)),
       );
+
+  /// 批量更新分类排序权重
+  Future<void> updateCategoryWeights(Map<int, int> idWeightMap) async {
+    await batch((batch) {
+      for (final entry in idWeightMap.entries) {
+        batch.update(
+          category,
+          CategoryCompanion(weight: Value(entry.value)),
+          where: (t) => t.id.equals(entry.key),
+        );
+      }
+    });
+  }
 
   /// 监听所有分类变化
   Stream<List<CategoryEntity>> watchAllCategories() => select(category).watch();
@@ -76,39 +101,20 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   Stream<List<CategoryEntity>> watchCategoriesByType(CategoryType type) =>
       (select(category)
             ..where((t) => t.type.equalsValue(type))
-            ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
           .watch();
 
-  // ==================== Category-Ledger Relation ====================
+  /// 监听顶级分类变化
+  Stream<List<CategoryEntity>> watchRootCategories() =>
+      (select(category)
+            ..where((t) => t.parentId.isNull())
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
+          .watch();
 
-  /// 获取分类关联的账本
-  Future<List<LedgerCategoryRelationEntity>> getCategoryLedgers(
-    int categoryId,
-  ) => (select(
-    relationCategoryLedger,
-  )..where((t) => t.categoryId.equals(categoryId))).get();
-
-  /// 获取账本下的分类ID列表
-  Future<List<int>> getCategoryIdsByLedgerId(int ledgerId) async {
-    final relations = await (select(
-      relationCategoryLedger,
-    )..where((t) => t.ledgerId.equals(ledgerId))).get();
-    return relations.map((r) => r.categoryId).toList();
-  }
-
-  /// 获取账本下的分类（按类型）
-  Future<List<CategoryEntity>> getCategoriesByLedgerAndType(
-    int ledgerId,
-    CategoryType type,
-  ) async {
-    final categoryIds = await getCategoryIdsByLedgerId(ledgerId);
-    if (categoryIds.isEmpty) return [];
-
-    return (select(category)
-          ..where(
-            (t) => t.categoryId.isIn(categoryIds) & t.type.equalsValue(type),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.order)]))
-        .get();
-  }
+  /// 监听子分类变化
+  Stream<List<CategoryEntity>> watchChildCategories(int parentId) =>
+      (select(category)
+            ..where((t) => t.parentId.equals(parentId))
+            ..orderBy([(t) => OrderingTerm.asc(t.weight)]))
+          .watch();
 }

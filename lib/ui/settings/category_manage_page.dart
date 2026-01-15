@@ -69,6 +69,7 @@ CategoryTypeInfo getCategoryTypeInfo(CategoryType type) {
 /// 所有分类 Provider
 final allCategoriesProvider = StreamProvider<List<CategoryEntity>>((ref) {
   final categoryDao = ref.watch(categoryDaoProvider);
+  if (categoryDao == null) return const Stream.empty();
   return categoryDao.watchAllCategories();
 });
 
@@ -130,7 +131,7 @@ class _CategoryManagePageState extends ConsumerState<CategoryManagePage>
                 categories
                     .where((c) => c.type == type && c.parentId == null)
                     .toList()
-                  ..sort((a, b) => a.order.compareTo(b.order));
+                  ..sort((a, b) => a.weight.compareTo(b.weight));
           }
 
           // 构建子分类映射
@@ -143,7 +144,7 @@ class _CategoryManagePageState extends ConsumerState<CategoryManagePage>
           }
           // 对子分类排序
           for (final children in childrenMap.values) {
-            children.sort((a, b) => a.order.compareTo(b.order));
+            children.sort((a, b) => a.weight.compareTo(b.weight));
           }
 
           return TabBarView(
@@ -259,7 +260,7 @@ class _CategoryTypeListView extends StatelessWidget {
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final category = categories[index];
-        final children = childrenMap[category.categoryId] ?? [];
+        final children = childrenMap[category.id] ?? [];
         return _CategoryListItem(
           category: category,
           children: children,
@@ -306,8 +307,8 @@ class _CategoryListItemState extends State<_CategoryListItem> {
       child: Column(
         children: [
           ListTile(
-            leading: widget.category.icon.isNotEmpty
-                ? AppIconWidget.fromString(widget.category.icon, size: 40)
+            leading: widget.category.icon?.isNotEmpty == true
+                ? AppIconWidget.fromString(widget.category.icon!, size: 40)
                 : CircleAvatar(
                     backgroundColor: theme.colorScheme.primaryContainer,
                     child: Icon(
@@ -379,8 +380,8 @@ class _CategoryListItemState extends State<_CategoryListItem> {
                 children: widget.children.map((child) {
                   return ListTile(
                     contentPadding: const EdgeInsets.only(left: 56, right: 16),
-                    leading: child.icon.isNotEmpty
-                        ? AppIconWidget.fromString(child.icon, size: 32)
+                    leading: child.icon?.isNotEmpty == true
+                        ? AppIconWidget.fromString(child.icon!, size: 32)
                         : CircleAvatar(
                             radius: 16,
                             backgroundColor:
@@ -446,7 +447,7 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
     super.initState();
     _nameController = TextEditingController(text: widget.editCategory?.name);
     _orderController = TextEditingController(
-      text: widget.editCategory?.order.toString() ?? '0',
+      text: widget.editCategory?.weight.toString() ?? '0',
     );
 
     if (widget.editCategory != null) {
@@ -458,7 +459,7 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
     }
 
     if (widget.parentCategory != null) {
-      _parentId = widget.parentCategory!.categoryId;
+      _parentId = widget.parentCategory!.id;
       _parentName = widget.parentCategory!.name;
       _type = widget.parentCategory!.type;
     }
@@ -471,6 +472,7 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
 
   Future<void> _loadParentName() async {
     final categoryDao = ref.read(categoryDaoProvider);
+    if (categoryDao == null) return;
     final parent = await categoryDao.getCategoryById(_parentId!);
     if (parent != null && mounted) {
       setState(() => _parentName = parent.name);
@@ -507,14 +509,17 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
 
     try {
       final categoryDao = ref.read(categoryDaoProvider);
+      if (categoryDao == null) {
+        throw Exception('请先选择账本');
+      }
 
       if (isEditing) {
         // 更新分类
         final updated = widget.editCategory!.copyWith(
           name: _nameController.text.trim(),
           type: _type,
-          icon: _icon ?? '',
-          order: int.tryParse(_orderController.text) ?? 0,
+          icon: drift.Value(_icon),
+          weight: int.tryParse(_orderController.text) ?? 0,
           parentId: drift.Value(_parentId),
         );
         await categoryDao.updateCategory(updated);
@@ -525,7 +530,7 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
             name: drift.Value(_nameController.text.trim()),
             type: drift.Value(_type),
             icon: drift.Value(_icon ?? ''),
-            order: drift.Value(int.tryParse(_orderController.text) ?? 0),
+            weight: drift.Value(int.tryParse(_orderController.text) ?? 0),
             parentId: drift.Value(_parentId),
           ),
         );
@@ -577,7 +582,10 @@ class _CategoryFormPageState extends ConsumerState<CategoryFormPage> {
 
     try {
       final categoryDao = ref.read(categoryDaoProvider);
-      await categoryDao.deleteCategory(widget.editCategory!.categoryId);
+      if (categoryDao == null) {
+        throw Exception('请先选择账本');
+      }
+      await categoryDao.deleteCategory(widget.editCategory!.id);
 
       if (mounted) {
         HapticService.mediumImpact();

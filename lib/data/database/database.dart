@@ -8,43 +8,39 @@ import 'package:path/path.dart' as p;
 import 'tables.dart';
 import 'daos/currency_dao.dart';
 import 'daos/account_dao.dart';
-import 'daos/ledger_dao.dart';
 import 'daos/category_dao.dart';
 import 'daos/stakeholder_dao.dart';
+import 'daos/project_dao.dart';
 import 'daos/transaction_dao.dart';
 import 'daos/reimbursement_dao.dart';
 
 part 'database.g.dart';
 
+/// 账本数据库
+/// 
+/// 每个账本对应一个独立的数据库文件
 @DriftDatabase(
   tables: [
     Currency,
     Account,
     AccountMeta,
     AccountCredit,
-    AccountBonus,
+    AccountPrepaid,
     AccountPlanLoan,
     AccountFlexLoan,
     AccountInvest,
     LoanPlan,
     LoanRecord,
-    Ledger,
-    RelationAccountLedger,
     Project,
     Category,
-    RelationCategoryLedger,
     Stakeholder,
-    RelationStakeholderLedger,
     Transactions,
     TransactionMeta,
     TransactionAmountDetail,
-    TransactionCategoryDetail,
-    TransactionInstallmentPlan,
-    TransactionInstallmentItem,
+    TransactionCountDetail,
     TransactionReduce,
     TransactionRefund,
-    RelationProjectTransaction,
-    RelationTransaction,
+    TransactionRelation,
     Reimbursement,
     ReimbursementExpectation,
     ReimbursementActual,
@@ -52,17 +48,22 @@ part 'database.g.dart';
   daos: [
     CurrencyDao,
     AccountDao,
-    LedgerDao,
     CategoryDao,
     StakeholderDao,
+    ProjectDao,
     TransactionDao,
     ReimbursementDao,
   ],
 )
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+class LedgerDatabase extends _$LedgerDatabase {
+  /// 账本ID
+  final String ledgerId;
 
-  AppDatabase.forTesting(super.e);
+  /// 创建账本数据库实例
+  LedgerDatabase({required this.ledgerId}) : super(_openConnection(ledgerId));
+
+  /// 用于测试的构造函数
+  LedgerDatabase.forTesting(super.e, {this.ledgerId = 'test'});
 
   @override
   int get schemaVersion => 1;
@@ -86,7 +87,7 @@ class AppDatabase extends _$AppDatabase {
     await batch((batch) {
       batch.insertAll(currency, [
         CurrencyCompanion.insert(
-          currencyCode: 'CNY',
+          code: 'CNY',
           name: '人民币',
           symbol: '¥',
           position: Value(CurrencyPosition.prefix),
@@ -94,7 +95,7 @@ class AppDatabase extends _$AppDatabase {
           source: Value(CurrencySource.system),
         ),
         CurrencyCompanion.insert(
-          currencyCode: 'USD',
+          code: 'USD',
           name: '美元',
           symbol: '\$',
           position: Value(CurrencyPosition.prefix),
@@ -102,7 +103,7 @@ class AppDatabase extends _$AppDatabase {
           source: Value(CurrencySource.system),
         ),
         CurrencyCompanion.insert(
-          currencyCode: 'EUR',
+          code: 'EUR',
           name: '欧元',
           symbol: '€',
           position: Value(CurrencyPosition.prefix),
@@ -110,7 +111,7 @@ class AppDatabase extends _$AppDatabase {
           source: Value(CurrencySource.system),
         ),
         CurrencyCompanion.insert(
-          currencyCode: 'JPY',
+          code: 'JPY',
           name: '日元',
           symbol: '¥',
           position: Value(CurrencyPosition.prefix),
@@ -118,7 +119,7 @@ class AppDatabase extends _$AppDatabase {
           source: Value(CurrencySource.system),
         ),
         CurrencyCompanion.insert(
-          currencyCode: 'GBP',
+          code: 'GBP',
           name: '英镑',
           symbol: '£',
           position: Value(CurrencyPosition.prefix),
@@ -126,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
           source: Value(CurrencySource.system),
         ),
         CurrencyCompanion.insert(
-          currencyCode: 'HKD',
+          code: 'HKD',
           name: '港元',
           symbol: 'HK\$',
           position: Value(CurrencyPosition.prefix),
@@ -144,29 +145,22 @@ class AppDatabase extends _$AppDatabase {
       await delete(reimbursementActual).go();
       await delete(reimbursementExpectation).go();
       await delete(reimbursement).go();
-      await delete(relationTransaction).go();
-      await delete(relationProjectTransaction).go();
+      await delete(transactionRelation).go();
       await delete(transactionRefund).go();
       await delete(transactionReduce).go();
-      await delete(transactionInstallmentItem).go();
-      await delete(transactionInstallmentPlan).go();
-      await delete(transactionCategoryDetail).go();
+      await delete(transactionCountDetail).go();
       await delete(transactionAmountDetail).go();
-      await delete(transactions).go();
       await delete(transactionMeta).go();
-      await delete(relationStakeholderLedger).go();
+      await delete(transactions).go();
       await delete(stakeholder).go();
-      await delete(relationCategoryLedger).go();
       await delete(category).go();
       await delete(project).go();
-      await delete(relationAccountLedger).go();
-      await delete(ledger).go();
       await delete(loanRecord).go();
       await delete(loanPlan).go();
       await delete(accountInvest).go();
       await delete(accountFlexLoan).go();
       await delete(accountPlanLoan).go();
-      await delete(accountBonus).go();
+      await delete(accountPrepaid).go();
       await delete(accountCredit).go();
       await delete(accountMeta).go();
       await delete(account).go();
@@ -185,60 +179,166 @@ class AppDatabase extends _$AppDatabase {
     data['account'] = await select(account).get();
     data['accountMeta'] = await select(accountMeta).get();
     data['accountCredit'] = await select(accountCredit).get();
-    data['accountBonus'] = await select(accountBonus).get();
+    data['accountPrepaid'] = await select(accountPrepaid).get();
     data['accountPlanLoan'] = await select(accountPlanLoan).get();
     data['accountFlexLoan'] = await select(accountFlexLoan).get();
     data['accountInvest'] = await select(accountInvest).get();
     data['loanPlan'] = await select(loanPlan).get();
     data['loanRecord'] = await select(loanRecord).get();
-    data['ledger'] = await select(ledger).get();
-    data['relationAccountLedger'] = await select(relationAccountLedger).get();
     data['project'] = await select(project).get();
     data['category'] = await select(category).get();
-    data['relationCategoryLedger'] = await select(relationCategoryLedger).get();
     data['stakeholder'] = await select(stakeholder).get();
-    data['relationStakeholderLedger'] =
-        await select(relationStakeholderLedger).get();
     data['transactions'] = await select(transactions).get();
     data['transactionMeta'] = await select(transactionMeta).get();
-    data['transactionAmountDetail'] = await select(
-      transactionAmountDetail,
-    ).get();
-    data['transactionCategoryDetail'] = await select(
-      transactionCategoryDetail,
-    ).get();
-    data['transactionInstallmentPlan'] = await select(
-      transactionInstallmentPlan,
-    ).get();
-    data['transactionInstallmentItem'] = await select(
-      transactionInstallmentItem,
-    ).get();
+    data['transactionAmountDetail'] = await select(transactionAmountDetail).get();
+    data['transactionCountDetail'] = await select(transactionCountDetail).get();
     data['transactionReduce'] = await select(transactionReduce).get();
     data['transactionRefund'] = await select(transactionRefund).get();
-    data['relationProjectTransaction'] = await select(
-      relationProjectTransaction,
-    ).get();
-    data['relationTransaction'] = await select(relationTransaction).get();
+    data['transactionRelation'] = await select(transactionRelation).get();
     data['reimbursement'] = await select(reimbursement).get();
-    data['reimbursementExpectation'] = await select(
-      reimbursementExpectation,
-    ).get();
+    data['reimbursementExpectation'] = await select(reimbursementExpectation).get();
     data['reimbursementActual'] = await select(reimbursementActual).get();
 
     return data;
   }
 
-  /// 获取数据库文件路径
-  static Future<String> getDatabasePath() async {
+  /// 获取此账本的数据库文件路径
+  Future<String> getDatabasePath() async {
+    return await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+  }
+
+  /// 获取指定账本的数据库文件路径
+  static Future<String> getDatabasePathForLedger(String ledgerId) async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    return p.join(dbFolder.path, 'x_transaction.db');
+    return p.join(dbFolder.path, 'ledger_$ledgerId.db');
+  }
+
+  /// 获取数据库存储目录
+  static Future<Directory> getDatabaseDirectory() async {
+    return await getApplicationDocumentsDirectory();
   }
 }
 
-LazyDatabase _openConnection() {
+/// 创建账本数据库连接
+LazyDatabase _openConnection(String ledgerId) {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'x_transaction.db'));
+    final file = File(p.join(dbFolder.path, 'ledger_$ledgerId.db'));
     return NativeDatabase.createInBackground(file);
   });
 }
+
+/// 数据库管理器
+/// 
+/// 管理多个账本数据库实例的创建和切换
+class DatabaseManager {
+  static final DatabaseManager _instance = DatabaseManager._internal();
+  factory DatabaseManager() => _instance;
+  DatabaseManager._internal();
+
+  /// 缓存的数据库实例
+  final Map<String, LedgerDatabase> _databases = {};
+
+  /// 获取指定账本的数据库实例
+  LedgerDatabase getDatabase(String ledgerId) {
+    if (!_databases.containsKey(ledgerId)) {
+      _databases[ledgerId] = LedgerDatabase(ledgerId: ledgerId);
+    }
+    return _databases[ledgerId]!;
+  }
+
+  /// 关闭指定账本的数据库
+  Future<void> closeDatabase(String ledgerId) async {
+    final db = _databases.remove(ledgerId);
+    await db?.close();
+  }
+
+  /// 关闭所有数据库
+  Future<void> closeAll() async {
+    for (final db in _databases.values) {
+      await db.close();
+    }
+    _databases.clear();
+  }
+
+  /// 删除账本数据库文件
+  static Future<bool> deleteDatabaseFile(String ledgerId) async {
+    try {
+      final path = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      // 同时删除可能存在的 -wal 和 -shm 文件
+      final walFile = File('$path-wal');
+      final shmFile = File('$path-shm');
+      if (await walFile.exists()) await walFile.delete();
+      if (await shmFile.exists()) await shmFile.delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 检查账本数据库文件是否存在
+  static Future<bool> databaseExists(String ledgerId) async {
+    final path = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+    return File(path).exists();
+  }
+
+  /// 复制数据库文件（用于导出）
+  static Future<File?> copyDatabase(String ledgerId, String targetPath) async {
+    try {
+      final sourcePath = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+      final sourceFile = File(sourcePath);
+      if (await sourceFile.exists()) {
+        return await sourceFile.copy(targetPath);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 导入数据库文件
+  static Future<bool> importDatabase(String ledgerId, String sourcePath) async {
+    try {
+      final targetPath = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+      final sourceFile = File(sourcePath);
+      if (await sourceFile.exists()) {
+        await sourceFile.copy(targetPath);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 获取所有数据库文件信息
+  static Future<List<Map<String, dynamic>>> listDatabaseFiles() async {
+    final dir = await LedgerDatabase.getDatabaseDirectory();
+    final files = <Map<String, dynamic>>[];
+    
+    await for (final entity in dir.list()) {
+      if (entity is File && entity.path.endsWith('.db')) {
+        final name = p.basename(entity.path);
+        if (name.startsWith('ledger_')) {
+          final stat = await entity.stat();
+          files.add({
+            'name': name,
+            'path': entity.path,
+            'size': stat.size,
+            'modified': stat.modified,
+          });
+        }
+      }
+    }
+    
+    return files;
+  }
+}
+
+// 为了向后兼容，保留 AppDatabase 类型别名
+@Deprecated('Use LedgerDatabase instead')
+typedef AppDatabase = LedgerDatabase;

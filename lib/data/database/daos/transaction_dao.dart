@@ -4,21 +4,19 @@ import '../tables.dart';
 
 part 'transaction_dao.g.dart';
 
+/// 交易 DAO
 @DriftAccessor(
   tables: [
     Transactions,
     TransactionMeta,
     TransactionAmountDetail,
-    TransactionCategoryDetail,
-    TransactionInstallmentPlan,
-    TransactionInstallmentItem,
+    TransactionCountDetail,
     TransactionReduce,
     TransactionRefund,
-    RelationProjectTransaction,
-    RelationTransaction,
+    TransactionRelation,
   ],
 )
-class TransactionDao extends DatabaseAccessor<AppDatabase>
+class TransactionDao extends DatabaseAccessor<LedgerDatabase>
     with _$TransactionDaoMixin {
   TransactionDao(super.db);
 
@@ -31,41 +29,42 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   /// 根据ID获取交易
   Future<TransactionEntity?> getTransactionById(int id) => (select(
     transactions,
-  )..where((t) => t.transactionId.equals(id))).getSingleOrNull();
+  )..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  /// 根据账本ID获取交易
-  Future<List<TransactionEntity>> getTransactionsByLedgerId(int ledgerId) =>
-      (select(transactions)
-            ..where((t) => t.ledgerId.equals(ledgerId))
-            ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
-          .get();
+  /// 根据ID列表获取交易
+  Future<List<TransactionEntity>> getTransactionsByIds(List<int> ids) =>
+      (select(transactions)..where((t) => t.id.isIn(ids))).get();
 
   /// 根据时间范围获取交易
   Future<List<TransactionEntity>> getTransactionsByDateRange(
-    int ledgerId,
     int startTimestamp,
     int endTimestamp,
   ) =>
       (select(transactions)
             ..where(
               (t) =>
-                  t.ledgerId.equals(ledgerId) &
                   t.timestamp.isBiggerOrEqualValue(startTimestamp) &
                   t.timestamp.isSmallerOrEqualValue(endTimestamp),
             )
             ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
           .get();
 
+
   /// 根据类型获取交易
   Future<List<TransactionEntity>> getTransactionsByType(
-    int ledgerId,
     TransactionType type,
   ) =>
       (select(transactions)
-            ..where(
-              (t) => t.ledgerId.equals(ledgerId) & t.type.equalsValue(type),
-            )
+            ..where((t) => t.type.equalsValue(type))
             ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
+          .get();
+
+
+  /// 获取最近的交易
+  Future<List<TransactionEntity>> getRecentTransactions({int limit = 50}) =>
+      (select(transactions)
+            ..orderBy([(t) => OrderingTerm.desc(t.timestamp)])
+            ..limit(limit))
           .get();
 
   /// 添加交易
@@ -78,12 +77,30 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
 
   /// 删除交易
   Future<int> deleteTransaction(int id) =>
-      (delete(transactions)..where((t) => t.transactionId.equals(id))).go();
+      (delete(transactions)..where((t) => t.id.equals(id))).go();
 
-  /// 监听账本交易变化
-  Stream<List<TransactionEntity>> watchTransactionsByLedgerId(int ledgerId) =>
+  /// 监听所有交易变化
+  Stream<List<TransactionEntity>> watchAllTransactions() =>
+      select(transactions).watch();
+
+  /// 监听最近交易变化
+  Stream<List<TransactionEntity>> watchRecentTransactions({int limit = 50}) =>
       (select(transactions)
-            ..where((t) => t.ledgerId.equals(ledgerId))
+            ..orderBy([(t) => OrderingTerm.desc(t.timestamp)])
+            ..limit(limit))
+          .watch();
+
+  /// 监听特定日期范围交易变化
+  Stream<List<TransactionEntity>> watchTransactionsByDateRange(
+    int startTimestamp,
+    int endTimestamp,
+  ) =>
+      (select(transactions)
+            ..where(
+              (t) =>
+                  t.timestamp.isBiggerOrEqualValue(startTimestamp) &
+                  t.timestamp.isSmallerOrEqualValue(endTimestamp),
+            )
             ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
           .watch();
 
@@ -105,9 +122,21 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
             t.transactionId.equals(transactionId) & t.scope.equalsValue(scope),
       )).get();
 
-  /// 添加交易元数据
-  Future<void> insertTransactionMeta(TransactionMetaCompanion entry) =>
-      into(transactionMeta).insert(entry, mode: InsertMode.insertOrReplace);
+  /// 获取特定交易元数据
+  Future<TransactionMetaEntity?> getTransactionMetaByKey(
+    int transactionId,
+    TransactionMetaScope scope,
+    String key,
+  ) => (select(transactionMeta)..where(
+        (t) =>
+            t.transactionId.equals(transactionId) &
+            t.scope.equalsValue(scope) &
+            t.key.equals(key),
+      )).getSingleOrNull();
+
+  /// 添加或更新交易元数据
+  Future<void> upsertTransactionMeta(TransactionMetaCompanion entry) =>
+      into(transactionMeta).insertOnConflictUpdate(entry);
 
   /// 删除交易的所有元数据
   Future<int> deleteTransactionMetasByTransactionId(int transactionId) =>
@@ -140,6 +169,14 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   Future<int> insertAmountDetail(TransactionAmountDetailCompanion entry) =>
       into(transactionAmountDetail).insert(entry);
 
+  /// 批量添加金额明细
+  Future<void> insertAmountDetails(List<TransactionAmountDetailCompanion> entries) =>
+      batch((batch) => batch.insertAll(transactionAmountDetail, entries));
+
+  /// 更新金额明细
+  Future<bool> updateAmountDetail(TransactionAmountDetailEntity entry) =>
+      update(transactionAmountDetail).replace(entry);
+
   /// 删除交易的所有金额明细
   Future<int> deleteAmountDetailsByTransactionId(int transactionId) => (delete(
     transactionAmountDetail,
@@ -152,264 +189,173 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     transactionAmountDetail,
   )..where((t) => t.accountId.equals(accountId))).get();
 
-  // ==================== TransactionCategoryDetail CRUD ====================
+  // ==================== TransactionCountDetail CRUD ====================
 
-  /// 获取交易的分类明细
-  Future<List<TransactionCategoryDetailEntity>> getCategoryDetails(
+  /// 获取交易的数量明细
+  Future<List<TransactionCountDetailEntity>> getCountDetails(
     int transactionId,
   ) => (select(
-    transactionCategoryDetail,
+    transactionCountDetail,
   )..where((t) => t.transactionId.equals(transactionId))).get();
 
-  /// 添加分类明细
-  Future<int> insertCategoryDetail(TransactionCategoryDetailCompanion entry) =>
-      into(transactionCategoryDetail).insert(entry);
+  /// 添加数量明细
+  Future<int> insertCountDetail(TransactionCountDetailCompanion entry) =>
+      into(transactionCountDetail).insert(entry);
 
-  /// 删除交易的所有分类明细
-  Future<int> deleteCategoryDetailsByTransactionId(int transactionId) =>
-      (delete(
-        transactionCategoryDetail,
-      )..where((t) => t.transactionId.equals(transactionId))).go();
+  /// 批量添加数量明细
+  Future<void> insertCountDetails(List<TransactionCountDetailCompanion> entries) =>
+      batch((batch) => batch.insertAll(transactionCountDetail, entries));
 
-  /// 根据分类ID获取分类明细
-  Future<List<TransactionCategoryDetailEntity>> getCategoryDetailsByCategoryId(
+  /// 更新数量明细
+  Future<bool> updateCountDetail(TransactionCountDetailEntity entry) =>
+      update(transactionCountDetail).replace(entry);
+
+  /// 删除交易的所有数量明细
+  Future<int> deleteCountDetailsByTransactionId(int transactionId) => (delete(
+    transactionCountDetail,
+  )..where((t) => t.transactionId.equals(transactionId))).go();
+
+  /// 根据分类ID获取数量明细
+  Future<List<TransactionCountDetailEntity>> getCountDetailsByCategoryId(
     int categoryId,
   ) => (select(
-    transactionCategoryDetail,
+    transactionCountDetail,
   )..where((t) => t.categoryId.equals(categoryId))).get();
-
-  // ==================== TransactionInstallment CRUD ====================
-
-  /// 获取交易的分期计划
-  Future<TransactionInstallmentPlanEntity?> getInstallmentPlan(
-    int transactionId,
-  ) => (select(
-    transactionInstallmentPlan,
-  )..where((t) => t.transactionId.equals(transactionId))).getSingleOrNull();
-
-  /// 添加分期计划
-  Future<int> insertInstallmentPlan(
-    TransactionInstallmentPlanCompanion entry,
-  ) => into(transactionInstallmentPlan).insert(entry);
-
-  /// 获取分期明细
-  Future<List<TransactionInstallmentItemEntity>> getInstallmentItems(
-    int installmentPlanId,
-  ) =>
-      (select(transactionInstallmentItem)
-            ..where((t) => t.installmentPlanId.equals(installmentPlanId))
-            ..orderBy([(t) => OrderingTerm.asc(t.installmentNumber)]))
-          .get();
-
-  /// 添加分期明细
-  Future<int> insertInstallmentItem(
-    TransactionInstallmentItemCompanion entry,
-  ) => into(transactionInstallmentItem).insert(entry);
-
-  /// 批量添加分期明细
-  Future<void> insertInstallmentItems(
-    List<TransactionInstallmentItemCompanion> entries,
-  ) => batch((batch) {
-    batch.insertAll(transactionInstallmentItem, entries);
-  });
 
   // ==================== TransactionReduce CRUD ====================
 
-  /// 获取交易的减免信息
-  Future<List<TransactionReduceEntity>> getReduces(int transactionId) =>
-      (select(
-        transactionReduce,
-      )..where((t) => t.transactionId.equals(transactionId))).get();
+  /// 获取减免信息
+  Future<TransactionReduceEntity?> getTransactionReduce(
+    int transactionId,
+  ) => (select(
+    transactionReduce,
+  )..where((t) => t.transactionId.equals(transactionId))).getSingleOrNull();
 
   /// 添加减免信息
-  Future<int> insertReduce(TransactionReduceCompanion entry) =>
+  Future<void> insertTransactionReduce(TransactionReduceCompanion entry) =>
       into(transactionReduce).insert(entry);
 
-  /// 删除交易的所有减免信息
-  Future<int> deleteReducesByTransactionId(int transactionId) => (delete(
+  /// 更新减免信息
+  Future<bool> updateTransactionReduce(TransactionReduceEntity entry) =>
+      update(transactionReduce).replace(entry);
+
+  /// 删除减免信息
+  Future<int> deleteTransactionReduce(int transactionId) => (delete(
     transactionReduce,
   )..where((t) => t.transactionId.equals(transactionId))).go();
 
   // ==================== TransactionRefund CRUD ====================
 
-  /// 获取交易的退款信息
-  Future<List<TransactionRefundEntity>> getRefunds(int transactionId) =>
-      (select(transactionRefund)
-            ..where((t) => t.transactionId.equals(transactionId))
-            ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]))
-          .get();
+  /// 获取退款信息
+  Future<List<TransactionRefundEntity>> getTransactionRefunds(
+    int transactionId,
+  ) => (select(
+    transactionRefund,
+  )..where((t) => t.transactionId.equals(transactionId))).get();
+
+  /// 根据ID获取退款信息
+  Future<TransactionRefundEntity?> getTransactionRefundById(int id) =>
+      (select(transactionRefund)..where((t) => t.id.equals(id))).getSingleOrNull();
 
   /// 添加退款信息
-  Future<int> insertRefund(TransactionRefundCompanion entry) =>
+  Future<int> insertTransactionRefund(TransactionRefundCompanion entry) =>
       into(transactionRefund).insert(entry);
 
   /// 更新退款信息
-  Future<bool> updateRefund(TransactionRefundEntity entry) =>
+  Future<bool> updateTransactionRefund(TransactionRefundEntity entry) =>
       update(transactionRefund).replace(entry);
 
   /// 删除退款信息
-  Future<int> deleteRefund(int id) => (delete(
+  Future<int> deleteTransactionRefund(int id) =>
+      (delete(transactionRefund)..where((t) => t.id.equals(id))).go();
+
+  /// 删除交易的所有退款信息
+  Future<int> deleteTransactionRefundsByTransactionId(int transactionId) => (delete(
     transactionRefund,
-  )..where((t) => t.transactionRefundId.equals(id))).go();
+  )..where((t) => t.transactionId.equals(transactionId))).go();
 
-  // ==================== Transaction-Project Relation ====================
+  // ==================== TransactionRelation CRUD ====================
 
-  /// 获取交易关联的项目ID列表
-  Future<List<int>> getProjectIdsByTransactionId(int transactionId) async {
-    final relations = await (select(
-      relationProjectTransaction,
-    )..where((t) => t.transactionId.equals(transactionId))).get();
-    return relations.map((r) => r.projectId).toList();
-  }
-
-  /// 获取项目关联的交易ID列表
-  Future<List<int>> getTransactionIdsByProjectId(int projectId) async {
-    final relations = await (select(
-      relationProjectTransaction,
-    )..where((t) => t.projectId.equals(projectId))).get();
-    return relations.map((r) => r.transactionId).toList();
-  }
-
-  /// 将交易关联到项目
-  Future<void> linkTransactionToProject(int transactionId, int projectId) =>
-      into(relationProjectTransaction).insert(
-        RelationProjectTransactionCompanion.insert(
-          transactionId: transactionId,
-          projectId: projectId,
-        ),
-        mode: InsertMode.insertOrIgnore,
-      );
-
-  /// 解除交易与项目的关联
-  Future<int> unlinkTransactionFromProject(int transactionId, int projectId) =>
-      (delete(relationProjectTransaction)..where(
-            (t) =>
-                t.transactionId.equals(transactionId) &
-                t.projectId.equals(projectId),
-          ))
-          .go();
-
-  // ==================== Transaction Relation ====================
-
-  /// 获取交易的关联交易
+  /// 获取交易关联
   Future<List<TransactionRelationEntity>> getTransactionRelations(
     int transactionId,
-  ) =>
-      (select(relationTransaction)..where(
+  ) => (select(transactionRelation)..where(
+        (t) =>
+            t.sourceTransactionId.equals(transactionId) |
+            t.targetTransactionId.equals(transactionId),
+      )).get();
+
+  /// 获取特定类型的交易关联
+  Future<List<TransactionRelationEntity>> getTransactionRelationsByType(
+    int transactionId,
+    TransactionRelationType type,
+  ) => (select(transactionRelation)..where(
+        (t) =>
+            (t.sourceTransactionId.equals(transactionId) |
+                t.targetTransactionId.equals(transactionId)) &
+            t.type.equalsValue(type),
+      )).get();
+
+  /// 添加交易关联
+  Future<int> insertTransactionRelation(TransactionRelationCompanion entry) =>
+      into(transactionRelation).insert(entry);
+
+  /// 删除交易关联
+  Future<int> deleteTransactionRelation(
+    int sourceId,
+    int targetId,
+    TransactionRelationType type,
+  ) => (delete(transactionRelation)..where(
+        (t) =>
+            t.sourceTransactionId.equals(sourceId) &
+            t.targetTransactionId.equals(targetId) &
+            t.type.equalsValue(type),
+      )).go();
+
+  /// 删除交易的所有关联
+  Future<int> deleteTransactionRelationsByTransactionId(int transactionId) =>
+      (delete(transactionRelation)..where(
             (t) =>
                 t.sourceTransactionId.equals(transactionId) |
                 t.targetTransactionId.equals(transactionId),
           ))
-          .get();
-
-  /// 添加交易关联
-  Future<void> insertTransactionRelation(RelationTransactionCompanion entry) =>
-      into(relationTransaction).insert(entry, mode: InsertMode.insertOrIgnore);
-
-  /// 删除交易关联
-  Future<int> deleteTransactionRelation(int sourceId, int targetId) =>
-      (delete(relationTransaction)..where(
-            (t) =>
-                t.sourceTransactionId.equals(sourceId) &
-                t.targetTransactionId.equals(targetId),
-          ))
           .go();
 
-  // ==================== 依赖检查方法 ====================
+  // ==================== 复合查询 ====================
 
-  /// 获取账本中使用指定账户的交易数量
-  Future<int> getTransactionCountByAccountInLedger(
-    int accountId,
-    int ledgerId,
-  ) async {
-    // 先获取账本中的所有交易ID
-    final ledgerTransactions = await (select(transactions)
-      ..where((t) => t.ledgerId.equals(ledgerId))
-    ).get();
-    final transactionIds = ledgerTransactions.map((t) => t.transactionId).toList();
-    if (transactionIds.isEmpty) return 0;
+  /// 获取完整的交易信息（包含金额明细和数量明细）
+  Future<Map<String, dynamic>> getFullTransaction(int transactionId) async {
+    final tx = await getTransactionById(transactionId);
+    if (tx == null) return {};
 
-    // 检查这些交易中有多少使用了指定账户
-    final count = countAll();
-    final query = selectOnly(transactionAmountDetail)
-      ..addColumns([count])
-      ..where(
-        transactionAmountDetail.accountId.equals(accountId) &
-        transactionAmountDetail.transactionId.isIn(transactionIds),
-      );
-    
-    final result = await query.getSingle();
-    return result.read(count) ?? 0;
+    final amountDetails = await getAmountDetails(transactionId);
+    final countDetails = await getCountDetails(transactionId);
+    final metas = await getTransactionMetas(transactionId);
+    final reduce = await getTransactionReduce(transactionId);
+    final refunds = await getTransactionRefunds(transactionId);
+    final relations = await getTransactionRelations(transactionId);
+
+    return {
+      'transaction': tx,
+      'amountDetails': amountDetails,
+      'countDetails': countDetails,
+      'metas': metas,
+      'reduce': reduce,
+      'refunds': refunds,
+      'relations': relations,
+    };
   }
 
-  /// 获取账本中使用指定分类的交易数量
-  Future<int> getTransactionCountByCategoryInLedger(
-    int categoryId,
-    int ledgerId,
-  ) async {
-    // 先获取账本中的所有交易ID
-    final ledgerTransactions = await (select(transactions)
-      ..where((t) => t.ledgerId.equals(ledgerId))
-    ).get();
-    final transactionIds = ledgerTransactions.map((t) => t.transactionId).toList();
-    if (transactionIds.isEmpty) return 0;
-
-    // 检查这些交易中有多少使用了指定分类
-    final count = countAll();
-    final query = selectOnly(transactionCategoryDetail)
-      ..addColumns([count])
-      ..where(
-        transactionCategoryDetail.categoryId.equals(categoryId) &
-        transactionCategoryDetail.transactionId.isIn(transactionIds),
-      );
-    
-    final result = await query.getSingle();
-    return result.read(count) ?? 0;
-  }
-
-  /// 获取账本中使用指定相关方的交易数量
-  Future<int> getTransactionCountByStakeholderInLedger(
-    int stakeholderId,
-    int ledgerId,
-  ) async {
-    final count = countAll();
-    final query = selectOnly(transactions)
-      ..addColumns([count])
-      ..where(
-        transactions.stakeholderId.equals(stakeholderId) &
-        transactions.ledgerId.equals(ledgerId),
-      );
-    
-    final result = await query.getSingle();
-    return result.read(count) ?? 0;
-  }
-
-  /// 清除账本中交易的分类信息
-  Future<int> clearCategoryFromTransactionsInLedger(
-    int categoryId,
-    int ledgerId,
-  ) async {
-    // 先获取账本中的所有交易ID
-    final ledgerTransactions = await (select(transactions)
-      ..where((t) => t.ledgerId.equals(ledgerId))
-    ).get();
-    final transactionIds = ledgerTransactions.map((t) => t.transactionId).toList();
-    if (transactionIds.isEmpty) return 0;
-
-    // 删除这些交易中使用此分类的明细
-    return (delete(transactionCategoryDetail)..where(
-      (t) => t.categoryId.equals(categoryId) & t.transactionId.isIn(transactionIds),
-    )).go();
-  }
-
-  /// 清除账本中交易的相关方信息
-  Future<int> clearStakeholderFromTransactionsInLedger(
-    int stakeholderId,
-    int ledgerId,
-  ) async {
-    // 将使用此相关方的交易的相关方字段设为 null
-    return (update(transactions)..where(
-      (t) => t.stakeholderId.equals(stakeholderId) & t.ledgerId.equals(ledgerId),
-    )).write(const TransactionsCompanion(stakeholderId: Value(null)));
+  /// 删除完整的交易（包含所有关联数据）
+  Future<void> deleteFullTransaction(int transactionId) async {
+    await transaction(() async {
+      await deleteTransactionRelationsByTransactionId(transactionId);
+      await deleteTransactionRefundsByTransactionId(transactionId);
+      await deleteTransactionReduce(transactionId);
+      await deleteCountDetailsByTransactionId(transactionId);
+      await deleteAmountDetailsByTransactionId(transactionId);
+      await deleteTransactionMetasByTransactionId(transactionId);
+      await deleteTransaction(transactionId);
+    });
   }
 }

@@ -68,10 +68,11 @@ class InvestAccountFormState extends ConsumerState<InvestAccountForm> {
 
   Future<void> _loadExistingData() async {
     try {
-      final accountDao = ref.read(accountDaoProvider);
+      final accountService = ref.read(accountServiceProvider);
+      if (accountService == null) return;
 
       // 加载账户元数据
-      final metaList = await accountDao.getAccountMeta(widget.editAccountId!);
+      final metaList = await accountService.getAccountMeta(widget.editAccountId!);
       for (final meta in metaList) {
         if (meta.scope == AccountMetaScope.system) {
           switch (meta.key) {

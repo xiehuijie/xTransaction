@@ -108,10 +108,11 @@ class PrepaidAccountFormState extends ConsumerState<PrepaidAccountForm> {
 
   Future<void> _loadExistingData() async {
     try {
-      final accountDao = ref.read(accountDaoProvider);
+      final accountService = ref.read(accountServiceProvider);
+      if (accountService == null) return;
 
       // 加载账户元数据
-      final metaList = await accountDao.getAccountMeta(widget.editAccountId!);
+      final metaList = await accountService.getAccountMeta(widget.editAccountId!);
       for (final meta in metaList) {
         if (meta.scope == AccountMetaScope.system) {
           switch (meta.key) {
@@ -127,17 +128,17 @@ class PrepaidAccountFormState extends ConsumerState<PrepaidAccountForm> {
 
       // 加载关联的赠送金账户信息
       final bonusAccounts =
-          await accountDao.getBonusAccountsByPrepaidId(widget.editAccountId!);
+          await accountService.getBonusAccountsByPrepaidId(widget.editAccountId!);
       if (bonusAccounts.isNotEmpty) {
         final bonusAccount =
-            await accountDao.getAccountById(bonusAccounts.first.bonusAccountId);
+            await accountService.getAccountById(bonusAccounts.first.bonusAccountId);
         if (bonusAccount != null) {
           _bonusNameController.text = bonusAccount.name;
           _bonusCurrencyCode = bonusAccount.currencyCode;
 
           // 获取赠送金初始余额
           final bonusMeta =
-              await accountDao.getAccountMeta(bonusAccount.accountId);
+              await accountService.getAccountMeta(bonusAccount.id);
           for (final meta in bonusMeta) {
             if (meta.scope == AccountMetaScope.system &&
                 meta.key == AccountMetaKeys.initialBalance) {
@@ -402,7 +403,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                 itemCount: currencies.length,
                 itemBuilder: (context, index) {
                   final currency = currencies[index];
-                  final isSelected = currency.currencyCode == selectedCode;
+                  final isSelected = currency.code == selectedCode;
 
                   return ListTile(
                     leading: CircleAvatar(
@@ -419,7 +420,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                       ),
                     ),
                     title: Text(currency.name),
-                    subtitle: Text(currency.currencyCode),
+                    subtitle: Text(currency.code),
                     trailing: isSelected
                         ? Icon(
                             Icons.check_circle,
@@ -428,7 +429,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                         : null,
                     onTap: () {
                       HapticService.selectionClick();
-                      Navigator.pop(context, currency.currencyCode);
+                      Navigator.pop(context, currency.code);
                     },
                   );
                 },

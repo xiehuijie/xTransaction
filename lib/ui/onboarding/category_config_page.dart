@@ -92,6 +92,10 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
         return '折扣/优惠';
       case CategoryType.cost:
         return '税收/手续费';
+      case CategoryType.gain:
+        return '收益';
+      case CategoryType.loss:
+        return '损失';
     }
   }
 
@@ -105,6 +109,10 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
         return '用于支出交易中的优惠减免部分';
       case CategoryType.cost:
         return '用于收入交易中的税费扣除部分';
+      case CategoryType.gain:
+        return '用于记录投资收益、资产增值等';
+      case CategoryType.loss:
+        return '用于记录投资亏损、资产减值等';
     }
   }
 
@@ -118,6 +126,9 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
         return state.discountCategories;
       case CategoryType.cost:
         return state.costCategories;
+      case CategoryType.gain:
+      case CategoryType.loss:
+        return []; // 暂不支持这两种类型的预配置
     }
   }
 
@@ -136,6 +147,9 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
       case CategoryType.cost:
         notifier.addCostCategory(category);
         break;
+      case CategoryType.gain:
+      case CategoryType.loss:
+        break; // 暂不支持
     }
   }
 
@@ -154,6 +168,9 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
       case CategoryType.cost:
         notifier.updateCostCategory(index, category);
         break;
+      case CategoryType.gain:
+      case CategoryType.loss:
+        break; // 暂不支持
     }
   }
 
@@ -172,6 +189,9 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
       case CategoryType.cost:
         notifier.removeCostCategory(index);
         break;
+      case CategoryType.gain:
+      case CategoryType.loss:
+        break; // 暂不支持
     }
   }
 
@@ -190,6 +210,9 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
       case CategoryType.cost:
         notifier.reorderCostCategory(oldIndex, newIndex);
         break;
+      case CategoryType.gain:
+      case CategoryType.loss:
+        break; // 暂不支持
     }
   }
 
@@ -323,6 +346,10 @@ class _CategoryListTabState extends ConsumerState<_CategoryListTab> {
         return Icons.local_offer_outlined;
       case CategoryType.cost:
         return Icons.receipt_long_outlined;
+      case CategoryType.gain:
+        return Icons.trending_up;
+      case CategoryType.loss:
+        return Icons.trending_down;
     }
   }
 

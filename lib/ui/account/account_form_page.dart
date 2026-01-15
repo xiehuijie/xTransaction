@@ -3,6 +3,7 @@
 /// 根据账户类型动态展示不同的表单配置
 library;
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,6 +65,16 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
   bool get isEditing => widget.editAccount != null;
 
   AccountTypeInfo get typeInfo => getAccountTypeInfo(widget.accountType);
+
+  /// 转换 InvestType 到 AccountInvestType
+  AccountInvestType _convertToAccountInvestType(InvestType investType) {
+    return switch (investType) {
+      InvestType.stock => AccountInvestType.stock,
+      InvestType.fund => AccountInvestType.fund,
+      InvestType.crypto => AccountInvestType.crypto,
+      InvestType.other => AccountInvestType.other,
+    };
+  }
 
   @override
   void initState() {
@@ -147,6 +158,9 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
 
     try {
       final accountService = ref.read(accountServiceProvider);
+      if (accountService == null) {
+        throw Exception('请先选择账本');
+      }
       final name = _nameController.text.trim();
       final description = _descriptionController.text.trim();
       final note = _noteController.text.trim();
@@ -209,10 +223,12 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
             if (investData == null) {
               throw Exception('投资账户配置无效');
             }
+            // 转换 InvestType 到 AccountInvestType
+            final accountInvestType = _convertToAccountInvestType(investData.investType);
             await accountService.createInvestAccount(
               name: name,
               currencyCode: _selectedCurrencyCode,
-              investType: investData.investType,
+              investType: accountInvestType,
               investCode: investData.investCode,
               description: description,
               icon: icon,
@@ -264,6 +280,9 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
     if (widget.editAccount == null) return;
 
     final accountService = ref.read(accountServiceProvider);
+    if (accountService == null) {
+      throw Exception('请先选择账本');
+    }
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
     final note = _noteController.text.trim();
@@ -275,7 +294,7 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
       description: description,
       icon: icon,
       currencyCode: _selectedCurrencyCode,
-      note: note,
+      note: Value(note),
     );
     await accountService.updateAccount(updatedAccount);
 
@@ -285,7 +304,7 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
         final creditData = _creditFormKey.currentState?.getFormData();
         if (creditData != null) {
           final creditAccount = CreditAccountEntity(
-            accountId: widget.editAccount!.accountId,
+            accountId: widget.editAccount!.id,
             creditLimit: creditData.creditLimit,
             billingCycleDay: creditData.billingCycleDay,
             paymentDueDay: creditData.paymentDueDay,
@@ -298,14 +317,14 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
         final investData = _investFormKey.currentState?.getFormData();
         if (investData != null) {
           await accountService.updateAccountMeta(
-            accountId: widget.editAccount!.accountId,
+            accountId: widget.editAccount!.id,
             scope: AccountMetaScope.system,
             key: AccountMetaKeys.investType,
             value: investData.investType.name,
           );
           if (investData.investCode != null && investData.investCode!.isNotEmpty) {
             await accountService.updateAccountMeta(
-              accountId: widget.editAccount!.accountId,
+              accountId: widget.editAccount!.id,
               scope: AccountMetaScope.system,
               key: AccountMetaKeys.investCode,
               value: investData.investCode!,
@@ -349,7 +368,10 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
 
     try {
       final accountService = ref.read(accountServiceProvider);
-      await accountService.deleteAccount(widget.editAccount!.accountId);
+      if (accountService == null) {
+        throw Exception('请先选择账本');
+      }
+      await accountService.deleteAccount(widget.editAccount!.id);
 
       ref.invalidate(groupedAccountsProvider);
       ref.invalidate(allAccountsProvider);
@@ -550,20 +572,20 @@ class _AccountFormPageState extends ConsumerState<AccountFormPage> {
       case AccountType.credit:
         return CreditAccountForm(
           key: _creditFormKey,
-          editAccountId: widget.editAccount?.accountId,
+          editAccountId: widget.editAccount?.id,
         );
 
       case AccountType.prepaid:
         return PrepaidAccountForm(
           key: _prepaidFormKey,
-          editAccountId: widget.editAccount?.accountId,
+          editAccountId: widget.editAccount?.id,
           selectedCurrencyCode: _selectedCurrencyCode,
         );
 
       case AccountType.invest:
         return InvestAccountForm(
           key: _investFormKey,
-          editAccountId: widget.editAccount?.accountId,
+          editAccountId: widget.editAccount?.id,
           selectedCurrencyCode: _selectedCurrencyCode,
         );
 
@@ -621,7 +643,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                 itemCount: currencies.length,
                 itemBuilder: (context, index) {
                   final currency = currencies[index];
-                  final isSelected = currency.currencyCode == selectedCode;
+                  final isSelected = currency.code == selectedCode;
 
                   return ListTile(
                     leading: CircleAvatar(
@@ -638,7 +660,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                       ),
                     ),
                     title: Text(currency.name),
-                    subtitle: Text(currency.currencyCode),
+                    subtitle: Text(currency.code),
                     trailing: isSelected
                         ? Icon(
                             Icons.check_circle,
@@ -647,7 +669,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                         : null,
                     onTap: () {
                       HapticService.selectionClick();
-                      Navigator.pop(context, currency.currencyCode);
+                      Navigator.pop(context, currency.code);
                     },
                   );
                 },

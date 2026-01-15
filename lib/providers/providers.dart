@@ -1,24 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/database/database.dart';
+import '../data/data.dart';
 import '../data/preferences/app_preferences.dart';
+import '../data/services/ledger_service.dart';
 import '../utils/app_theme.dart';
 
 export 'locale_provider.dart';
 export 'account_provider.dart';
 
-/// 数据库 Provider
-final databaseProvider = Provider<AppDatabase>((ref) {
-  final database = AppDatabase();
-  ref.onDispose(() => database.close());
-  return database;
-});
+// ==================== 基础服务 Providers ====================
 
 /// 应用配置 Provider
 final appPreferencesProvider = FutureProvider<AppPreferences>((ref) async {
   return AppPreferences.create();
 });
+
+/// 账本服务 Provider
+final ledgerServiceProvider = FutureProvider<LedgerService>((ref) async {
+  return LedgerService.create();
+});
+
+// ==================== 账本管理 Providers ====================
+
+/// 所有账本列表 Provider
+final allLedgersProvider = Provider<List<LedgerMeta>>((ref) {
+  final ledgerService = ref.watch(ledgerServiceProvider);
+  return ledgerService.whenOrNull(data: (s) => s.getAllLedgers()) ?? [];
+});
+
+/// 当前选中账本ID Provider (可变状态)
+final currentLedgerIdProvider = StateProvider<String?>((ref) {
+  final ledgerService = ref.watch(ledgerServiceProvider);
+  return ledgerService.whenOrNull(data: (s) => s.getCurrentLedgerId());
+});
+
+/// 当前账本元数据 Provider
+final currentLedgerProvider = Provider<LedgerMeta?>((ref) {
+  final currentId = ref.watch(currentLedgerIdProvider);
+  if (currentId == null) return null;
+  
+  final ledgerService = ref.watch(ledgerServiceProvider);
+  return ledgerService.whenOrNull(
+    data: (s) => s.getLedgerById(currentId),
+  );
+});
+
+/// 数据库管理器 Provider
+final databaseManagerProvider = Provider<DatabaseManager>((ref) {
+  final manager = DatabaseManager();
+  ref.onDispose(() => manager.closeAll());
+  return manager;
+});
+
+/// 当前账本数据库 Provider
+/// 
+/// 根据当前选中的账本ID返回对应的数据库实例
+final currentDatabaseProvider = Provider<LedgerDatabase?>((ref) {
+  final currentId = ref.watch(currentLedgerIdProvider);
+  if (currentId == null) return null;
+  
+  final manager = ref.watch(databaseManagerProvider);
+  return manager.getDatabase(currentId);
+});
+
+/// 指定账本数据库 Provider (带参数)
+final ledgerDatabaseProvider = Provider.family<LedgerDatabase, String>((ref, ledgerId) {
+  final manager = ref.watch(databaseManagerProvider);
+  return manager.getDatabase(ledgerId);
+});
+
+// ==================== DAO Providers ====================
+
+/// 货币 DAO Provider
+final currencyDaoProvider = Provider<CurrencyDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.currencyDao;
+});
+
+/// 账户 DAO Provider
+final accountDaoProvider = Provider<AccountDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.accountDao;
+});
+
+/// 分类 DAO Provider
+final categoryDaoProvider = Provider<CategoryDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.categoryDao;
+});
+
+/// 相关方 DAO Provider
+final stakeholderDaoProvider = Provider<StakeholderDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.stakeholderDao;
+});
+
+/// 项目 DAO Provider
+final projectDaoProvider = Provider<ProjectDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.projectDao;
+});
+
+/// 交易 DAO Provider
+final transactionDaoProvider = Provider<TransactionDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.transactionDao;
+});
+
+/// 报销 DAO Provider
+final reimbursementDaoProvider = Provider<ReimbursementDao?>((ref) {
+  final db = ref.watch(currentDatabaseProvider);
+  return db?.reimbursementDao;
+});
+
+// ==================== 应用配置 Providers ====================
 
 /// 是否已初始化 Provider
 final isInitializedProvider = FutureProvider<bool>((ref) async {
@@ -56,11 +152,7 @@ final enableBiometricProvider = FutureProvider<bool>((ref) async {
   return prefs.enableBiometric;
 });
 
-/// 当前账本ID Provider
-final currentLedgerIdProvider = FutureProvider<int?>((ref) async {
-  final prefs = await ref.watch(appPreferencesProvider.future);
-  return prefs.currentLedgerId;
-});
+// ==================== 主题 Providers ====================
 
 /// 主题模式 Provider (使用 StateProvider 以便实时更新)
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
@@ -84,38 +176,10 @@ final initThemeProvider = FutureProvider<void>((ref) async {
   );
 });
 
-/// DAO Providers
-final currencyDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.currencyDao;
-});
+// ==================== 向后兼容 ====================
 
-final accountDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.accountDao;
-});
-
-final ledgerDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.ledgerDao;
-});
-
-final categoryDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.categoryDao;
-});
-
-final stakeholderDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.stakeholderDao;
-});
-
-final transactionDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.transactionDao;
-});
-
-final reimbursementDaoProvider = Provider((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.reimbursementDao;
+/// 旧版数据库 Provider (已废弃，保留向后兼容)
+@Deprecated('Use currentDatabaseProvider instead')
+final databaseProvider = Provider<LedgerDatabase?>((ref) {
+  return ref.watch(currentDatabaseProvider);
 });

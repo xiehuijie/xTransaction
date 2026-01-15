@@ -98,32 +98,27 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
 
   Future<void> _loadExistingData() async {
     try {
-      final accountDao = ref.read(accountDaoProvider);
-      final stakeholderDao = ref.read(stakeholderDaoProvider);
+      final accountService = ref.read(accountServiceProvider);
+      if (accountService == null) return;
 
       // 加载灵活借贷账户详情
       final flexLoanAccount =
-          await accountDao.getFlexLoanAccount(widget.editAccountId!);
+          await accountService.getFlexLoanAccount(widget.editAccountId!);
       if (flexLoanAccount != null) {
         _loanType = flexLoanAccount.type;
         _rateController.text = flexLoanAccount.rate.toStringAsFixed(2);
         _startDate = _dateFromDays(flexLoanAccount.startDate);
         _endDate = _dateFromDays(flexLoanAccount.endDate);
-        _loanNoteController.text = flexLoanAccount.note;
 
         // 加载相关方
         _selectedStakeholder =
-            await stakeholderDao.getStakeholderById(flexLoanAccount.stakeholderId);
+            await accountService.getStakeholderById(flexLoanAccount.stakeholderId);
       }
 
-      // 加载还款计划
-      final plans = await accountDao.getLoanPlansByAccountId(widget.editAccountId!);
-      _plans = plans.map((p) => LoanPlanEditData(
-            id: p.loanPlanId,
-            amount: p.amount,
-            dueDate: _dateFromDays(p.dueDate),
-            note: p.note,
-          )).toList();
+      // 加载还款计划 - 新表结构暂不支持旧的还款计划格式
+      // final plans = await accountService.getLoanPlansByAccountId(widget.editAccountId!);
+      // TODO: 适配新的 LoanPlan 表结构
+      _plans = [];
     } catch (e) {
       debugPrint('加载借贷账户数据失败: $e');
     } finally {
@@ -149,7 +144,7 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
     final ratePercent = double.tryParse(_rateController.text) ?? 0;
 
     return LoanAccountFormData(
-      stakeholderId: _selectedStakeholder!.stakeholderId,
+      stakeholderId: _selectedStakeholder!.id,
       loanType: _loanType,
       rate: ratePercent,
       startDate: _dateToDays(_startDate),
@@ -158,8 +153,9 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
       plans: _plans.isNotEmpty
           ? _plans
               .map((p) => LoanPlanData(
-                    amount: p.amount,
-                    dueDate: _dateToDays(p.dueDate),
+                    rate: 0.0, // TODO: 适配新表结构
+                    startDate: _dateToDays(p.dueDate),
+                    endDate: null,
                     note: p.note,
                   ))
               .toList()
@@ -189,7 +185,7 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
       isScrollControlled: true,
       builder: (context) => _StakeholderPickerSheet(
         stakeholders: stakeholders,
-        selectedId: _selectedStakeholder?.stakeholderId,
+        selectedId: _selectedStakeholder?.id,
       ),
     );
 
@@ -476,7 +472,7 @@ class LoanAccountFormState extends ConsumerState<LoanAccountForm> {
   }
 }
 
-/// 借贷计划编辑数据
+/// 借贷计划编辑数据（UI层模型）
 class LoanPlanEditData {
   int? id;
   int amount;
@@ -567,7 +563,7 @@ class _StakeholderPickerSheet extends StatelessWidget {
                   itemCount: stakeholders.length,
                   itemBuilder: (context, index) {
                     final stakeholder = stakeholders[index];
-                    final isSelected = stakeholder.stakeholderId == selectedId;
+                    final isSelected = stakeholder.id == selectedId;
 
                     return ListTile(
                       leading: CircleAvatar(

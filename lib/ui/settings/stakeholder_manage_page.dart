@@ -253,8 +253,8 @@ class _StakeholderListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
-        leading: stakeholder.avatar != null && stakeholder.avatar!.isNotEmpty
-            ? AppIconWidget.fromString(stakeholder.avatar!, size: 40)
+        leading: stakeholder.icon?.isNotEmpty == true
+            ? AppIconWidget.fromString(stakeholder.icon!, size: 40)
             : CircleAvatar(
                 backgroundColor: theme.colorScheme.primaryContainer,
                 child: Icon(
@@ -268,20 +268,13 @@ class _StakeholderListItem extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        subtitle: stakeholder.description.isNotEmpty
+        subtitle: stakeholder.description?.isNotEmpty == true
             ? Text(
-                stakeholder.description,
+                stakeholder.description!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               )
-            : stakeholder.contact != null && stakeholder.contact!.isNotEmpty
-                ? Text(
-                    stakeholder.contact!,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                : null,
+            : null,
         trailing: Icon(
           Icons.chevron_right,
           color: theme.colorScheme.onSurfaceVariant,
@@ -317,10 +310,8 @@ class _StakeholderFormPageState extends ConsumerState<StakeholderFormPage> {
 
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
-  late TextEditingController _contactController;
-  late TextEditingController _noteController;
 
-  String? _avatar;
+  String? _icon;
   StakeholderType _type = StakeholderType.person;
 
   bool get isEditing => widget.editStakeholder != null;
@@ -332,13 +323,9 @@ class _StakeholderFormPageState extends ConsumerState<StakeholderFormPage> {
         TextEditingController(text: widget.editStakeholder?.name);
     _descriptionController =
         TextEditingController(text: widget.editStakeholder?.description);
-    _contactController =
-        TextEditingController(text: widget.editStakeholder?.contact);
-    _noteController =
-        TextEditingController(text: widget.editStakeholder?.note);
 
     if (widget.editStakeholder != null) {
-      _avatar = widget.editStakeholder!.avatar;
+      _icon = widget.editStakeholder!.icon;
       _type = widget.editStakeholder!.type;
     } else if (widget.initialType != null) {
       _type = widget.initialType!;
@@ -349,17 +336,15 @@ class _StakeholderFormPageState extends ConsumerState<StakeholderFormPage> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _contactController.dispose();
-    _noteController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectAvatar() async {
+  Future<void> _selectIcon() async {
     HapticService.lightImpact();
     final result = await Navigator.of(context).push<AppIcon>(
       MaterialPageRoute(
         builder: (_) => IconPickerPage(
-          initialIcon: _avatar != null ? AppIcon.fromString(_avatar!) : null,
+          initialIcon: _icon != null ? AppIcon.fromString(_icon!) : null,
           title: '选择头像',
           showFlags: false,
         ),
@@ -367,7 +352,7 @@ class _StakeholderFormPageState extends ConsumerState<StakeholderFormPage> {
     );
 
     if (result != null) {
-      setState(() => _avatar = result.toStorageString());
+      setState(() => _icon = result.toStorageString());
     }
   }
 
