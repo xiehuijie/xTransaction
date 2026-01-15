@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:x_transaction/data/database/database.dart';
@@ -25,17 +26,17 @@ void main() {
     test('should get system currencies after initialization', () async {
       final currencies = await currencyDao.getSystemCurrencies();
       expect(currencies, isNotEmpty);
-      expect(currencies.any((c) => c.currencyCode == 'CNY'), isTrue);
-      expect(currencies.any((c) => c.currencyCode == 'USD'), isTrue);
+      expect(currencies.any((c) => c.code == 'CNY'), isTrue);
+      expect(currencies.any((c) => c.code == 'USD'), isTrue);
     });
 
     test('should insert custom currency', () async {
       await currencyDao.insertCurrency(
         CurrencyCompanion.insert(
-          currencyCode: 'BTC',
+          code: 'BTC',
           name: 'Bitcoin',
           symbol: '₿',
-          source: const Value(CurrencySource.custom),
+          source: Value(CurrencySource.custom),
         ),
       );
 
@@ -48,7 +49,7 @@ void main() {
     test('should delete currency', () async {
       await currencyDao.insertCurrency(
         CurrencyCompanion.insert(
-          currencyCode: 'TEST',
+          code: 'TEST',
           name: 'Test',
           symbol: 'T',
         ),
@@ -76,12 +77,14 @@ void main() {
     });
 
     test('should insert and retrieve account', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final accountId = await accountDao.insertAccount(
         AccountCompanion.insert(
           name: 'Test Account',
           type: AccountType.balance,
           currencyCode: 'CNY',
-          balance: const Value(100000), // 1000.00 元
+          createdAt: now,
+          updatedAt: now,
           icon: const Value('wallet'),
         ),
       );
@@ -90,15 +93,17 @@ void main() {
       expect(account, isNotNull);
       expect(account!.name, equals('Test Account'));
       expect(account.type, equals(AccountType.balance));
-      expect(account.balance, equals(100000));
     });
 
     test('should get accounts by type', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       await accountDao.insertAccount(
         AccountCompanion.insert(
           name: 'Balance 1',
           type: AccountType.balance,
           currencyCode: 'CNY',
+          createdAt: now,
+          updatedAt: now,
         ),
       );
       await accountDao.insertAccount(
@@ -106,6 +111,8 @@ void main() {
           name: 'Credit 1',
           type: AccountType.credit,
           currencyCode: 'CNY',
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
@@ -118,39 +125,22 @@ void main() {
       expect(creditAccounts.first.name, equals('Credit 1'));
     });
 
-    test('should archive and unarchive account', () async {
-      final accountId = await accountDao.insertAccount(
-        AccountCompanion.insert(
-          name: 'Archive Test',
-          type: AccountType.balance,
-          currencyCode: 'CNY',
-        ),
-      );
-
-      // Archive
-      await accountDao.archiveAccount(accountId, true);
-      var account = await accountDao.getAccountById(accountId);
-      expect(account!.archived, isTrue);
-
-      // Unarchive
-      await accountDao.archiveAccount(accountId, false);
-      account = await accountDao.getAccountById(accountId);
-      expect(account!.archived, isFalse);
-    });
-
     test('should manage account meta', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final accountId = await accountDao.insertAccount(
         AccountCompanion.insert(
           name: 'Meta Test',
           type: AccountType.balance,
           currencyCode: 'CNY',
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
       await accountDao.upsertAccountMeta(
         AccountMetaCompanion.insert(
           accountId: accountId,
-          scope: AccountMetaScope.user,
+          scope: AccountMetaScope.custom,
           key: 'custom_key',
           value: 'custom_value',
         ),
@@ -158,11 +148,39 @@ void main() {
 
       final meta = await accountDao.getAccountMetaByKey(
         accountId,
-        AccountMetaScope.user,
+        AccountMetaScope.custom,
         'custom_key',
       );
       expect(meta, isNotNull);
       expect(meta!.value, equals('custom_value'));
+    });
+
+    test('should insert and retrieve credit account', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final accountId = await accountDao.insertAccount(
+        AccountCompanion.insert(
+          name: 'Credit Card',
+          type: AccountType.credit,
+          currencyCode: 'CNY',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      await accountDao.insertCreditAccount(
+        AccountCreditCompanion(
+          accountId: Value(accountId),
+          creditLimit: const Value(500000), // 5000.00
+          billingCycleDay: const Value(5),
+          paymentDueDay: const Value(25),
+        ),
+      );
+
+      final creditAccount = await accountDao.getCreditAccount(accountId);
+      expect(creditAccount, isNotNull);
+      expect(creditAccount!.creditLimit, equals(500000));
+      expect(creditAccount.billingCycleDay, equals(5));
+      expect(creditAccount.paymentDueDay, equals(25));
     });
   });
 
@@ -238,6 +256,29 @@ void main() {
       final rootCategories = await categoryDao.getRootCategories();
       expect(rootCategories.length, equals(2));
     });
+
+    test('should get categories by type', () async {
+      await categoryDao.insertCategory(
+        CategoryCompanion.insert(
+          name: 'Expense Cat',
+          type: CategoryType.expense,
+        ),
+      );
+      await categoryDao.insertCategory(
+        CategoryCompanion.insert(
+          name: 'Income Cat',
+          type: CategoryType.income,
+        ),
+      );
+
+      final expenseCategories = await categoryDao.getCategoriesByType(CategoryType.expense);
+      expect(expenseCategories.length, equals(1));
+      expect(expenseCategories.first.name, equals('Expense Cat'));
+
+      final incomeCategories = await categoryDao.getCategoriesByType(CategoryType.income);
+      expect(incomeCategories.length, equals(1));
+      expect(incomeCategories.first.name, equals('Income Cat'));
+    });
   });
 
   group('TransactionDao Tests', () {
@@ -263,38 +304,37 @@ void main() {
       final txId = await transactionDao.insertTransaction(
         TransactionsCompanion.insert(
           type: TransactionType.expense,
-          currencyCode: 'CNY',
-          amount: 5000, // 50.00
-          realAmount: 5000,
           timestamp: now,
-          date: 45000, // 1900日期系统天数
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
       final tx = await transactionDao.getTransactionById(txId);
       expect(tx, isNotNull);
       expect(tx!.type, equals(TransactionType.expense));
-      expect(tx.amount, equals(5000));
     });
 
     test('should add amount details to transaction', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final nowSec = now ~/ 1000;
+      
       final accountId = await accountDao.insertAccount(
         AccountCompanion.insert(
           name: 'Test',
           type: AccountType.balance,
           currencyCode: 'CNY',
+          createdAt: nowSec,
+          updatedAt: nowSec,
         ),
       );
 
-      final now = DateTime.now().millisecondsSinceEpoch;
       final txId = await transactionDao.insertTransaction(
         TransactionsCompanion.insert(
           type: TransactionType.expense,
-          currencyCode: 'CNY',
-          amount: 10000,
-          realAmount: 10000,
           timestamp: now,
-          date: 45000,
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
@@ -302,15 +342,51 @@ void main() {
         TransactionAmountDetailCompanion.insert(
           transactionId: txId,
           accountId: accountId,
-          amount: 10000,
-          realAmount: 10000,
-          changeType: AmountChangeType.decrease,
+          type: AmountChangeType.basic,
+          currencyCode: 'CNY',
+          occurAmount: -10000, // 支出用负数
+          localAmount: -10000,
+          timestamp: now,
         ),
       );
 
       final details = await transactionDao.getAmountDetails(txId);
       expect(details.length, equals(1));
-      expect(details.first.amount, equals(10000));
+      expect(details.first.occurAmount, equals(-10000));
+    });
+
+    test('should add count details with category to transaction', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final nowSec = now ~/ 1000;
+
+      final categoryId = await categoryDao.insertCategory(
+        CategoryCompanion.insert(
+          name: 'Food',
+          type: CategoryType.expense,
+        ),
+      );
+
+      final txId = await transactionDao.insertTransaction(
+        TransactionsCompanion.insert(
+          type: TransactionType.expense,
+          timestamp: now,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      await transactionDao.insertCountDetail(
+        TransactionCountDetailCompanion.insert(
+          transactionId: txId,
+          categoryId: categoryId,
+          amount: 5000, // 50.00
+        ),
+      );
+
+      final details = await transactionDao.getCountDetails(txId);
+      expect(details.length, equals(1));
+      expect(details.first.amount, equals(5000));
+      expect(details.first.categoryId, equals(categoryId));
     });
 
     test('should delete full transaction with relations', () async {
@@ -319,18 +395,16 @@ void main() {
       final txId = await transactionDao.insertTransaction(
         TransactionsCompanion.insert(
           type: TransactionType.expense,
-          currencyCode: 'CNY',
-          amount: 5000,
-          realAmount: 5000,
           timestamp: now,
-          date: 45000,
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
       await transactionDao.upsertTransactionMeta(
         TransactionMetaCompanion.insert(
           transactionId: txId,
-          scope: TransactionMetaScope.user,
+          scope: TransactionMetaScope.custom,
           key: 'note',
           value: 'test note',
         ),
@@ -344,17 +418,39 @@ void main() {
       final metas = await transactionDao.getTransactionMetas(txId);
       expect(metas, isEmpty);
     });
+
+    test('should get transactions by date range', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final yesterday = now - 86400000; // 24 hours ago
+      final tomorrow = now + 86400000; // 24 hours later
+      
+      await transactionDao.insertTransaction(
+        TransactionsCompanion.insert(
+          type: TransactionType.expense,
+          timestamp: now,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final inRangeTransactions = await transactionDao.getTransactionsByDateRange(yesterday, tomorrow);
+      expect(inRangeTransactions.length, equals(1));
+
+      final outOfRangeTransactions = await transactionDao.getTransactionsByDateRange(
+        tomorrow,
+        tomorrow + 86400000,
+      );
+      expect(outOfRangeTransactions.length, equals(0));
+    });
   });
 
   group('ReimbursementDao Tests', () {
     late LedgerDatabase db;
     late ReimbursementDao reimbursementDao;
-    late TransactionDao transactionDao;
 
     setUp(() async {
       db = createTestDatabase();
       reimbursementDao = db.reimbursementDao;
-      transactionDao = db.transactionDao;
     });
 
     tearDown(() async {
@@ -363,80 +459,53 @@ void main() {
 
     test('should insert and retrieve reimbursement', () async {
       final now = DateTime.now().millisecondsSinceEpoch;
-      
-      final txId = await transactionDao.insertTransaction(
-        TransactionsCompanion.insert(
-          type: TransactionType.expense,
-          currencyCode: 'CNY',
-          amount: 100000,
-          realAmount: 100000,
-          timestamp: now,
-          date: 45000,
-        ),
-      );
 
       final reimbId = await reimbursementDao.insertReimbursement(
         ReimbursementCompanion.insert(
-          transactionId: txId,
-          name: 'Business Trip',
+          summary: 'Business Trip',
           createdAt: now,
+          updatedAt: now,
         ),
       );
 
       final reimb = await reimbursementDao.getReimbursementById(reimbId);
       expect(reimb, isNotNull);
-      expect(reimb!.name, equals('Business Trip'));
+      expect(reimb!.summary, equals('Business Trip'));
+      expect(reimb.status, isFalse); // 默认未完成
     });
 
-    test('should calculate reimbursement progress', () async {
+    test('should complete reimbursement', () async {
       final now = DateTime.now().millisecondsSinceEpoch;
-      
-      final txId = await transactionDao.insertTransaction(
-        TransactionsCompanion.insert(
-          type: TransactionType.expense,
-          currencyCode: 'CNY',
-          amount: 100000,
-          realAmount: 100000,
-          timestamp: now,
-          date: 45000,
-        ),
-      );
 
       final reimbId = await reimbursementDao.insertReimbursement(
         ReimbursementCompanion.insert(
-          transactionId: txId,
-          name: 'Test Reimb',
+          summary: 'Test Reimb',
           createdAt: now,
+          updatedAt: now,
         ),
       );
 
-      // Add expectations
-      await reimbursementDao.insertExpectation(
-        ReimbursementExpectationCompanion.insert(
-          reimbursementId: reimbId,
-          amount: 50000,
-          stakeholderId: const Value(null),
-        ),
-      );
-      await reimbursementDao.insertExpectation(
-        ReimbursementExpectationCompanion.insert(
-          reimbursementId: reimbId,
-          amount: 50000,
-          stakeholderId: const Value(null),
+      // 标记完成
+      await reimbursementDao.completeReimbursement(reimbId);
+
+      final reimb = await reimbursementDao.getReimbursementById(reimbId);
+      expect(reimb!.status, isTrue);
+    });
+
+    test('should get pending reimbursements', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      await reimbursementDao.insertReimbursement(
+        ReimbursementCompanion.insert(
+          summary: 'Pending Reimb',
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
-      // Add actuals
-      await reimbursementDao.insertActual(
-        ReimbursementActualCompanion.insert(
-          reimbursementId: reimbId,
-          amount: 30000,
-          timestamp: now,
-        ),
-      );
-
-      final progress = await reimbursementDao.calculateProgress(reimbId);
-      expect(progress, equals(30.0)); // 30000 / 100000 * 100 = 30%
+      final pending = await reimbursementDao.getPendingReimbursements();
+      expect(pending.length, equals(1));
+      expect(pending.first.summary, equals('Pending Reimb'));
     });
   });
 
@@ -454,9 +523,12 @@ void main() {
     });
 
     test('should insert and retrieve project', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final projectId = await projectDao.insertProject(
         ProjectCompanion.insert(
           name: 'Test Project',
+          createdAt: now,
+          updatedAt: now,
           icon: const Value('folder'),
         ),
       );
@@ -467,8 +539,13 @@ void main() {
     });
 
     test('should archive and unarchive project', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final projectId = await projectDao.insertProject(
-        ProjectCompanion.insert(name: 'Archive Test'),
+        ProjectCompanion.insert(
+          name: 'Archive Test',
+          createdAt: now,
+          updatedAt: now,
+        ),
       );
 
       await projectDao.archiveProject(projectId, true);
@@ -481,11 +558,20 @@ void main() {
     });
 
     test('should get active projects only', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       await projectDao.insertProject(
-        ProjectCompanion.insert(name: 'Active Project'),
+        ProjectCompanion.insert(
+          name: 'Active Project',
+          createdAt: now,
+          updatedAt: now,
+        ),
       );
       final archivedId = await projectDao.insertProject(
-        ProjectCompanion.insert(name: 'Archived Project'),
+        ProjectCompanion.insert(
+          name: 'Archived Project',
+          createdAt: now,
+          updatedAt: now,
+        ),
       );
       await projectDao.archiveProject(archivedId, true);
 
@@ -509,10 +595,13 @@ void main() {
     });
 
     test('should insert and retrieve stakeholder', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final stakeholderId = await stakeholderDao.insertStakeholder(
         StakeholderCompanion.insert(
           name: 'John Doe',
           type: StakeholderType.person,
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
@@ -523,22 +612,156 @@ void main() {
     });
 
     test('should search stakeholders by name', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       await stakeholderDao.insertStakeholder(
         StakeholderCompanion.insert(
           name: 'Alice Smith',
           type: StakeholderType.person,
+          createdAt: now,
+          updatedAt: now,
         ),
       );
       await stakeholderDao.insertStakeholder(
         StakeholderCompanion.insert(
           name: 'Bob Johnson',
           type: StakeholderType.person,
+          createdAt: now,
+          updatedAt: now,
         ),
       );
 
       final results = await stakeholderDao.searchStakeholders('Alice');
       expect(results.length, equals(1));
       expect(results.first.name, equals('Alice Smith'));
+    });
+
+    test('should archive stakeholder', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final stakeholderId = await stakeholderDao.insertStakeholder(
+        StakeholderCompanion.insert(
+          name: 'Test Stakeholder',
+          type: StakeholderType.merchant,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      await stakeholderDao.archiveStakeholder(stakeholderId, true);
+      var stakeholder = await stakeholderDao.getStakeholderById(stakeholderId);
+      expect(stakeholder!.archived, isTrue);
+
+      await stakeholderDao.archiveStakeholder(stakeholderId, false);
+      stakeholder = await stakeholderDao.getStakeholderById(stakeholderId);
+      expect(stakeholder!.archived, isFalse);
+    });
+  });
+
+  group('LoanPlan and LoanRecord Tests', () {
+    late LedgerDatabase db;
+    late AccountDao accountDao;
+
+    setUp(() async {
+      db = createTestDatabase();
+      accountDao = db.accountDao;
+    });
+
+    tearDown(() async {
+      await db.close();
+    });
+
+    test('should insert and retrieve loan plan', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      
+      final accountId = await accountDao.insertAccount(
+        AccountCompanion.insert(
+          name: 'Loan Account',
+          type: AccountType.loan,
+          currencyCode: 'CNY',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final loanPlanId = await accountDao.insertLoanPlan(
+        LoanPlanCompanion.insert(
+          accountId: accountId,
+          startDate: 45000, // 日期天数
+          rate: const Value(0.05), // 5% 年利率
+        ),
+      );
+
+      final loanPlan = await accountDao.getLoanPlanById(loanPlanId);
+      expect(loanPlan, isNotNull);
+      expect(loanPlan!.accountId, equals(accountId));
+      expect(loanPlan.rate, equals(0.05));
+    });
+
+    test('should insert and retrieve loan records', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      
+      final accountId = await accountDao.insertAccount(
+        AccountCompanion.insert(
+          name: 'Loan Account',
+          type: AccountType.loan,
+          currencyCode: 'CNY',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final loanPlanId = await accountDao.insertLoanPlan(
+        LoanPlanCompanion.insert(
+          accountId: accountId,
+          startDate: 45000,
+        ),
+      );
+
+      // 添加借贷记录
+      await accountDao.insertLoanRecord(
+        LoanRecordCompanion.insert(
+          loanPlanId: loanPlanId,
+          period: 1,
+          amount: 100000, // 1000.00 本金
+          interest: 5000, // 50.00 利息
+          date: 45030,
+        ),
+      );
+      await accountDao.insertLoanRecord(
+        LoanRecordCompanion.insert(
+          loanPlanId: loanPlanId,
+          period: 2,
+          amount: 100000,
+          interest: 4500,
+          date: 45060,
+        ),
+      );
+
+      final records = await accountDao.getLoanRecordsByPlanId(loanPlanId);
+      expect(records.length, equals(2));
+      expect(records.first.period, equals(1));
+      expect(records.first.amount, equals(100000));
+    });
+  });
+
+  group('DatabaseManager Tests', () {
+    test('should create different databases for different ledger IDs', () {
+      final manager = DatabaseManager();
+      
+      final db1 = manager.getDatabase('ledger1');
+      final db2 = manager.getDatabase('ledger2');
+      
+      expect(db1.ledgerId, equals('ledger1'));
+      expect(db2.ledgerId, equals('ledger2'));
+      expect(identical(db1, db2), isFalse);
+    });
+
+    test('should return same database instance for same ledger ID', () {
+      final manager = DatabaseManager();
+      
+      final db1 = manager.getDatabase('same_ledger');
+      final db2 = manager.getDatabase('same_ledger');
+      
+      expect(identical(db1, db2), isTrue);
     });
   });
 }

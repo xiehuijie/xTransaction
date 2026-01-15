@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/database/database.dart';
 import '../../utils/haptic_service.dart';
 import 'database_browser_page.dart';
 
@@ -54,7 +56,7 @@ class DeveloperToolsPage extends ConsumerWidget {
                 context,
                 icon: Icons.storage_rounded,
                 title: '数据库浏览器',
-                subtitle: '查看和编辑数据库表',
+                subtitle: '浏览、编辑数据库表，管理账本',
                 onTap: () {
                   HapticService.lightImpact();
                   Navigator.push(
@@ -63,6 +65,16 @@ class DeveloperToolsPage extends ConsumerWidget {
                       builder: (context) => const DatabaseBrowserPage(),
                     ),
                   );
+                },
+              ),
+              _buildToolItem(
+                context,
+                icon: Icons.folder_open_rounded,
+                title: '数据库文件',
+                subtitle: '查看所有账本的数据库文件信息',
+                onTap: () {
+                  HapticService.lightImpact();
+                  _showDatabaseFilesDialog(context);
                 },
               ),
             ],
@@ -110,6 +122,104 @@ class DeveloperToolsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showDatabaseFilesDialog(BuildContext context) async {
+    try {
+      final files = await DatabaseManager.listDatabaseFiles();
+      
+      if (!context.mounted) return;
+      
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.folder_open),
+              const SizedBox(width: 8),
+              const Text('数据库文件'),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: files.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Center(child: Text('暂无数据库文件')),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: files.length,
+                    itemBuilder: (context, index) {
+                      final file = files[index];
+                      final size = _formatFileSize(file['size'] as int);
+                      final modified = file['modified'] as DateTime;
+                      
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          leading: const Icon(Icons.storage, color: Colors.teal),
+                          title: Text(
+                            file['name'] as String,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('大小: $size'),
+                              Text(
+                                '修改: ${_formatDateTime(modified)}',
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                          isThreeLine: true,
+                          trailing: IconButton(
+                            icon: const Icon(Icons.copy, size: 20),
+                            tooltip: '复制路径',
+                            onPressed: () {
+                              Clipboard.setData(
+                                ClipboardData(text: file['path'] as String),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('路径已复制到剪贴板')),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('关闭'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('获取文件列表失败: $e')),
+        );
+      }
+    }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  String _formatDateTime(DateTime dt) {
+    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildSection(

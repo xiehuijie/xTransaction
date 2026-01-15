@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import '../../data/database/database.dart';
 import '../../data/services/ledger_service.dart';
@@ -233,10 +234,11 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // 导出功能
             ListTile(
               leading: const Icon(Icons.upload),
               title: const Text('导出数据库'),
-              subtitle: const Text('将当前账本导出为文件'),
+              subtitle: const Text('将当前账本导出为 SQLite 文件'),
               onTap: () {
                 Navigator.pop(context);
                 _exportDatabase(db);
@@ -245,13 +247,34 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
             ListTile(
               leading: const Icon(Icons.file_download),
               title: const Text('导出为 JSON'),
-              subtitle: const Text('将数据导出为 JSON 格式'),
+              subtitle: const Text('将数据导出为 JSON 格式（可读）'),
               onTap: () {
                 Navigator.pop(context);
                 _exportAsJson(db);
               },
             ),
             const Divider(),
+            // 导入功能
+            ListTile(
+              leading: const Icon(Icons.download),
+              title: const Text('导入数据库'),
+              subtitle: const Text('从 SQLite 文件导入数据（替换当前数据）'),
+              onTap: () {
+                Navigator.pop(context);
+                _showImportDatabaseDialog(db);
+              },
+            ),
+            const Divider(),
+            // 管理功能
+            ListTile(
+              leading: const Icon(Icons.folder_open),
+              title: const Text('查看数据库文件'),
+              subtitle: const Text('显示所有账本数据库文件'),
+              onTap: () {
+                Navigator.pop(context);
+                _showDatabaseFiles();
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.delete_forever, color: Colors.red),
               title: const Text('重置数据库', style: TextStyle(color: Colors.red)),
@@ -265,6 +288,171 @@ class _DatabaseBrowserPageState extends ConsumerState<DatabaseBrowserPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showImportDatabaseDialog(LedgerDatabase db) async {
+    final pathController = TextEditingController();
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('导入数据库'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '警告：导入将覆盖当前账本的所有数据！',
+              style: TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: pathController,
+              decoration: const InputDecoration(
+                labelText: '数据库文件路径',
+                hintText: '/path/to/database.db',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '请输入要导入的 SQLite 数据库文件的完整路径',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('导入'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && pathController.text.isNotEmpty) {
+      try {
+        final sourcePath = pathController.text.trim();
+        final sourceFile = File(sourcePath);
+        
+        if (!await sourceFile.exists()) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('文件不存在')),
+            );
+          }
+          return;
+        }
+
+        // 关闭当前数据库连接
+        final manager = ref.read(databaseManagerProvider);
+        await manager.closeDatabase(db.ledgerId);
+
+        // 执行导入
+        final success = await DatabaseManager.importDatabase(
+          db.ledgerId,
+          sourcePath,
+        );
+
+        if (mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('数据库导入成功')),
+            );
+            // 刷新页面
+            setState(() {});
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('导入失败')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('导入失败: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _showDatabaseFiles() async {
+    try {
+      final files = await DatabaseManager.listDatabaseFiles();
+      
+      if (!mounted) return;
+      
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('数据库文件列表'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: files.isEmpty
+                ? const Center(child: Text('暂无数据库文件'))
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: files.length,
+                    itemBuilder: (context, index) {
+                      final file = files[index];
+                      final size = _formatFileSize(file['size'] as int);
+                      final modified = file['modified'] as DateTime;
+                      
+                      return ListTile(
+                        leading: const Icon(Icons.storage),
+                        title: Text(file['name'] as String),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('大小: $size'),
+                            Text(
+                              '修改时间: ${_formatDateTime(modified)}',
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.copy),
+                          tooltip: '复制路径',
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: file['path'] as String),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('路径已复制')),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('关闭'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('获取文件列表失败: $e')),
+        );
+      }
+    }
+  }
+
+  String _formatDateTime(DateTime dt) {
+    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   Future<void> _exportDatabase(LedgerDatabase db) async {
