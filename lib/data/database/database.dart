@@ -300,6 +300,133 @@ class DatabaseManager {
     }
   }
 
+  /// Validates if file is a valid SQLite database
+  /// 
+  /// SQLite database files start with fixed magic bytes: 'SQLite format 3\0'
+  static Future<bool> isValidSqliteFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) return false;
+      
+      final randomAccess = await file.open(mode: FileMode.read);
+      try {
+        final header = await randomAccess.read(16);
+        // SQLite file header magic bytes: "SQLite format 3\0"
+        const sqliteMagic = [
+          0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66,
+          0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33, 0x00
+        ];
+        
+        if (header.length < 16) return false;
+        
+        for (int i = 0; i < 16; i++) {
+          if (header[i] != sqliteMagic[i]) return false;
+        }
+        return true;
+      } finally {
+        await randomAccess.close();
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Creates database backup
+  /// 
+  /// Returns backup file path, or null if backup fails
+  static Future<String?> createBackup(String ledgerId) async {
+    try {
+      final sourcePath = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+      final sourceFile = File(sourcePath);
+      if (!await sourceFile.exists()) return null;
+      
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final backupPath = '$sourcePath.backup_$timestamp';
+      await sourceFile.copy(backupPath);
+      return backupPath;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Restores database from backup
+  static Future<bool> restoreFromBackup(String ledgerId, String backupPath) async {
+    try {
+      final targetPath = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+      final backupFile = File(backupPath);
+      if (!await backupFile.exists()) return false;
+      
+      await backupFile.copy(targetPath);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Deletes backup file
+  static Future<void> deleteBackup(String backupPath) async {
+    try {
+      final file = File(backupPath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      // Ignore delete failures
+    }
+  }
+
+  /// Imports database file with validation and backup
+  /// 
+  /// [ledgerId] - Target ledger ID
+  /// [sourcePath] - Source database file path
+  /// [createBackupFirst] - Whether to create backup before import
+  /// 
+  /// Returns:
+  /// - success: Whether import succeeded
+  /// - backupPath: Backup file path (only valid when createBackupFirst is true)
+  /// - error: Error message
+  static Future<Map<String, dynamic>> importDatabaseWithValidation(
+    String ledgerId, 
+    String sourcePath, {
+    bool createBackupFirst = true,
+  }) async {
+    try {
+      final sourceFile = File(sourcePath);
+      if (!await sourceFile.exists()) {
+        return {'success': false, 'error': 'Source file does not exist'};
+      }
+
+      // Validate it's a valid SQLite file
+      if (!await isValidSqliteFile(sourcePath)) {
+        return {'success': false, 'error': 'Not a valid SQLite database file'};
+      }
+
+      String? backupPath;
+      
+      // Create backup
+      if (createBackupFirst) {
+        final targetPath = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+        if (await File(targetPath).exists()) {
+          backupPath = await createBackup(ledgerId);
+          if (backupPath == null) {
+            return {'success': false, 'error': 'Failed to create backup'};
+          }
+        }
+      }
+
+      // Execute import
+      final targetPath = await LedgerDatabase.getDatabasePathForLedger(ledgerId);
+      await sourceFile.copy(targetPath);
+      
+      return {
+        'success': true, 
+        'backupPath': backupPath,
+      };
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
   /// 导入数据库文件
   static Future<bool> importDatabase(String ledgerId, String sourcePath) async {
     try {
